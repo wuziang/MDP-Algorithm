@@ -62,7 +62,7 @@ public class Simulator {
     private static void displayEverything() {
         // Initialise main frame for display
         _appFrame = new JFrame();
-        _appFrame.setTitle("MDP Group 2 Simulator");
+        _appFrame.setTitle("MDP Group 4 Simulator");
         _appFrame.setSize(new Dimension(690, 700));
         _appFrame.setResizable(false);
 
@@ -284,7 +284,7 @@ public class Simulator {
                 timeExploDialog.setVisible(true);
             }
         });
-        _buttons.add(btn_TimeExploration);
+//        _buttons.add(btn_TimeExploration);
 
 
         // CoverageExploration Class for Multithreading
@@ -329,6 +329,6 @@ public class Simulator {
                 coverageExploDialog.setVisible(true);
             }
         });
-        _buttons.add(btn_CoverageExploration);
+//        _buttons.add(btn_CoverageExploration);
     }
 }

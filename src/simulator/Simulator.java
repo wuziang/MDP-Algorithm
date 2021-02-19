@@ -31,6 +31,9 @@ public class Simulator {
     private static Map realMap = null;              // real map
     private static Map exploredMap = null;          // exploration map
 
+    private static int waypointX;
+    private static int waypointY;
+
     private static int timeLimit = 3600;            // time limit
     private static int coverageLimit = 300;         // coverage limit
 
@@ -138,16 +141,23 @@ public class Simulator {
             btn_LoadMap.addMouseListener(new MouseAdapter() {
                 public void mousePressed(MouseEvent e) {
                     JDialog loadMapDialog = new JDialog(_appFrame, "Load Map", true);
-                    loadMapDialog.setSize(400, 60);
+                    loadMapDialog.setSize(600, 80);
                     loadMapDialog.setLayout(new FlowLayout());
 
                     final JTextField loadTF = new JTextField(15);
+                    final JTextField loadWaypoint = new JTextField(10);
+
                     JButton loadMapButton = new JButton("Load");
 
                     loadMapButton.addMouseListener(new MouseAdapter() {
                         public void mousePressed(MouseEvent e) {
                             loadMapDialog.setVisible(false);
                             loadMapFromDisk(realMap, loadTF.getText());
+
+                            String waypoint=loadWaypoint.getText();
+                            waypointX=Integer.parseInt(waypoint.substring(0, waypoint.indexOf(',')));
+                            waypointY=Integer.parseInt(waypoint.substring(waypoint.indexOf(',')+1));
+
                             CardLayout cl = ((CardLayout) _mapCards.getLayout());
                             cl.show(_mapCards, "REAL_MAP");
                             realMap.repaint();
@@ -156,6 +166,8 @@ public class Simulator {
 
                     loadMapDialog.add(new JLabel("File Name: "));
                     loadMapDialog.add(loadTF);
+                    loadMapDialog.add(new JLabel("Waypoint: "));
+                    loadMapDialog.add(loadWaypoint);
                     loadMapDialog.add(loadMapButton);
                     loadMapDialog.setVisible(true);
                 }
@@ -177,10 +189,16 @@ public class Simulator {
                     }
                 }
 
-                FastestPathAlgo fastestPath;
-                fastestPath = new FastestPathAlgo(exploredMap, bot);
+                FastestPathAlgo fastestPathToWayPoint;
+                fastestPathToWayPoint = new FastestPathAlgo(exploredMap, bot);
+                fastestPathToWayPoint.runFastestPath(waypointX,waypointY);
 
-                fastestPath.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
+                bot.setRobotPos(waypointX,waypointY);
+                exploredMap.repaint();
+
+                FastestPathAlgo fastestPathToGoal;
+                fastestPathToGoal = new FastestPathAlgo(exploredMap, bot);
+                fastestPathToGoal.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
 
                 return 222;
             }
@@ -239,7 +257,7 @@ public class Simulator {
         });
         _buttons.add(btn_FastestPath);
 
-
+        /*
         // TimeExploration Class for Multithreading
         class TimeExploration extends SwingWorker<Integer, String> {
             protected Integer doInBackground() throws Exception {
@@ -330,5 +348,6 @@ public class Simulator {
             }
         });
 //        _buttons.add(btn_CoverageExploration);
+         */
     }
 }

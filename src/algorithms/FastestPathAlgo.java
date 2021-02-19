@@ -276,7 +276,7 @@ public class FastestPathAlgo {
 
         ArrayList<MOVEMENT> movements = new ArrayList<>();
 
-        Robot tempBot = new Robot(1, 1, false);
+        Robot tempBot = new Robot(bot.getRobotPosRow(), bot.getRobotPosCol(), false);
         tempBot.setSpeed(0);
         while ((tempBot.getRobotPosRow() != goalRow) || (tempBot.getRobotPosCol() != goalCol)) {
             if (tempBot.getRobotPosRow() == temp.getRow() && tempBot.getRobotPosCol() == temp.getCol()) {

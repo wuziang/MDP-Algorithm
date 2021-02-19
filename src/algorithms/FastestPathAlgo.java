@@ -170,7 +170,7 @@ public class FastestPathAlgo {
      * Find the fastest path from the robot's current position to [goalRow, goalCol].
      */
     public String runFastestPath(int goalRow, int goalCol) {
-        System.out.println("Calculating fastest path from (" + current.getRow() + ", " + current.getCol() + ") to goal (" + goalRow + ", " + goalCol + ")...");
+        System.out.println("\nFinding fastest path from (" + current.getRow() + ", " + current.getCol() + ") to goal (" + goalRow + ", " + goalCol + ")...");
 
         Stack<Cell> path;
         do {
@@ -188,7 +188,7 @@ public class FastestPathAlgo {
             toVisit.remove(current);    // remove current from toVisit
 
             if (visited.contains(exploredMap.getCell(goalRow, goalCol))) {
-                System.out.println("Goal visited. Path found!");
+//                System.out.println("Goal visited. Path found!");
                 path = getPath(goalRow, goalCol);
                 printFastestPath(path);
                 return executePath(path, goalRow, goalCol);
@@ -292,7 +292,7 @@ public class FastestPathAlgo {
                 m = MOVEMENT.FORWARD;
             }
 
-            System.out.println("Movement " + MOVEMENT.print(m) + " from (" + tempBot.getRobotPosRow() + ", " + tempBot.getRobotPosCol() + ") to (" + temp.getRow() + ", " + temp.getCol() + ")");
+            // System.out.println("Movement " + MOVEMENT.print(m) + " from (" + tempBot.getRobotPosRow() + ", " + tempBot.getRobotPosCol() + ") to (" + temp.getRow() + ", " + temp.getCol() + ")");
 
             tempBot.move(m);
             movements.add(m);
@@ -346,7 +346,7 @@ public class FastestPathAlgo {
             }
         }
 
-        System.out.println("\nMovements: " + outputString.toString());
+        System.out.println("Moves: " + outputString.toString());
         return outputString.toString();
     }
 
@@ -443,19 +443,17 @@ public class FastestPathAlgo {
      * Prints the fastest path from the Stack object.
      */
     private void printFastestPath(Stack<Cell> path) {
-        System.out.println("\nLooped " + loopCount + " times.");
-        System.out.println("The number of steps is: " + (path.size() - 1) + "\n");
+//        System.out.println("\nLooped " + loopCount + " times.");
+//        System.out.println("The number of steps is: " + (path.size() - 1) + "\n");
 
         Stack<Cell> pathForPrint = (Stack<Cell>) path.clone();
         Cell temp;
-        System.out.println("Path:");
+        System.out.print("Path:");
         while (!pathForPrint.isEmpty()) {
             temp = pathForPrint.pop();
-            if (!pathForPrint.isEmpty()) System.out.print("(" + temp.getRow() + ", " + temp.getCol() + ") --> ");
-            else System.out.print("(" + temp.getRow() + ", " + temp.getCol() + ")");
+            if (!pathForPrint.isEmpty()) System.out.print("(" + temp.getRow() + "," + temp.getCol() + ")->");
+            else System.out.print("(" + temp.getRow() + "," + temp.getCol() + ")\n");
         }
-
-        System.out.println("\n");
     }
 
     /**

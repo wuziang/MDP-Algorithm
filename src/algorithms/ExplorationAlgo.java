@@ -65,7 +65,7 @@ public class ExplorationAlgo {
             }
         }
 
-        System.out.println("Starting exploration...");
+        System.out.println("\nExploring...");
 
         startTime = System.currentTimeMillis();
         endTime = startTime + (timeLimit * 1000);
@@ -76,7 +76,7 @@ public class ExplorationAlgo {
         senseAndRepaint();
 
         areaExplored = calculateAreaExplored();
-        System.out.println("Explored Area: " + areaExplored);
+        // System.out.println("Explored Area: " + areaExplored);
 
         explorationLoop(bot.getRobotPosRow(), bot.getRobotPosCol());
     }
@@ -92,7 +92,7 @@ public class ExplorationAlgo {
             nextMove();
 
             areaExplored = calculateAreaExplored();
-            System.out.println("Area explored: " + areaExplored);
+            // System.out.println("Area explored: " + areaExplored);
 
             if (bot.getRobotPosRow() == r && bot.getRobotPosCol() == c) {
                 if (areaExplored >= 100) {
@@ -213,19 +213,22 @@ public class ExplorationAlgo {
      * Returns the robot to START after exploration and points the bot northwards.
      */
     private void goHome() {
+//        System.out.println("Exploration complete!");
+
         if (!bot.getTouchedGoal() && coverageLimit == 300 && timeLimit == 3600) {
             FastestPathAlgo goToGoal = new FastestPathAlgo(exploredMap, bot, realMap);
             goToGoal.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
         }
 
-        FastestPathAlgo returnToStart = new FastestPathAlgo(exploredMap, bot, realMap);
-        returnToStart.runFastestPath(RobotConstants.START_ROW, RobotConstants.START_COL);
+        if (bot.getRobotPosRow()!=RobotConstants.START_ROW || bot.getRobotPosCol()!=RobotConstants.START_COL){
+            FastestPathAlgo returnToStart = new FastestPathAlgo(exploredMap, bot, realMap);
+            returnToStart.runFastestPath(RobotConstants.START_ROW, RobotConstants.START_COL);
+        }
 
-        System.out.println("Exploration complete!");
         areaExplored = calculateAreaExplored();
-        System.out.printf("%.2f%% Coverage", (areaExplored / 300.0) * 100.0);
-        System.out.println(", " + areaExplored + " Cells");
-        System.out.println((System.currentTimeMillis() - startTime) / 1000 + " Seconds");
+        System.out.printf("%.2f%% Coverage\n", (areaExplored / 300.0) * 100.0);
+//        System.out.println(", " + areaExplored + " Cells");
+//        System.out.println((System.currentTimeMillis() - startTime) / 1000 + " Seconds");
 
         if (bot.getRealBot()) {
             turnBotDirection(DIRECTION.WEST);

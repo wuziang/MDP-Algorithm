@@ -153,7 +153,7 @@ public class Robot {
         }
 
         if (realBot) sendMovement(m, sendMoveToAndroid);
-        else System.out.println("Move: " + MOVEMENT.print(m));
+        // else System.out.println("Move: " + MOVEMENT.print(m));
 
         updateTouchedGoal();
     }

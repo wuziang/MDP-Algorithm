@@ -312,7 +312,6 @@ public class Simulator {
                 return 333;
             }
         }
-
         // Time-limited Exploration Button
         JButton btn_TimeExploration = new JButton("Time-Limited");
         formatButton(btn_TimeExploration);
@@ -353,7 +352,6 @@ public class Simulator {
                 return 444;
             }
         }
-
         // Coverage-limited Exploration Button
         JButton btn_CoverageExploration = new JButton("Coverage-Limited");
         formatButton(btn_CoverageExploration);

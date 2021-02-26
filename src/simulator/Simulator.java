@@ -180,7 +180,7 @@ public class Simulator {
         class FastestPath extends SwingWorker<Integer, String> {
             protected Integer doInBackground() throws Exception {
                 bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
-                exploredMap.repaint();
+                realMap.repaint();
 
                 if (realRun) {
                     while (true) {
@@ -191,14 +191,14 @@ public class Simulator {
                 }
 
                 FastestPathAlgo fastestPathToWayPoint;
-                fastestPathToWayPoint = new FastestPathAlgo(exploredMap, bot);
+                fastestPathToWayPoint = new FastestPathAlgo(realMap, bot);
                 fastestPathToWayPoint.runFastestPath(waypointX,waypointY);
 
                 bot.setRobotPos(waypointX,waypointY);
-                exploredMap.repaint();
+                realMap.repaint();
 
                 FastestPathAlgo fastestPathToGoal;
-                fastestPathToGoal = new FastestPathAlgo(exploredMap, bot);
+                fastestPathToGoal = new FastestPathAlgo(realMap, bot);
                 fastestPathToGoal.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
 
                 return 222;
@@ -294,7 +294,7 @@ public class Simulator {
         btn_FastestPath.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 CardLayout cl = ((CardLayout) _mapCards.getLayout());
-                cl.show(_mapCards, "EXPLORATION");
+                cl.show(_mapCards, "REAL_MAP");
                 new FastestPath().execute();
             }
         });

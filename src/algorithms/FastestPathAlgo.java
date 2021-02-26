@@ -82,7 +82,7 @@ public class FastestPathAlgo {
      * Returns true if the cell can be visited.
      */
     private boolean canBeVisited(Cell c) {
-        return c.getIsExplored() && !c.getIsObstacle() && !c.getIsVirtualWall();
+        return !c.getIsObstacle() && !c.getIsVirtualWall();
     }
 
     /**

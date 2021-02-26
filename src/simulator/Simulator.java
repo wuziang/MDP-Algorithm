@@ -66,8 +66,8 @@ public class Simulator {
     private static void displayEverything() {
         // Initialise main frame for display
         _appFrame = new JFrame();
-        _appFrame.setTitle("MDP Group 4 Simulator");
-        _appFrame.setSize(new Dimension(690, 700));
+        _appFrame.setTitle("MDP Group 4");
+        _appFrame.setSize(new Dimension(700, 750));
         _appFrame.setResizable(false);
 
         // Center the main frame in the middle of the screen
@@ -118,7 +118,7 @@ public class Simulator {
      * Initialises the JPanel for the buttons.
      */
     private static void initButtonsLayout() {
-        _buttons.setLayout(new GridLayout());
+        _buttons.setLayout(new GridLayout(2,1));
         addButtons();
     }
 
@@ -263,6 +263,18 @@ public class Simulator {
             }
         }
 
+        // Fastest Path Button
+        JButton btn_FastestPath = new JButton("Fastest Path");
+        formatButton(btn_FastestPath);
+        btn_FastestPath.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                CardLayout cl = ((CardLayout) _mapCards.getLayout());
+                cl.show(_mapCards, "REAL_MAP");
+                new FastestPath().execute();
+            }
+        });
+        _buttons.add(btn_FastestPath);
+
         // Exploration Button
         JButton btn_Exploration = new JButton("Exploration");
         formatButton(btn_Exploration);
@@ -274,7 +286,6 @@ public class Simulator {
             }
         });
         _buttons.add(btn_Exploration);
-
 
         // Image Exploration Button
         JButton btn_Image_Exploration = new JButton("Image Exploration");
@@ -288,17 +299,7 @@ public class Simulator {
         });
         _buttons.add(btn_Image_Exploration);
 
-        // Fastest Path Button
-        JButton btn_FastestPath = new JButton("Fastest Path");
-        formatButton(btn_FastestPath);
-        btn_FastestPath.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-                CardLayout cl = ((CardLayout) _mapCards.getLayout());
-                cl.show(_mapCards, "REAL_MAP");
-                new FastestPath().execute();
-            }
-        });
-        _buttons.add(btn_FastestPath);
+
 
 
         // TimeExploration Class for Multithreading

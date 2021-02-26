@@ -234,35 +234,6 @@ public class Simulator {
             }
         }
 
-        // Image Exploration Class for Multithreading
-        class ImageExploration extends SwingWorker<Integer, String> {
-            protected Integer doInBackground() throws Exception {
-                int row, col;
-
-                row = RobotConstants.START_ROW;
-                col = RobotConstants.START_COL;
-
-                bot.setRobotPos(row, col);
-                exploredMap.repaint();
-
-                ImageExplorationAlgo image_exploration;
-                image_exploration = new ImageExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
-
-                if (realRun) {
-                    CommMgr.getCommMgr().sendMsg(null, CommMgr.BOT_START);
-                }
-
-                image_exploration.runExploration();
-                generateMapDescriptor(exploredMap);
-
-                if (realRun) {
-                    new FastestPath().execute();
-                }
-
-                return 333;
-            }
-        }
-
         // Exploration Button
         JButton btn_Exploration = new JButton("Exploration");
         formatButton(btn_Exploration);
@@ -274,19 +245,6 @@ public class Simulator {
             }
         });
         _buttons.add(btn_Exploration);
-
-
-        // Image Exploration Button
-        JButton btn_Image_Exploration = new JButton("Image Exploration");
-        formatButton(btn_Image_Exploration);
-        btn_Image_Exploration.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-                CardLayout cl = ((CardLayout) _mapCards.getLayout());
-                cl.show(_mapCards, "EXPLORATION");
-                new ImageExploration().execute();
-            }
-        });
-        _buttons.add(btn_Image_Exploration);
 
         // Fastest Path Button
         JButton btn_FastestPath = new JButton("Fastest Path");
@@ -300,7 +258,7 @@ public class Simulator {
         });
         _buttons.add(btn_FastestPath);
 
-
+        /*
         // TimeExploration Class for Multithreading
         class TimeExploration extends SwingWorker<Integer, String> {
             protected Integer doInBackground() throws Exception {
@@ -312,7 +270,6 @@ public class Simulator {
                 return 333;
             }
         }
-
         // Time-limited Exploration Button
         JButton btn_TimeExploration = new JButton("Time-Limited");
         formatButton(btn_TimeExploration);
@@ -340,8 +297,7 @@ public class Simulator {
                 timeExploDialog.setVisible(true);
             }
         });
-        _buttons.add(btn_TimeExploration);
-
+//        _buttons.add(btn_TimeExploration);
         // CoverageExploration Class for Multithreading
         class CoverageExploration extends SwingWorker<Integer, String> {
             protected Integer doInBackground() throws Exception {
@@ -353,7 +309,6 @@ public class Simulator {
                 return 444;
             }
         }
-
         // Coverage-limited Exploration Button
         JButton btn_CoverageExploration = new JButton("Coverage-Limited");
         formatButton(btn_CoverageExploration);
@@ -379,7 +334,7 @@ public class Simulator {
                 coverageExploDialog.setVisible(true);
             }
         });
-        _buttons.add(btn_CoverageExploration);
-
+//        _buttons.add(btn_CoverageExploration);
+         */
     }
 }

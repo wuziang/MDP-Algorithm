@@ -277,6 +277,7 @@ public class FastestPathAlgo {
         ArrayList<MOVEMENT> movements = new ArrayList<>();
 
         Robot tempBot = new Robot(bot.getRobotPosRow(), bot.getRobotPosCol(), false);
+        tempBot.setRobotDir(bot.getRobotCurDir());
         tempBot.setSpeed(0);
         while ((tempBot.getRobotPosRow() != goalRow) || (tempBot.getRobotPosCol() != goalCol)) {
             if (tempBot.getRobotPosRow() == temp.getRow() && tempBot.getRobotPosCol() == temp.getCol()) {
@@ -320,33 +321,34 @@ public class FastestPathAlgo {
                     this.exploredMap.repaint();
                 }
             }
-        } else {
-            int fCount = 0;
-            for (MOVEMENT x : movements) {
-                if (x == MOVEMENT.FORWARD) {
-                    fCount++;
-                    if (fCount == 10) {
-                        bot.moveForwardMultiple(fCount);
-                        fCount = 0;
-                        exploredMap.repaint();
-                    }
-                } else if (x == MOVEMENT.RIGHT || x == MOVEMENT.LEFT) {
-                    if (fCount > 0) {
-                        bot.moveForwardMultiple(fCount);
-                        fCount = 0;
-                        exploredMap.repaint();
-                    }
-
-                    bot.move(x);
-                    exploredMap.repaint();
-                }
-            }
-
-            if (fCount > 0) {
-                bot.moveForwardMultiple(fCount);
-                exploredMap.repaint();
-            }
         }
+//        else {
+//            int fCount = 0;
+//            for (MOVEMENT x : movements) {
+//                if (x == MOVEMENT.FORWARD) {
+//                    fCount++;
+//                    if (fCount == 10) {
+//                        bot.moveForwardMultiple(fCount);
+//                        fCount = 0;
+//                        exploredMap.repaint();
+//                    }
+//                } else if (x == MOVEMENT.RIGHT || x == MOVEMENT.LEFT) {
+//                    if (fCount > 0) {
+//                        bot.moveForwardMultiple(fCount);
+//                        fCount = 0;
+//                        exploredMap.repaint();
+//                    }
+//
+//                    bot.move(x);
+//                    exploredMap.repaint();
+//                }
+//            }
+//
+//            if (fCount > 0) {
+//                bot.moveForwardMultiple(fCount);
+//                exploredMap.repaint();
+//            }
+//        }
 
         return outputString.toString();
     }

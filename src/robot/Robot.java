@@ -193,7 +193,6 @@ public class Robot {
                     posCol += count;
                     break;
             }
-
             comm.sendMsg(this.getRobotPosRow() + "," + this.getRobotPosCol() + "," + DIRECTION.print(this.getRobotCurDir()), CommMgr.BOT_POS);
         }
     }

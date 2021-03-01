@@ -172,7 +172,6 @@ public class Simulator {
                 fastestPathToWayPoint = new FastestPathAlgo(realMap, bot);
                 fastestPathToWayPoint.runFastestPath(waypointX,waypointY);
 
-                bot.setRobotDir(RobotConstants.DIRECTION.NORTH);
                 bot.setRobotPos(waypointX,waypointY);
                 realMap.repaint();
 

@@ -61,7 +61,7 @@ public class ExplorationAlgo {
                 System.out.println("Waiting for EX_START...");
                 String msg = CommMgr.getCommMgr().recvMsg();
                 String[] msgArr = msg.split(";");
-                if (msgArr[0].equals(CommMgr.EX_START)) break;
+                // if (msgArr[0].equals(CommMgr.EX_START)) break;
             }
         }
 
@@ -71,7 +71,7 @@ public class ExplorationAlgo {
         endTime = startTime + (timeLimit * 1000);
 
         if (bot.getRealBot()) {
-            CommMgr.getCommMgr().sendMsg(null, CommMgr.BOT_START);
+            // CommMgr.getCommMgr().sendMsg(null, CommMgr.BOT_START);
         }
         senseAndRepaint();
 

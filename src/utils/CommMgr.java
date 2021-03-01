@@ -10,13 +10,9 @@ import java.net.UnknownHostException;
 
 public class CommMgr {
 
-    public static final String EX_START = "EX_START";       // Android --> PC
-    public static final String FP_START = "FP_START";       // Android --> PC
-    public static final String MAP_STRINGS = "MAP";         // PC --> Android
-    public static final String BOT_POS = "BOT_POS";         // PC --> Android
-    public static final String BOT_START = "BOT_START";     // PC --> Arduino
-    public static final String INSTRUCTIONS = "INSTR";      // PC --> Arduino
-    public static final String SENSOR_DATA = "SDATA";       // Arduino --> PC
+    public static final String AN = "AN";
+    public static final String AR = "AR";
+    public static final String IR = "IR";
 
     private static CommMgr commMgr = null;
     private static Socket conn = null;
@@ -38,8 +34,8 @@ public class CommMgr {
         System.out.println("Opening connection...");
 
         try {
-            String HOST = "192.168.2.1";
-            int PORT = 8008;
+            String HOST = "192.168.4.4";
+            int PORT = 5050;
             conn = new Socket(HOST, PORT);
 
             writer = new BufferedWriter(new OutputStreamWriter(new BufferedOutputStream(conn.getOutputStream())));
@@ -88,10 +84,10 @@ public class CommMgr {
             String outputMsg;
             if (msg == null) {
                 outputMsg = msgType + "\n";
-            } else if (msgType.equals(MAP_STRINGS) || msgType.equals(BOT_POS)) {
-                outputMsg = msgType + " " + msg + "\n";
+            } else if (msgType.equals(AN) || msgType.equals(AR) || msgType.equals(AR)) {
+                outputMsg = msgType + "," + msg + "\n";
             } else {
-                outputMsg = msgType + "\n" + msg + "\n";
+                break;
             }
 
             System.out.println("Sending out message:\n" + outputMsg);

@@ -68,7 +68,7 @@ public class ImageExplorationAlgo {
             }
         }
 
-        System.out.println("Starting exploration...");
+        System.out.println("Finding images...");
 
         startTime = System.currentTimeMillis();
         endTime = startTime + (timeLimit * 1000);
@@ -79,7 +79,7 @@ public class ImageExplorationAlgo {
         senseAndRepaint();
 
         areaExplored = calculateAreaExplored();
-        System.out.println("Explored Area: " + areaExplored);
+        // System.out.println("Explored Area: " + areaExplored);
 
         explorationLoop(bot.getRobotPosRow(), bot.getRobotPosCol());
     }
@@ -99,7 +99,7 @@ public class ImageExplorationAlgo {
             nextMove();
 
             areaExplored = calculateAreaExplored();
-            System.out.println("Area explored: " + areaExplored);
+            // System.out.println("Area explored: " + areaExplored);
 
             // This is the stopping condition where r and c are the robot's starting positions
             if (bot.getRobotPosRow() == r && bot.getRobotPosCol() == c) {
@@ -359,11 +359,11 @@ public class ImageExplorationAlgo {
         FastestPathAlgo returnToStart = new FastestPathAlgo(exploredMap, bot, realMap);
         returnToStart.runFastestPath(RobotConstants.START_ROW, RobotConstants.START_COL);
 
-        System.out.println("Exploration complete!");
+        // System.out.println("Exploration complete!");
         areaExplored = calculateAreaExplored();
         System.out.printf("%.2f%% Coverage", (areaExplored / 300.0) * 100.0);
-        System.out.println(", " + areaExplored + " Cells");
-        System.out.println((System.currentTimeMillis() - startTime) / 1000 + " Seconds");
+        // System.out.println(", " + areaExplored + " Cells");
+        // System.out.println((System.currentTimeMillis() - startTime) / 1000 + " Seconds");
 
         if (bot.getRealBot()) {
             turnBotDirection(DIRECTION.WEST);

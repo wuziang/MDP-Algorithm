@@ -223,6 +223,7 @@ public class ExplorationAlgo {
         if (bot.getRobotPosRow()!=RobotConstants.START_ROW || bot.getRobotPosCol()!=RobotConstants.START_COL){
             FastestPathAlgo returnToStart = new FastestPathAlgo(exploredMap, bot, realMap);
             returnToStart.runFastestPath(RobotConstants.START_ROW, RobotConstants.START_COL);
+            System.out.println();
         }
 
         areaExplored = calculateAreaExplored();

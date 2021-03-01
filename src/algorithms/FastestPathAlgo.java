@@ -82,7 +82,7 @@ public class FastestPathAlgo {
      * Returns true if the cell can be visited.
      */
     private boolean canBeVisited(Cell c) {
-        return !c.getIsObstacle() && !c.getIsVirtualWall();
+        return c.getIsExplored() && !c.getIsObstacle() && !c.getIsVirtualWall();
     }
 
     /**
@@ -292,12 +292,14 @@ public class FastestPathAlgo {
                 m = MOVEMENT.FORWARD;
             }
 
-            // System.out.println("Movement " + MOVEMENT.print(m) + " from (" + tempBot.getRobotPosRow() + ", " + tempBot.getRobotPosCol() + ") to (" + temp.getRow() + ", " + temp.getCol() + ")");
+//            System.out.println("Movement " + MOVEMENT.print(m) + " from (" + tempBot.getRobotPosRow() + ", " + tempBot.getRobotPosCol() + ") to (" + temp.getRow() + ", " + temp.getCol() + ")");
 
             tempBot.move(m);
             movements.add(m);
             outputString.append(MOVEMENT.print(m));
         }
+
+        System.out.println("Moves: " + outputString.toString());
 
         if (!bot.getRealBot() || explorationMode) {
             for (MOVEMENT x : movements) {
@@ -346,7 +348,6 @@ public class FastestPathAlgo {
             }
         }
 
-        System.out.println("Moves: " + outputString.toString());
         return outputString.toString();
     }
 

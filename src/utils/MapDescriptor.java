@@ -45,12 +45,66 @@ public class MapDescriptor {
     }
 
     /**
+     * Reads filename.txt from disk and loads it into the passed Map object. Uses a simple binary indicator to
+     * identify if a cell is an obstacle.
+     */
+    public static void loadMapDescriptorFromDisk(Map map, String filename) {
+        try {
+            InputStream inputStream = new FileInputStream("maps/" + filename + ".txt");
+            BufferedReader buf = new BufferedReader(new InputStreamReader(inputStream));
+
+            String p1 = buf.readLine();
+            String p2 = buf.readLine();
+
+            String bin = hexToBin(p2);
+            int binPtr = 0;
+            for (int row = 0; row < MapConstants.MAP_ROWS; row++) {
+                for (int col = 0; col < MapConstants.MAP_COLS; col++) {
+                    if (bin.charAt(binPtr) == '1') map.setObstacleCell(row, col, true);
+                    binPtr++;
+                }
+            }
+
+            map.setAllExplored();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Helper method to convert a binary string to a hex string.
      */
     private static String binToHex(String bin) {
-        int dec = Integer.parseInt(bin, 2);
+
+        int dec = Integer.parseInt(bin,2);
 
         return Integer.toHexString(dec);
+    }
+
+    /**
+     * Helper method to convert a hex string to a binary string.
+     */
+    private static String hexToBin(String hex) {
+        String bin = hex;
+
+        bin = bin.replaceAll("0", "0000");
+        bin = bin.replaceAll("1", "0001");
+        bin = bin.replaceAll("2", "0010");
+        bin = bin.replaceAll("3", "0011");
+        bin = bin.replaceAll("4", "0100");
+        bin = bin.replaceAll("5", "0101");
+        bin = bin.replaceAll("6", "0110");
+        bin = bin.replaceAll("7", "0111");
+        bin = bin.replaceAll("8", "1000");
+        bin = bin.replaceAll("9", "1001");
+        bin = bin.replaceAll("A", "1010");
+        bin = bin.replaceAll("B", "1011");
+        bin = bin.replaceAll("C", "1100");
+        bin = bin.replaceAll("D", "1101");
+        bin = bin.replaceAll("E", "1110");
+        bin = bin.replaceAll("F", "1111");
+
+        return bin;
     }
 
     /**

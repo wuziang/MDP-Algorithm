@@ -14,8 +14,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static utils.MapDescriptor.generateMapDescriptor;
-import static utils.MapDescriptor.loadMapFromDisk;
+import static utils.MapDescriptor.*;
 
 /**
  * Simulator for robot navigation in virtual arena.
@@ -153,7 +152,7 @@ public class Simulator {
                     loadMapButton.addMouseListener(new MouseAdapter() {
                         public void mousePressed(MouseEvent e) {
                             loadMapDialog.setVisible(false);
-                            loadMapFromDisk(realMap, loadTF.getText());
+                            loadMapDescriptorFromDisk(realMap, loadTF.getText());
 
                             String waypoint=loadWaypoint.getText();
                             waypointX=Integer.parseInt(waypoint.substring(0, waypoint.indexOf(',')));
@@ -165,7 +164,7 @@ public class Simulator {
                         }
                     });
 
-                    loadMapDialog.add(new JLabel("File Name: "));
+                    loadMapDialog.add(new JLabel("File: "));
                     loadMapDialog.add(loadTF);
                     loadMapDialog.add(new JLabel("Waypoint: "));
                     loadMapDialog.add(loadWaypoint);
@@ -194,6 +193,7 @@ public class Simulator {
                 fastestPathToWayPoint = new FastestPathAlgo(realMap, bot);
                 fastestPathToWayPoint.runFastestPath(waypointX,waypointY);
 
+                bot.setRobotDir(RobotConstants.DIRECTION.NORTH);
                 bot.setRobotPos(waypointX,waypointY);
                 realMap.repaint();
 
@@ -299,9 +299,6 @@ public class Simulator {
         });
         _buttons.add(btn_Image_Exploration);
 
-
-
-
         // TimeExploration Class for Multithreading
         class TimeExploration extends SwingWorker<Integer, String> {
             protected Integer doInBackground() throws Exception {
@@ -313,6 +310,7 @@ public class Simulator {
                 return 333;
             }
         }
+
         // Time-limited Exploration Button
         JButton btn_TimeExploration = new JButton("Time-Limited");
         formatButton(btn_TimeExploration);
@@ -353,6 +351,7 @@ public class Simulator {
                 return 444;
             }
         }
+
         // Coverage-limited Exploration Button
         JButton btn_CoverageExploration = new JButton("Coverage-Limited");
         formatButton(btn_CoverageExploration);
@@ -379,6 +378,5 @@ public class Simulator {
             }
         });
         _buttons.add(btn_CoverageExploration);
-
     }
 }

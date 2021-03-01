@@ -61,20 +61,22 @@ public class ImageExplorationAlgo {
             }
 
             while (true) {
-                System.out.println("Waiting for EX_START...");
+                System.out.println("Waiting for to Start...");
                 String msg = CommMgr.getCommMgr().recvMsg();
-                String[] msgArr = msg.split(";");
-                // if (msgArr[0].equals(CommMgr.EX_START)) break;
+                if(!msg.isEmpty()){
+                    break;
+                }
             }
         }
 
-        // System.out.println("Finding images...");
+        System.out.println("Finding images...");
 
         startTime = System.currentTimeMillis();
         endTime = startTime + (timeLimit * 1000);
 
         if (bot.getRealBot()) {
-            CommMgr.getCommMgr().sendMsg(null, CommMgr.BOT_START);
+            String start = "start";
+            CommMgr.getCommMgr().sendMsg(start, CommMgr.AR);
         }
         senseAndRepaint();
 
@@ -138,28 +140,40 @@ public class ImageExplorationAlgo {
 
         if (northBlocked()){
             turnBotDirection(DIRECTION.NORTH);
+
             // Send message to Rpi to take photo
+            String capture = "TakePhoto";
+            CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
 
             // Return back to original direction
             turnBotDirection(originalDirection);
         }
         if (eastBlocked()){
             turnBotDirection(DIRECTION.EAST);
+
             // Send message to Rpi to take photo
+            String capture = "TakePhoto";
+            CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
 
             // Return back to original direction
             turnBotDirection(originalDirection);
         }
         if (southBlocked()){
             turnBotDirection(DIRECTION.SOUTH);
+
             // Send message to Rpi to take photo
+            String capture = "TakePhoto";
+            CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
 
             // Return back to original direction
             turnBotDirection(originalDirection);
         }
         if (westBlocked()){
             turnBotDirection(DIRECTION.WEST);
+
             // Send message to Rpi to take photo
+            String capture = "TakePhoto";
+            CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
 
             // Return back to original direction
             turnBotDirection(originalDirection);

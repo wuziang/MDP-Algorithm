@@ -174,9 +174,9 @@ public class Robot {
         } else {
             CommMgr comm = CommMgr.getCommMgr();
             if (count == 10) {
-                comm.sendMsg("0", CommMgr.INSTRUCTIONS);
+                comm.sendMsg("0", CommMgr.AR);
             } else if (count < 10) {
-                comm.sendMsg(Integer.toString(count), CommMgr.INSTRUCTIONS);
+                comm.sendMsg(Integer.toString(count), CommMgr.AR);
             }
 
             switch (robotDir) {
@@ -193,7 +193,12 @@ public class Robot {
                     posCol += count;
                     break;
             }
-            comm.sendMsg(this.getRobotPosRow() + "," + this.getRobotPosCol() + "," + DIRECTION.print(this.getRobotCurDir()), CommMgr.BOT_POS);
+
+            // Figure this one out
+            String robotRow = String.valueOf(this.getRobotPosRow());
+            String robotCol = String.valueOf(this.getRobotPosCol());
+            String robotDir = Character.toString(DIRECTION.print(this.getRobotCurDir()));
+            comm.sendMsg(robotRow + "" + robotCol + "" + robotDir, CommMgr.AN);
         }
     }
 
@@ -202,9 +207,14 @@ public class Robot {
      */
     private void sendMovement(MOVEMENT m, boolean sendMoveToAndroid) {
         CommMgr comm = CommMgr.getCommMgr();
-        comm.sendMsg(MOVEMENT.print(m) + "", CommMgr.INSTRUCTIONS);
+        comm.sendMsg(Character.toString(MOVEMENT.print(m)), CommMgr.AR);
+
+        // Check what does this do
         if (m != MOVEMENT.CALIBRATE && sendMoveToAndroid) {
-            comm.sendMsg(this.getRobotPosRow() + "," + this.getRobotPosCol() + "," + DIRECTION.print(this.getRobotCurDir()), CommMgr.BOT_POS);
+            String robotRow = String.valueOf(this.getRobotPosRow());
+            String robotCol = String.valueOf(this.getRobotPosCol());
+            String robotDir = Character.toString(DIRECTION.print(this.getRobotCurDir()));
+            comm.sendMsg(robotRow + "" + robotCol + "" + robotDir, CommMgr.AN);
         }
     }
 
@@ -280,7 +290,7 @@ public class Robot {
             String msg = comm.recvMsg();
             String[] msgArr = msg.split(";");
 
-            if (msgArr[0].equals(CommMgr.SENSOR_DATA)) {
+            if (msgArr[0].equals(CommMgr.AR)) {
                 result[0] = Integer.parseInt(msgArr[1].split("_")[1]);
                 result[1] = Integer.parseInt(msgArr[2].split("_")[1]);
                 result[2] = Integer.parseInt(msgArr[3].split("_")[1]);
@@ -297,7 +307,10 @@ public class Robot {
             LRLeft.senseReal(explorationMap, result[5]);
 
             String[] mapStrings = MapDescriptor.generateMapDescriptor(explorationMap);
-            comm.sendMsg(mapStrings[0] + " " + mapStrings[1], CommMgr.MAP_STRINGS);
+            String robotRow = String.valueOf(this.getRobotPosRow());
+            String robotCol = String.valueOf(this.getRobotPosCol());
+            String robotDir = Character.toString(DIRECTION.print(this.getRobotCurDir()));
+            comm.sendMsg(mapStrings[0] + ".." + mapStrings[1] + ".." + robotRow + ".." + robotCol + ".." + robotDir, CommMgr.AN);
         }
 
         return result;

@@ -10,14 +10,6 @@ import java.net.UnknownHostException;
 
 public class CommMgr {
 
-    public static final String EX_START = "EX_START";       // Android --> PC
-    public static final String FP_START = "FP_START";       // Android --> PC
-    public static final String MAP_STRINGS = "MAP";         // PC --> Android
-    public static final String BOT_POS = "BOT_POS";         // PC --> Android
-    public static final String BOT_START = "BOT_START";     // PC --> Arduino
-    public static final String INSTRUCTIONS = "INSTR";      // PC --> Arduino
-    public static final String SENSOR_DATA = "SDATA";       // Arduino --> PC
-
     public static final String AN = "AN";
     public static final String AR = "AR";
     public static final String IR = "IR";
@@ -115,7 +107,6 @@ public class CommMgr {
         try {
             StringBuilder sb = new StringBuilder();
             String input = reader.readLine();
-            System.out.println(input);
 
             if (input != null && input.length() > 0) {
                 sb.append(input);

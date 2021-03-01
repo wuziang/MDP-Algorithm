@@ -58,10 +58,11 @@ public class ExplorationAlgo {
             }
 
             while (true) {
-                System.out.println("Waiting for EX_START...");
+                System.out.println("Waiting for to Start...");
                 String msg = CommMgr.getCommMgr().recvMsg();
-                String[] msgArr = msg.split(";");
-                // if (msgArr[0].equals(CommMgr.EX_START)) break;
+                if(!msg.isEmpty()){
+                    break;
+                }
             }
         }
 
@@ -71,7 +72,8 @@ public class ExplorationAlgo {
         endTime = startTime + (timeLimit * 1000);
 
         if (bot.getRealBot()) {
-            // CommMgr.getCommMgr().sendMsg(null, CommMgr.BOT_START);
+            String start = "start";
+            CommMgr.getCommMgr().sendMsg(start, CommMgr.AR);
         }
         senseAndRepaint();
 
@@ -89,10 +91,6 @@ public class ExplorationAlgo {
      */
     private void explorationLoop(int r, int c) {
         do {
-            String[] mapOutput = generateMapDescriptor(exploredMap);
-            String p1 = mapOutput[0];
-            String p2 = mapOutput[1];
-
             nextMove();
 
             areaExplored = calculateAreaExplored();

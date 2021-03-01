@@ -85,9 +85,9 @@ public class CommMgr {
             if (msg == null) {
                 outputMsg = msgType;
             } else if (msgType.equals(AN) || msgType.equals(AR) || msgType.equals(AR)) {
-                outputMsg = msgType + "," + msg;
+                outputMsg = msgType + "," + msg + "\n";
             } else{
-                outputMsg = msg;
+                outputMsg = msg + "\n";
             }
 
             System.out.println("Message sent: " + outputMsg);

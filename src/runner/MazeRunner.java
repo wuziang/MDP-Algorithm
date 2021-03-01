@@ -130,7 +130,7 @@ public class MazeRunner {
                 fastestPathToGoal = new FastestPathAlgo(realMap, bot);
                 String output2 = fastestPathToGoal.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
 
-                comm.sendMsg(output1+output2, CommMgr.AN);
+                comm.sendMsg(output1+output2, CommMgr.AR);
 
                 return 222;
             }
@@ -164,7 +164,7 @@ public class MazeRunner {
                 exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
                 if (realRun) {
-                    CommMgr.getCommMgr().sendMsg(null, CommMgr.BOT_START);
+                    CommMgr.getCommMgr().sendMsg(null, CommMgr.AR);
                 }
 
                 exploration.runExploration();
@@ -193,7 +193,7 @@ public class MazeRunner {
                 image_exploration = new ImageExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
                 if (realRun) {
-                    CommMgr.getCommMgr().sendMsg(null, CommMgr.BOT_START);
+                    CommMgr.getCommMgr().sendMsg(null, CommMgr.AR);
                 }
 
                 image_exploration.runExploration();

@@ -68,13 +68,13 @@ public class ImageExplorationAlgo {
             }
         }
 
-        System.out.println("Finding images...");
+        // System.out.println("Finding images...");
 
         startTime = System.currentTimeMillis();
         endTime = startTime + (timeLimit * 1000);
 
         if (bot.getRealBot()) {
-            // CommMgr.getCommMgr().sendMsg(null, CommMgr.BOT_START);
+            CommMgr.getCommMgr().sendMsg(null, CommMgr.BOT_START);
         }
         senseAndRepaint();
 

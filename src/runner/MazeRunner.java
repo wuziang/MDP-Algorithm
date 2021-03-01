@@ -22,8 +22,6 @@ import static utils.MapDescriptor.*;
 
 public class MazeRunner {
     private static JFrame _appFrame = null;         // application JFrame
-
-    private static JPanel _mapCards = null;         // JPanel for map views
     private static JPanel _buttons = null;          // JPanel for buttons
 
     private static Robot bot;
@@ -38,7 +36,7 @@ public class MazeRunner {
     private static int coverageLimit = 300;         // coverage limit
 
     private static final CommMgr comm = CommMgr.getCommMgr();
-    private static final boolean realRun = true;
+    private static final boolean realRun = false;
 
     private static final String filename = "MD1";
 
@@ -46,7 +44,7 @@ public class MazeRunner {
      * Initialises the different maps and displays the application.
      */
     public static void main(String[] args) {
-        comm.openConnection();
+        if (realRun) comm.openConnection();
 
         bot = new Robot(RobotConstants.START_ROW, RobotConstants.START_COL, realRun);
 
@@ -72,20 +70,11 @@ public class MazeRunner {
         // Center the main frame in the middle of the screen
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         _appFrame.setLocation(dim.width / 2 - _appFrame.getSize().width / 2, dim.height / 2 - _appFrame.getSize().height / 2);
-
-        // Create the CardLayout for storing the different maps
-        // _mapCards = new JPanel(new CardLayout());
-
-        // Create the JPanel for the buttons
         _buttons = new JPanel();
 
         // Add _mapCards & _buttons to the main frame's content pane
         Container contentPane = _appFrame.getContentPane();
-        // contentPane.add(_mapCards, BorderLayout.CENTER);
         contentPane.add(_buttons);
-
-        // Initialize the main map view
-        // initMainLayout();
 
         // Initialize the buttons
         initButtonsLayout();
@@ -93,24 +82,6 @@ public class MazeRunner {
         // Display the application
         _appFrame.setVisible(true);
         _appFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    }
-
-    /**
-     * Initialises the main map view by adding the different maps as cards in the CardLayout. Displays realMap
-     * by default.
-     */
-    private static void initMainLayout() {
-        if (!realRun) {
-            _mapCards.add(realMap, "REAL_MAP");
-        }
-        _mapCards.add(exploredMap, "EXPLORATION");
-
-        CardLayout cl = ((CardLayout) _mapCards.getLayout());
-        if (!realRun) {
-            cl.show(_mapCards, "REAL_MAP");
-        } else {
-            cl.show(_mapCards, "EXPLORATION");
-        }
     }
 
     /**
@@ -140,30 +111,26 @@ public class MazeRunner {
                 bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
                 realMap.repaint();
 
-                while (true) {
-                    System.out.println("Waiting for Waypoints...");
+                if (realRun) {
                     String msg = comm.recvMsg();
                     if(!msg.isEmpty()){
                         waypointX=Integer.parseInt(msg.substring(0, msg.indexOf(',')));
                         waypointY=Integer.parseInt(msg.substring(msg.indexOf(',')+1));
-                        break;
                     }
                 }
-                String output = "AN,";
 
                 FastestPathAlgo fastestPathToWayPoint;
                 fastestPathToWayPoint = new FastestPathAlgo(realMap, bot);
-                output = output+ fastestPathToWayPoint.runFastestPath(waypointX,waypointY);
+                String output1 = fastestPathToWayPoint.runFastestPath(waypointX,waypointY);
 
-                // bot.setRobotDir(RobotConstants.DIRECTION.NORTH);
                 bot.setRobotPos(waypointX,waypointY);
                 realMap.repaint();
 
                 FastestPathAlgo fastestPathToGoal;
                 fastestPathToGoal = new FastestPathAlgo(realMap, bot);
-                output = output+fastestPathToGoal.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
+                String output2 = fastestPathToGoal.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
 
-                comm.sendMsg(output, CommMgr.AN);
+                comm.sendMsg(output1+output2, CommMgr.AN);
 
                 return 222;
             }
@@ -197,7 +164,7 @@ public class MazeRunner {
                 exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
                 if (realRun) {
-                    // CommMgr.getCommMgr().sendMsg(null, CommMgr.BOT_START);
+                    CommMgr.getCommMgr().sendMsg(null, CommMgr.BOT_START);
                 }
 
                 exploration.runExploration();
@@ -226,7 +193,7 @@ public class MazeRunner {
                 image_exploration = new ImageExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
                 if (realRun) {
-                    // CommMgr.getCommMgr().sendMsg(null, CommMgr.BOT_START);
+                    CommMgr.getCommMgr().sendMsg(null, CommMgr.BOT_START);
                 }
 
                 image_exploration.runExploration();
@@ -245,8 +212,6 @@ public class MazeRunner {
         formatButton(btn_Exploration);
         btn_Exploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-                CardLayout cl = ((CardLayout) _mapCards.getLayout());
-                cl.show(_mapCards, "EXPLORATION");
                 new Exploration().execute();
             }
         });
@@ -257,8 +222,6 @@ public class MazeRunner {
         formatButton(btn_Image_Exploration);
         btn_Image_Exploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-                CardLayout cl = ((CardLayout) _mapCards.getLayout());
-                cl.show(_mapCards, "EXPLORATION");
                 new ImageExploration().execute();
             }
         });

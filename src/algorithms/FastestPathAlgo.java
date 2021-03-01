@@ -279,6 +279,8 @@ public class FastestPathAlgo {
         Robot tempBot = new Robot(bot.getRobotPosRow(), bot.getRobotPosCol(), false);
         tempBot.setRobotDir(bot.getRobotCurDir());
         tempBot.setSpeed(0);
+
+        int fCount = 0;
         while ((tempBot.getRobotPosRow() != goalRow) || (tempBot.getRobotPosCol() != goalCol)) {
             if (tempBot.getRobotPosRow() == temp.getRow() && tempBot.getRobotPosCol() == temp.getCol()) {
                 temp = path.pop();
@@ -297,7 +299,25 @@ public class FastestPathAlgo {
 
             tempBot.move(m);
             movements.add(m);
-            outputString.append(MOVEMENT.print(m));
+            // outputString.append(MOVEMENT.print(m));
+
+            if (m == MOVEMENT.FORWARD) {
+                fCount++;
+                if (fCount == 9) {
+                    outputString.append(String.valueOf(fCount));
+                    fCount = 0;
+                }
+            } else if (m == MOVEMENT.RIGHT || m == MOVEMENT.LEFT) {
+                if (fCount > 0) {
+                    outputString.append(String.valueOf(fCount));
+                    fCount = 0;
+                }
+                outputString.append(MOVEMENT.print(m));
+            }
+        }
+
+        if (fCount > 0) {
+            outputString.append(String.valueOf(fCount));
         }
 
         System.out.println("Moves: " + outputString.toString());
@@ -314,12 +334,12 @@ public class FastestPathAlgo {
                 bot.move(x);
                 this.exploredMap.repaint();
 
-                // During exploration, use sensor data to update exploredMap.
-                if (explorationMode) {
-                    bot.setSensors();
-                    bot.sense(this.exploredMap, this.realMap);
-                    this.exploredMap.repaint();
-                }
+//                // During exploration, use sensor data to update exploredMap.
+//                if (explorationMode) {
+//                    bot.setSensors();
+//                    bot.sense(this.exploredMap, this.realMap);
+//                    this.exploredMap.repaint();
+//                }
             }
         }
 //        else {
@@ -451,7 +471,7 @@ public class FastestPathAlgo {
 
         Stack<Cell> pathForPrint = (Stack<Cell>) path.clone();
         Cell temp;
-        System.out.print("Path:");
+        System.out.print("Path: ");
         while (!pathForPrint.isEmpty()) {
             temp = pathForPrint.pop();
             if (!pathForPrint.isEmpty()) System.out.print("(" + temp.getRow() + "," + temp.getCol() + ")->");

@@ -10,6 +10,14 @@ import java.net.UnknownHostException;
 
 public class CommMgr {
 
+    public static final String EX_START = "EX_START";       // Android --> PC
+    public static final String FP_START = "FP_START";       // Android --> PC
+    public static final String MAP_STRINGS = "MAP";         // PC --> Android
+    public static final String BOT_POS = "BOT_POS";         // PC --> Android
+    public static final String BOT_START = "BOT_START";     // PC --> Arduino
+    public static final String INSTRUCTIONS = "INSTR";      // PC --> Arduino
+    public static final String SENSOR_DATA = "SDATA";       // Arduino --> PC
+
     public static final String AN = "AN";
     public static final String AR = "AR";
     public static final String IR = "IR";
@@ -31,7 +39,7 @@ public class CommMgr {
     }
 
     public void openConnection() {
-        System.out.println("Opening connection...");
+        System.out.println("\nOpening connection...");
 
         try {
             String HOST = "192.168.4.4";
@@ -57,7 +65,7 @@ public class CommMgr {
     }
 
     public void closeConnection() {
-        System.out.println("Closing connection...");
+        System.out.println("\nClosing connection...");
 
         try {
             reader.close();
@@ -78,19 +86,19 @@ public class CommMgr {
     }
 
     public void sendMsg(String msg, String msgType) {
-        System.out.println("Sending a message...");
+        System.out.println("\nSending a message...");
 
         try {
             String outputMsg;
             if (msg == null) {
-                outputMsg = msgType + "\n";
+                outputMsg = msgType;
             } else if (msgType.equals(AN) || msgType.equals(AR) || msgType.equals(AR)) {
-                outputMsg = msgType + "," + msg + "\n";
-            } else {
-                break;
+                outputMsg = msgType + "," + msg;
+            } else{
+                outputMsg = msg;
             }
 
-            System.out.println("Sending out message:\n" + outputMsg);
+            System.out.println("Message sent: " + outputMsg);
             writer.write(outputMsg);
             writer.flush();
         } catch (IOException e) {
@@ -102,15 +110,16 @@ public class CommMgr {
     }
 
     public String recvMsg() {
-        System.out.println("Receiving a message...");
+        System.out.println("\nReceiving a message...");
 
         try {
             StringBuilder sb = new StringBuilder();
             String input = reader.readLine();
+            System.out.println(input);
 
             if (input != null && input.length() > 0) {
                 sb.append(input);
-                System.out.println(sb.toString());
+                System.out.println("Message received: " + sb.toString());
                 return sb.toString();
             }
         } catch (IOException e) {

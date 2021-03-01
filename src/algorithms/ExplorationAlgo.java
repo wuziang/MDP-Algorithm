@@ -8,7 +8,7 @@ import robot.RobotConstants;
 import robot.RobotConstants.DIRECTION;
 import robot.RobotConstants.MOVEMENT;
 import utils.CommMgr;
-
+import static utils.MapDescriptor.generateMapDescriptor;
 /**
  * Exploration algorithm for the robot.
  */
@@ -89,6 +89,10 @@ public class ExplorationAlgo {
      */
     private void explorationLoop(int r, int c) {
         do {
+            String[] mapOutput = generateMapDescriptor(exploredMap);
+            String p1 = mapOutput[0];
+            String p2 = mapOutput[1];
+
             nextMove();
 
             areaExplored = calculateAreaExplored();

@@ -158,10 +158,10 @@ public class Map extends JPanel {
      */
     public void paintComponent(Graphics g) {
         // Create a two-dimensional array of _DisplayCell objects for rendering.
-        _DisplayCell[][] _mapCells = new _DisplayCell[MapConstants.MAP_ROWS][MapConstants.MAP_COLS];
+        MapDisplay[][] _mapCells = new MapDisplay[MapConstants.MAP_ROWS][MapConstants.MAP_COLS];
         for (int mapRow = 0; mapRow < MapConstants.MAP_ROWS; mapRow++) {
             for (int mapCol = 0; mapCol < MapConstants.MAP_COLS; mapCol++) {
-                _mapCells[mapRow][mapCol] = new _DisplayCell(mapCol * GraphicsConstants.CELL_SIZE, mapRow * GraphicsConstants.CELL_SIZE, GraphicsConstants.CELL_SIZE);
+                _mapCells[mapRow][mapCol] = new MapDisplay(mapCol * GraphicsConstants.CELL_SIZE, mapRow * GraphicsConstants.CELL_SIZE, GraphicsConstants.CELL_SIZE);
             }
         }
 
@@ -214,12 +214,12 @@ public class Map extends JPanel {
         }
     }
 
-    private class _DisplayCell {
+    private class MapDisplay {
         public final int cellX;
         public final int cellY;
         public final int cellSize;
 
-        public _DisplayCell(int borderX, int borderY, int borderSize) {
+        public MapDisplay(int borderX, int borderY, int borderSize) {
             this.cellX = borderX + GraphicsConstants.CELL_LINE_WEIGHT;
             this.cellY = GraphicsConstants.MAP_H - (borderY - GraphicsConstants.CELL_LINE_WEIGHT);
             this.cellSize = borderSize - (GraphicsConstants.CELL_LINE_WEIGHT * 2);

@@ -131,6 +131,7 @@ public class MazeRunner {
                 String output2 = fastestPathToGoal.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
 
                 comm.sendMsg(output1+output2, CommMgr.AR);
+                comm.sendMsg("FP_START", CommMgr.AN);
 
                 return 222;
             }

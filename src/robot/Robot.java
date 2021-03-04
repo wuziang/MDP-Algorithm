@@ -6,8 +6,6 @@ import robot.RobotConstants.DIRECTION;
 import robot.RobotConstants.MOVEMENT;
 import utils.CommMgr;
 import utils.MapDescriptor;
-
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 // @formatter:off
@@ -96,8 +94,7 @@ public class Robot {
      * Takes in a MOVEMENT and moves the robot accordingly by changing its position and direction. Sends the movement
      * if this.realBot is set.
      */
-    public void move(MOVEMENT m, boolean sendMoveToAndroid) {
-        //System.out.println("move (Robot) activated");
+    public void move(MOVEMENT m) {
         if (!realBot) {
             // Emulate real movement by pausing execution.
             try {
@@ -183,83 +180,34 @@ public class Robot {
                 break;
         }
 
-        // System.out.println(Character.toString(MOVEMENT.print(m)));
-
-        if (realBot)
-            sendMovement(m, sendMoveToAndroid);
+        if (realBot){
+            // TODO: Movement to Arduino
+            CommMgr comm = CommMgr.getCommMgr();
+            comm.sendMsg(Character.toString(MOVEMENT.print(m)), CommMgr.AR);
+            comm.recvMsg();
+        }
         // else System.out.println("Move: " + MOVEMENT.print(m));
 
         updateTouchedGoal();
     }
 
-    /**
-     * Overloaded method that calls this.move(MOVEMENT m, boolean sendMoveToAndroid = true).
-     */
-    public void move(MOVEMENT m) {
-        //System.out.println("move (shorter version) Activated");
-        this.move(m, true);
-    }
-
-    /**
-     * Sends a number instead of 'F' for multiple continuous forward movements.
-     */
-    public void moveForwardMultiple(int count) {
-        //System.out.println("moveForwardMultiple Activated");
-        if (count == 1) {
-            move(MOVEMENT.FORWARD);
-        } else {
-            CommMgr comm = CommMgr.getCommMgr();
-            if (count == 10) {
-                comm.sendMsg("0", CommMgr.AR);
-            } else if (count < 10) {
-                comm.sendMsg(Integer.toString(count), CommMgr.AR);
-            }
-
-            switch (robotDir) {
-                case NORTH:
-                    posRow += count;
-                    break;
-                case EAST:
-                    posCol += count;
-                    break;
-                case SOUTH:
-                    posRow += count;
-                    break;
-                case WEST:
-                    posCol += count;
-                    break;
-            }
-
-            // Sends robot position to Android
-            /** String robotRow = String.valueOf(this.getRobotPosRow());
-            String robotCol = String.valueOf(this.getRobotPosCol());
-            String robotDir = Character.toString(DIRECTION.print(this.getRobotCurDir()));
-            comm.sendMsg(robotRow + "" + robotCol + "" + robotDir, CommMgr.AN); **/
+    // TODO: Signal to Camera
+    public boolean takePhoto(int targetRow, int targetCol, String side){
+        String coordinate = String.valueOf(targetRow) + "," + String.valueOf(targetCol);
+        if(realBot){
+            String capture = "TakePhoto";
+            CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
+            CommMgr.getCommMgr().sendMsg(coordinate, CommMgr.IR);
         }
-    }
+        // else System.out.println("Take Photo: " + coordinate + " ("+ side +")");
 
-    /**
-     * Uses the CommMgr to send the next movement to the robot.
-     */
-    private void sendMovement(MOVEMENT m, boolean sendMoveToAndroid) {
-        //System.out.println("sendMovement Activated");
-        CommMgr comm = CommMgr.getCommMgr();
-        comm.sendMsg(Character.toString(MOVEMENT.print(m)), CommMgr.AR);
-
-        // Sends position of Robot to Android
-        /**if (m != MOVEMENT.CALIBRATE && sendMoveToAndroid) {
-            String robotRow = String.valueOf(this.getRobotPosRow());
-            String robotCol = String.valueOf(this.getRobotPosCol());
-            String robotDir = Character.toString(DIRECTION.print(this.getRobotCurDir()));
-            comm.sendMsg(robotRow + "" + robotCol + "" + robotDir, CommMgr.AN);
-        }**/
+        return false;
     }
 
     /**
      * Sets the sensors' position and direction values according to the robot's current position and direction.
      */
     public void setSensors() {
-        //System.out.println("setSensors Activated");
         switch (robotDir) {
             case NORTH:
                 SRFrontLeft.setSensor(this.posRow + 1, this.posCol - 1, this.robotDir);
@@ -296,7 +244,6 @@ public class Robot {
      * Uses the current direction of the robot and the given movement to find the new direction of the robot.
      */
     private DIRECTION findNewDirection(MOVEMENT m) {
-        //System.out.println("findNewDirection Activated");
         if (m == MOVEMENT.RIGHT) {
             return DIRECTION.getNext(robotDir);
         } else {
@@ -310,7 +257,6 @@ public class Robot {
      * @return [SRLeft, SRFrontLeft, SRFrontCenter, SRFrontRight, SRRight]
      */
     public int[] sense(Map explorationMap, Map realMap) {
-        //System.out.println("sense Activated");
         int[] result = new int[5];
 
         if (!realBot) {
@@ -320,36 +266,37 @@ public class Robot {
             result[3] = SRFrontRight.sense(explorationMap, realMap);
             result[4] = SRRight.sense(explorationMap, realMap);
         } else {
+            // Input in the form of xx, xx, xx, xx, xx, xx
             CommMgr comm = CommMgr.getCommMgr();
-            String msg = comm.recvMsg();    // Input in the form of xx, xx, xx, xx, xx, xx
-            String[] msgArr = msg.split(",");   // Splits the incoming message into an array based on the position of ','
+            String msg = comm.recvMsg();
 
-            System.out.println("Received a message here");
+            // Splits the incoming message into an array based on the position of ','
+            String[] msgArr = msg.split(",");
 
-            // Convert the values in the incoming message from strings to double
-            /*double[] msgArr2 = new double[6];
-            for (int i=0; i<5; i++){
-                msgArr2[i] = Double.parseDouble(msgArr[i]);
-            }
-
-            // Process the double values to the values the algorithm will use
-            int[] msgArr3 = new int[6];
-            for (int i=0; i<5; i++){
-                if (msgArr2[i] > 41){
-                    msgArr3[i] = -1;
-                }
-                else {
-                    msgArr3[i] = (int) (msgArr2[i]/10);
-                }
-            }*/
-
-            /*if (msgArr[0].equals(CommMgr.AR)) {
-                result[0] = msgArr3[0];
-                result[1] = msgArr3[1];
-                result[2] = msgArr3[2];
-                result[3] = msgArr3[3];
-                result[4] = msgArr3[4];
-            }*/
+//            // Convert the values in the incoming message from strings to double
+//            double[] msgArr2 = new double[6];
+//            for (int i=0; i<5; i++){
+//                msgArr2[i] = Double.parseDouble(msgArr[i]);
+//            }
+//
+//            // Process the double values to the values the algorithm will use
+//            int[] msgArr3 = new int[6];
+//            for (int i=0; i<5; i++){
+//                if (msgArr2[i] > 41){
+//                    msgArr3[i] = -1;
+//                }
+//                else {
+//                    msgArr3[i] = (int) (msgArr2[i]/10);
+//                }
+//            }
+//
+//            if (msgArr[0].equals(CommMgr.AR)) {
+//                result[0] = msgArr3[0];
+//                result[1] = msgArr3[1];
+//                result[2] = msgArr3[2];
+//                result[3] = msgArr3[3];
+//                result[4] = msgArr3[4];
+//            }
 
             for (int i=0; i<5; i++){
                 result[i] = Integer.parseInt(msgArr[i]);
@@ -361,15 +308,16 @@ public class Robot {
             SRFrontRight.senseReal(explorationMap, result[3]);
             SRRight.senseReal(explorationMap, result[4]);
 
-            String[] mapStrings = MapDescriptor.generateMapDescriptor(explorationMap);
-            String robotRow = String.valueOf(this.getRobotPosRow());
-            String robotCol = String.valueOf(this.getRobotPosCol());
-            String robotDir = Character.toString(DIRECTION.print(this.getRobotCurDir()));
-            comm.sendMsg(mapStrings[0] + "," + mapStrings[1] + "," + robotRow + "," + robotCol + "," + robotDir, CommMgr.AN);
+            // TODO: Map String to Android
+//            String[] mapStrings = MapDescriptor.generateMapDescriptor(explorationMap);
+//            String robotRow = String.valueOf(this.getRobotPosRow());
+//            String robotCol = String.valueOf(this.getRobotPosCol());
+//            String robotDir = Character.toString(DIRECTION.print(this.getRobotCurDir()));
+//
+//            comm.sendMsg(mapStrings[0] + "," + mapStrings[1] + "," + robotCol + "," + robotRow + "," + robotDir, CommMgr.AN);
         }
 
-        System.out.println(Arrays.toString(result));
-
+        // System.out.println(Arrays.toString(result));
         return result;
     }
 }

@@ -2,12 +2,11 @@ package simulator;
 
 import algorithms.ExplorationAlgo;
 import algorithms.FastestPathAlgo;
-import algorithms.ImageExplorationAlgo;
+import algorithms.ImageProcessingAlgo;
 import map.Map;
 import map.MapConstants;
 import robot.Robot;
 import robot.RobotConstants;
-import utils.CommMgr;
 
 import javax.swing.*;
 import java.awt.*;
@@ -61,7 +60,7 @@ public class Simulator {
     private static void displayEverything() {
         // Initialise main frame for display
         _appFrame = new JFrame();
-        _appFrame.setTitle("MDP Group 4");
+        _appFrame.setTitle("Simulator");
         _appFrame.setSize(new Dimension(700, 750));
         _appFrame.setResizable(false);
 
@@ -217,10 +216,10 @@ public class Simulator {
                 bot.setRobotPos(row, col);
                 exploredMap.repaint();
 
-                ImageExplorationAlgo image_exploration;
-                image_exploration = new ImageExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+                ImageProcessingAlgo image;
+                image = new ImageProcessingAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
-                image_exploration.runExploration();
+                image.runImage();
                 generateMapDescriptor(exploredMap);
 
                 return 333;
@@ -244,8 +243,8 @@ public class Simulator {
         formatButton(btn_Exploration);
         btn_Exploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-//                loadMapDescriptorFromDisk(realMap, filename);
-//                realMap.repaint();
+                loadMapDescriptorFromDisk(realMap, filename);
+                realMap.repaint();
 
                 CardLayout cl = ((CardLayout) _mapCards.getLayout());
                 cl.show(_mapCards, "EXPLORATION");
@@ -255,10 +254,13 @@ public class Simulator {
         _buttons.add(btn_Exploration);
 
         // Image Exploration Button
-        JButton btn_Image_Exploration = new JButton("Image Exploration");
+        JButton btn_Image_Exploration = new JButton("Image Processing");
         formatButton(btn_Image_Exploration);
         btn_Image_Exploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
+                loadMapDescriptorFromDisk(realMap, filename);
+                realMap.repaint();
+
                 CardLayout cl = ((CardLayout) _mapCards.getLayout());
                 cl.show(_mapCards, "EXPLORATION");
                 new ImageExploration().execute();

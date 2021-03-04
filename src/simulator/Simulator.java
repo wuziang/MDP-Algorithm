@@ -244,8 +244,8 @@ public class Simulator {
         formatButton(btn_Exploration);
         btn_Exploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-                loadMapDescriptorFromDisk(realMap, filename);
-                realMap.repaint();
+//                loadMapDescriptorFromDisk(realMap, filename);
+//                realMap.repaint();
 
                 CardLayout cl = ((CardLayout) _mapCards.getLayout());
                 cl.show(_mapCards, "EXPLORATION");

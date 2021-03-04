@@ -41,21 +41,21 @@ public class ExplorationAlgo {
 
             //CommMgr.getCommMgr().recvMsg();
 
-            if (bot.getRealBot()) {
-                bot.move(MOVEMENT.LEFT, false);
-                //CommMgr.getCommMgr().recvMsg();
-                bot.move(MOVEMENT.CALIBRATE, false);
-                //CommMgr.getCommMgr().recvMsg();
-                bot.move(MOVEMENT.LEFT, false);
-                //CommMgr.getCommMgr().recvMsg();
-                bot.move(MOVEMENT.CALIBRATE, false);
-                //CommMgr.getCommMgr().recvMsg();
-                bot.move(MOVEMENT.RIGHT, false);
-                //CommMgr.getCommMgr().recvMsg();
-                bot.move(MOVEMENT.CALIBRATE, false);
-                //CommMgr.getCommMgr().recvMsg();
-                bot.move(MOVEMENT.RIGHT, false);
-            }
+//            if (bot.getRealBot()) {
+//                bot.move(MOVEMENT.LEFT, false);
+//                //CommMgr.getCommMgr().recvMsg();
+//                bot.move(MOVEMENT.CALIBRATE, false);
+//                //CommMgr.getCommMgr().recvMsg();
+//                bot.move(MOVEMENT.LEFT, false);
+//                //CommMgr.getCommMgr().recvMsg();
+//                bot.move(MOVEMENT.CALIBRATE, false);
+//                //CommMgr.getCommMgr().recvMsg();
+//                bot.move(MOVEMENT.RIGHT, false);
+//                //CommMgr.getCommMgr().recvMsg();
+//                bot.move(MOVEMENT.CALIBRATE, false);
+//                //CommMgr.getCommMgr().recvMsg();
+//                bot.move(MOVEMENT.RIGHT, false);
+//            }
 
             while (true) {
                 System.out.println("Waiting for to Start...");
@@ -90,14 +90,14 @@ public class ExplorationAlgo {
      * 3. System.currentTimeMillis() > endTime
      */
     private void explorationLoop(int r, int c) {
-        System.out.println("explorationLoop activated");
+        // System.out.println("explorationLoop activated");
         do {
             nextMove();
 
             areaExplored = calculateAreaExplored();
             // System.out.println("Area explored: " + areaExplored);
 
-            System.out.println("This is the end of one move\n");
+            //System.out.println("This is the end of one move\n");
 
             // This is the stopping condition where r and c are the robot's starting positions
             if (bot.getRobotPosRow() == r && bot.getRobotPosCol() == c) {
@@ -114,7 +114,7 @@ public class ExplorationAlgo {
      * Determines the next move for the robot and executes it accordingly.
      */
     private void nextMove() {
-        System.out.println("nextMove activated");
+        //System.out.println("nextMove activated");
 
         if (lookRight()) {
             moveBot(MOVEMENT.RIGHT);
@@ -256,7 +256,7 @@ public class ExplorationAlgo {
      * Returns true for cells that are explored and not obstacles.
      */
     private boolean isExploredNotObstacle(int r, int c) {
-        System.out.println("isExploredNotObstacle Checked");
+        //System.out.println("isExploredNotObstacle Checked");
         if (exploredMap.checkValidCoordinates(r, c)) {
             Cell tmp = exploredMap.getCell(r, c);
             return (tmp.getIsExplored() && !tmp.getIsObstacle());
@@ -268,7 +268,7 @@ public class ExplorationAlgo {
      * Returns true for cells that are explored, not virtual walls and not obstacles.
      */
     private boolean isExploredAndFree(int r, int c) {
-        System.out.println("isExploredAndFree Checked");
+        //System.out.println("isExploredAndFree Checked");
         if (exploredMap.checkValidCoordinates(r, c)) {
             Cell b = exploredMap.getCell(r, c);
             return (b.getIsExplored() && !b.getIsVirtualWall() && !b.getIsObstacle());
@@ -295,7 +295,7 @@ public class ExplorationAlgo {
      * Moves the bot, repaints the map and calls senseAndRepaint().
      */
     private void moveBot(MOVEMENT m) {
-        System.out.println("moveBot (Algo) Activated");
+        //System.out.println("moveBot (Algo) Activated");
 
         // Insert pledge algorithm here
         /*
@@ -305,7 +305,7 @@ public class ExplorationAlgo {
         - The starting waypoint should not be visited and this should be the main condition to start the pledge algorithm
          */
 
-        if (bot.getRobotPosCol() != 1 & bot.getRobotPosRow() != 1) {
+        /*if (bot.getRobotPosCol() != 1 & bot.getRobotPosRow() != 1) {
             int currentColumn = 0;
             int currentRow = 0;
             DIRECTION currentDirection = null;
@@ -340,14 +340,14 @@ public class ExplorationAlgo {
                         break;
                     }
 
-                    /*if (currentColumn == startColumn & currentRow == startRow & currentDirection == startDirection) {
+                    *//*if (currentColumn == startColumn & currentRow == startRow & currentDirection == startDirection) {
                         flag = true;
                         System.out.println("Exited the Pledge");
-                    }*/
+                    }*//*
                 }
                 System.out.println("Exited the Pledge");
             }
-        }
+        }*/
 
         bot.move(m);
         exploredMap.repaint();
@@ -383,7 +383,7 @@ public class ExplorationAlgo {
      * Sets the bot's sensors, processes the sensor data and repaints the map.
      */
     private void senseAndRepaint() {
-        System.out.println("senseAndRepaint Activated");
+        //System.out.println("senseAndRepaint Activated");
         bot.setSensors();
         bot.sense(exploredMap, realMap);
         exploredMap.repaint();
@@ -393,7 +393,7 @@ public class ExplorationAlgo {
      * Checks if the robot can calibrate at its current position given a direction.
      */
     private boolean canCalibrateOnTheSpot(DIRECTION botDir) {
-        System.out.println("canCalibrateOnTheSpot Activated");
+        //System.out.println("canCalibrateOnTheSpot Activated");
         int row = bot.getRobotPosRow();
         int col = bot.getRobotPosCol();
 
@@ -414,7 +414,7 @@ public class ExplorationAlgo {
      * Returns a possible direction for robot calibration or null, otherwise.
      */
     private DIRECTION getCalibrationDirection() {
-        System.out.println("getCalibrationDirection Activated");
+        //System.out.println("getCalibrationDirection Activated");
         DIRECTION origDir = bot.getRobotCurDir();
         DIRECTION dirToCheck;
 
@@ -435,7 +435,7 @@ public class ExplorationAlgo {
      * to its original direction.
      */
     private void calibrateBot(DIRECTION targetDir) {
-        System.out.println("calibrateBot Activated");
+        //System.out.println("calibrateBot Activated");
         DIRECTION origDir = bot.getRobotCurDir();
 
         turnBotDirection(targetDir);
@@ -447,7 +447,7 @@ public class ExplorationAlgo {
      * Turns the robot to the required direction.
      */
     private void turnBotDirection(DIRECTION targetDir) {
-        System.out.println("turnBotDirection Activated");
+        //System.out.println("turnBotDirection Activated");
         int numOfTurn = Math.abs(bot.getRobotCurDir().ordinal() - targetDir.ordinal());
         if (numOfTurn > 2) numOfTurn = numOfTurn % 2;
 

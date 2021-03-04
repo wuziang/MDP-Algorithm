@@ -85,12 +85,12 @@ public class CommMgr {
             if (msg == null) {
                 outputMsg = msgType;
             } else if (msgType.equals(AN) || msgType.equals(AR) || msgType.equals(AR)) {
-                outputMsg = msgType + "," + msg;
+                outputMsg = msgType + "," + msg + "\n";
             } else{
-                outputMsg = msg;
+                outputMsg = msg + "\n";
             }
 
-            System.out.println("Message sent: " + outputMsg);
+            System.out.print("Message sent: " + outputMsg);
             writer.write(outputMsg);
             writer.flush();
         } catch (IOException e) {
@@ -110,7 +110,7 @@ public class CommMgr {
 
             if (input != null && input.length() > 0) {
                 sb.append(input);
-                System.out.println("Message received: " + sb.toString());
+                System.out.print("Message received: " + sb.toString());
                 return sb.toString();
             }
         } catch (IOException e) {

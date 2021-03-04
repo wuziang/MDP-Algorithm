@@ -38,7 +38,7 @@ public class MazeRunner {
     private static int coverageLimit = 300;         // coverage limit
 
     private static final CommMgr comm = CommMgr.getCommMgr();
-    private static final boolean realRun = true;
+    private static final boolean realRun = false;
 
     private static final String filename = "MD1";
 
@@ -186,8 +186,16 @@ public class MazeRunner {
                 ExplorationAlgo exploration;
                 exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
+                if (realRun) {
+                    CommMgr.getCommMgr().sendMsg(null, CommMgr.AR);
+                }
+
                 exploration.runExploration();
                 generateMapDescriptor(exploredMap);
+
+                if (realRun) {
+                    new FastestPath().execute();
+                }
 
                 return 111;
             }
@@ -207,8 +215,16 @@ public class MazeRunner {
                 ImageExplorationAlgo image_exploration;
                 image_exploration = new ImageExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
+                if (realRun) {
+                    CommMgr.getCommMgr().sendMsg(null, CommMgr.AR);
+                }
+
                 image_exploration.runExploration();
                 generateMapDescriptor(exploredMap);
+
+                if (realRun) {
+                    new FastestPath().execute();
+                }
 
                 return 333;
             }

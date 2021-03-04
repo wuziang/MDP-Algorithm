@@ -8,7 +8,6 @@ import robot.RobotConstants;
 import robot.RobotConstants.DIRECTION;
 import robot.RobotConstants.MOVEMENT;
 import utils.CommMgr;
-import static utils.MapDescriptor.generateMapDescriptor;
 /**
  * Exploration algorithm for the robot.
  */

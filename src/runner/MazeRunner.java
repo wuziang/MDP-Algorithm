@@ -39,7 +39,7 @@ public class MazeRunner {
 
     private static final CommMgr comm = CommMgr.getCommMgr();
     private static final boolean connect = true;
-    private static final boolean realBot = false;
+    private static final boolean realBot = true;
 
     private static final String filename = "MD1";
 
@@ -105,7 +105,7 @@ public class MazeRunner {
         _mapCards.add(exploredMap, "EXPLORATION");
 
         CardLayout cl = ((CardLayout) _mapCards.getLayout());
-        cl.show(_mapCards, "REAL_MAP");
+        cl.show(_mapCards, "EXPLORATION");
     }
 
     /**
@@ -193,6 +193,9 @@ public class MazeRunner {
                 loadMapDescriptorFromDisk(realMap, filename);
                 realMap.repaint();
 
+                CardLayout cl = ((CardLayout) _mapCards.getLayout());
+                cl.show(_mapCards, "REAL_MAP");
+
                 new FastestPath().execute();
             }
         });
@@ -213,15 +216,21 @@ public class MazeRunner {
                 exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
                 exploration.runExploration();
-                generateMapDescriptor(exploredMap);
-
-                if (connect) {
-                    new FastestPath().execute();
-                }
+                // generateMapDescriptor(exploredMap);
 
                 return 111;
             }
         }
+
+        // Exploration Button
+        JButton btn_Exploration = new JButton("Exploration");
+        formatButton(btn_Exploration);
+        btn_Exploration.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                new Exploration().execute();
+            }
+        });
+        _buttons.add(btn_Exploration);
 
         // Image Exploration Class for Multithreading
         class ImageExploration extends SwingWorker<Integer, String> {
@@ -251,16 +260,6 @@ public class MazeRunner {
                 return 333;
             }
         }
-
-        // Exploration Button
-        JButton btn_Exploration = new JButton("Exploration");
-        formatButton(btn_Exploration);
-        btn_Exploration.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-                new Exploration().execute();
-            }
-        });
-        _buttons.add(btn_Exploration);
 
         // Image Exploration Button
         JButton btn_Image_Exploration = new JButton("Image Exploration");

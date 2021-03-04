@@ -2,9 +2,8 @@ package runner;
 
 import algorithms.ExplorationAlgo;
 import algorithms.FastestPathAlgo;
-import algorithms.ImageExplorationAlgo;
+import algorithms.ImageProcessingAlgo;
 import map.Map;
-import map.MapConstants;
 import robot.Robot;
 import robot.RobotConstants;
 import utils.CommMgr;
@@ -38,18 +37,19 @@ public class MazeRunner {
     private static int coverageLimit = 300;         // coverage limit
 
     private static final CommMgr comm = CommMgr.getCommMgr();
-    private static final boolean connect = true;
-    private static final boolean realBot = true;
 
+    private static final boolean connected = false;
+
+    private static final boolean loadedMap = true;
     private static final String filename = "MD1";
 
     /**
      * Initialises the different maps and displays the application.
      */
     public static void main(String[] args) {
-        if (connect) comm.openConnection();
+        if (connected) comm.openConnection();
 
-        bot = new Robot(RobotConstants.START_ROW, RobotConstants.START_COL, realBot);
+        bot = new Robot(RobotConstants.START_ROW, RobotConstants.START_COL, !loadedMap);
 
         realMap = new Map(bot);
         realMap.setAllUnexplored();
@@ -66,7 +66,7 @@ public class MazeRunner {
     private static void displayEverything() {
         // Initialise main frame for display
         _appFrame = new JFrame();
-        _appFrame.setTitle("MDP Group 4");
+        _appFrame.setTitle("Real-Time Display");
         _appFrame.setSize(new Dimension(700, 700));
         _appFrame.setResizable(false);
 
@@ -134,7 +134,7 @@ public class MazeRunner {
             protected Integer doInBackground() throws Exception {
                 bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
 
-                if (connect) {
+                if (connected) {
                     String msg = comm.recvMsg();
                     if(!msg.isEmpty()){
                         waypointX=Integer.parseInt(msg.substring(0, msg.indexOf(',')));
@@ -152,7 +152,20 @@ public class MazeRunner {
                 fastestPathToGoal = new FastestPathAlgo(realMap, bot);
                 String output2 = fastestPathToGoal.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
 
-                comm.sendMsg(output1+output2, CommMgr.AR);
+                String output;
+                if(output1.charAt(output1.length()-1)<='8'
+                        && output1.charAt(output1.length()-1)>='1'
+                        && output2.charAt(0)<='8'
+                        && output2.charAt(0)>='1'){
+                    output = output1.substring(0, output1.length()-1)
+                            + Character.toString(output1.charAt(output1.length()-1)+output2.charAt(0)-'0')
+                            + output2.substring(1);
+                }
+                else{
+                    output = output1+output2;
+                }
+
+                comm.sendMsg(output, CommMgr.AR);
                 comm.sendMsg("FP_START", CommMgr.AN);
 
                 bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
@@ -204,19 +217,13 @@ public class MazeRunner {
         // Exploration Class for Multithreading
         class Exploration extends SwingWorker<Integer, String> {
             protected Integer doInBackground() throws Exception {
-                int row, col;
-
-                row = RobotConstants.START_ROW;
-                col = RobotConstants.START_COL;
-
-                bot.setRobotPos(row, col);
+                bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
                 exploredMap.repaint();
 
                 ExplorationAlgo exploration;
                 exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
                 exploration.runExploration();
-                // generateMapDescriptor(exploredMap);
 
                 return 111;
             }
@@ -233,40 +240,27 @@ public class MazeRunner {
         _buttons.add(btn_Exploration);
 
         // Image Exploration Class for Multithreading
-        class ImageExploration extends SwingWorker<Integer, String> {
+        class ImageProcessing extends SwingWorker<Integer, String> {
             protected Integer doInBackground() throws Exception {
-                int row, col;
-
-                row = RobotConstants.START_ROW;
-                col = RobotConstants.START_COL;
-
-                bot.setRobotPos(row, col);
+                bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
                 exploredMap.repaint();
 
-                ImageExplorationAlgo image_exploration;
-                image_exploration = new ImageExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+                ImageProcessingAlgo image;
+                image = new ImageProcessingAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
-                if (connect) {
-                    CommMgr.getCommMgr().sendMsg(null, CommMgr.AR);
-                }
-
-                image_exploration.runExploration();
+                image.runImage();
                 generateMapDescriptor(exploredMap);
-
-                if (connect) {
-                    new FastestPath().execute();
-                }
 
                 return 333;
             }
         }
 
         // Image Exploration Button
-        JButton btn_Image_Exploration = new JButton("Image Exploration");
+        JButton btn_Image_Exploration = new JButton("Image Processing");
         formatButton(btn_Image_Exploration);
         btn_Image_Exploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-                new ImageExploration().execute();
+                new ImageProcessing().execute();
             }
         });
         _buttons.add(btn_Image_Exploration);

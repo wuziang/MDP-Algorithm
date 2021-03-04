@@ -2,34 +2,30 @@ package algorithms;
 
 import map.Cell;
 import map.Map;
-import map.MapConstants;
 import robot.Robot;
-import robot.RobotConstants;
 import robot.RobotConstants.DIRECTION;
 import robot.RobotConstants.MOVEMENT;
 import utils.CommMgr;
-
-import java.util.Arrays;
 
 /**
  * Exploration algorithm for the robot.
  */
 
-public class ImageExplorationAlgo {
+public class ImageProcessingAlgo {
     private final Map exploredMap;
     private final Map realMap;
     private final Robot bot;
 
     private final int coverageLimit;
     private final int timeLimit;
-    private int areaExplored;
 
     private long startTime;
     private long endTime;
 
     private int[] sensorData;
+    private int foundImage=0;
 
-    public ImageExplorationAlgo(Map exploredMap, Map realMap, Robot bot, int coverageLimit, int timeLimit) {
+    public ImageProcessingAlgo(Map exploredMap, Map realMap, Robot bot, int coverageLimit, int timeLimit) {
         this.exploredMap = exploredMap;
         this.realMap = realMap;
         this.bot = bot;
@@ -40,50 +36,36 @@ public class ImageExplorationAlgo {
     /**
      * Main method that is called to start the exploration.
      */
-    public void runExploration() {
-        System.out.println("\nFinding Image...");
+    public void runImage() {
+        System.out.println("\nProcessing Image...");
 
         if (bot.getRealBot()) {
-            while (true) {
-                String msg = CommMgr.getCommMgr().recvMsg();
-                if(!msg.isEmpty()){
-                    break;
-                }
-            }
+            CommMgr.getCommMgr().recvMsg();
         }
 
         startTime = System.currentTimeMillis();
         endTime = startTime + (timeLimit * 1000);
 
         senseAndRepaint();
-
-        areaExplored = calculateAreaExplored();
-        explorationLoop(bot.getRobotPosRow(), bot.getRobotPosCol());
+        imageLoop(bot.getRobotPosRow(), bot.getRobotPosCol());
     }
 
     /**
      * Loops through robot movements until one (or more) of the following conditions is met:
      * 1. Robot is back at (r, c)
-     * 2. areaExplored > coverageLimit
+     * 2. foundImage == 6
      * 3. System.currentTimeMillis() > endTime
      */
-    private void explorationLoop(int r, int c) {
+    private void imageLoop(int r, int c) {
         do {
             // This will determine the robot's next move to make
             nextMove();
-            areaExplored = calculateAreaExplored();
-
             currentPosition();
 
-            // This is the stopping condition where r and c are the robot's starting positions
             if (bot.getRobotPosRow() == r && bot.getRobotPosCol() == c) {
-                if (areaExplored >= 100) {
-                    break;
-                }
+                break;
             }
-        } while (areaExplored <= coverageLimit && System.currentTimeMillis() <= endTime);
-
-        // goHome();
+        } while (foundImage<6 && System.currentTimeMillis() <= endTime);
     }
 
     /**
@@ -329,17 +311,6 @@ public class ImageExplorationAlgo {
     }
 
     /**
-     * Returns the robot to START after exploration and points the bot northwards.
-     */
-    private void goHome() {
-        FastestPathAlgo returnToStart = new FastestPathAlgo(exploredMap, bot);
-        String output = returnToStart.runFastestPath(RobotConstants.START_ROW, RobotConstants.START_COL);
-
-        areaExplored = calculateAreaExplored();
-        System.out.printf("%.2f%% Coverage", (areaExplored / 300.0) * 100.0);
-    }
-
-    /**
      * Returns true for cells that are explored and not obstacles.
      */
     private boolean isExploredNotObstacle(int r, int c) {
@@ -370,21 +341,6 @@ public class ImageExplorationAlgo {
             return (b.getIsExplored() && !b.getIsVirtualWall() && !b.getIsObstacle());
         }
         return false;
-    }
-
-    /**
-     * Returns the number of cells explored in the grid.
-     */
-    private int calculateAreaExplored() {
-        int result = 0;
-        for (int r = 0; r < MapConstants.MAP_ROWS; r++) {
-            for (int c = 0; c < MapConstants.MAP_COLS; c++) {
-                if (exploredMap.getCell(r, c).getIsExplored()) {
-                    result++;
-                }
-            }
-        }
-        return result;
     }
 
     /**

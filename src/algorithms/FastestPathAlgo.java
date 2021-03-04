@@ -31,21 +31,11 @@ public class FastestPathAlgo {
     private double[][] gCosts;              // array of real cost from START to [row][col] i.e. g(n)
     private Robot bot;
     private Map exploredMap;
-    private final Map realMap;
     private int loopCount;
-    private boolean explorationMode;
 
     public FastestPathAlgo(Map exploredMap, Robot bot) {
-        this.realMap = null;
         initObject(exploredMap, bot);
     }
-
-    public FastestPathAlgo(Map exploredMap, Robot bot, Map realMap) {
-        this.realMap = realMap;
-        this.explorationMode = true;
-        initObject(exploredMap, bot);
-    }
-
     /**
      * Initialise the FastestPathAlgo object.
      */
@@ -319,7 +309,7 @@ public class FastestPathAlgo {
 
         System.out.println("Moves: " + outputString.toString());
 
-        if (!bot.getRealBot() || explorationMode) {
+        if (!bot.getRealBot()) {
             for (MOVEMENT x : movements) {
                 if (x == MOVEMENT.FORWARD) {
                     if (!canMoveForward()) {

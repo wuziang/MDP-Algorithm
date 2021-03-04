@@ -181,7 +181,7 @@ public class Robot {
         }
 
         if (realBot){
-            // TODO:: Exploration to Arduino
+            // TODO: Movement to Arduino
             CommMgr comm = CommMgr.getCommMgr();
             comm.sendMsg(Character.toString(MOVEMENT.print(m)), CommMgr.AR);
             comm.recvMsg();
@@ -191,6 +191,7 @@ public class Robot {
         updateTouchedGoal();
     }
 
+    // TODO: Signal to Camera
     public void takePhoto(){
         String capture = "TakePhoto";
         CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
@@ -301,7 +302,7 @@ public class Robot {
             SRFrontRight.senseReal(explorationMap, result[3]);
             SRRight.senseReal(explorationMap, result[4]);
 
-            // TODO:: Exploration to Android
+            // TODO: Map String to Android
 //            String[] mapStrings = MapDescriptor.generateMapDescriptor(explorationMap);
 //            String robotRow = String.valueOf(this.getRobotPosRow());
 //            String robotCol = String.valueOf(this.getRobotPosCol());

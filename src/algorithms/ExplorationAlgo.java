@@ -42,12 +42,7 @@ public class ExplorationAlgo {
         System.out.println("\nExploring...");
 
         if (bot.getRealBot()) {
-            while (true) {
-                String msg = CommMgr.getCommMgr().recvMsg();
-                if(!msg.isEmpty()){
-                    break;
-                }
-            }
+            CommMgr.getCommMgr().recvMsg();
         }
 
         startTime = System.currentTimeMillis();
@@ -72,9 +67,7 @@ public class ExplorationAlgo {
 
             // This is the stopping condition where r and c are the robot's starting positions
             if (bot.getRobotPosRow() == r && bot.getRobotPosCol() == c) {
-                if (areaExplored >= 100) {
-                    break;
-                }
+                break;
             }
         } while (areaExplored <= coverageLimit && System.currentTimeMillis() <= endTime);
 

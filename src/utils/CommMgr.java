@@ -90,7 +90,7 @@ public class CommMgr {
                 outputMsg = msg + "\n";
             }
 
-            System.out.println("Message sent: " + outputMsg);
+            System.out.print("Message sent: " + outputMsg);
             writer.write(outputMsg);
             writer.flush();
         } catch (IOException e) {
@@ -110,7 +110,7 @@ public class CommMgr {
 
             if (input != null && input.length() > 0) {
                 sb.append(input);
-                System.out.println("Message received: " + sb.toString());
+                System.out.print("Message received: " + sb.toString());
                 return sb.toString();
             }
         } catch (IOException e) {

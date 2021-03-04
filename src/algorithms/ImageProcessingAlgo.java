@@ -73,7 +73,11 @@ public class ImageProcessingAlgo {
         } while (foundImage<6 && System.currentTimeMillis() <= endTime);
 
         double sides = calculateSidesPossible();
-        System.out.printf("\nImage Processing Coverage %.2f%%\n", (takenImage/sides) * 100.0);
+        System.out.printf("\nImage Processing Coverage %.2f%%", (takenImage/sides) * 100.0);
+
+        if(bot.getRealBot()) {
+            System.out.printf("\nImages Found: %d\n", foundImage);
+        }
     }
 
     /**
@@ -215,7 +219,7 @@ public class ImageProcessingAlgo {
 
         turnBotDirection(DIRECTION.NORTH);
 
-        bot.takePhoto(cellRow, currentColumn, DIRECTION.SOUTH.toString());
+        if(bot.takePhoto(cellRow, currentColumn, DIRECTION.SOUTH.toString())) foundImage++;;
         takenImage++;
 
         turnBotDirection(currentDirection);
@@ -255,7 +259,7 @@ public class ImageProcessingAlgo {
 
         turnBotDirection(DIRECTION.EAST);
 
-        bot.takePhoto(currentRow, cellColumn, DIRECTION.WEST.toString());
+        if(bot.takePhoto(currentRow, cellColumn, DIRECTION.WEST.toString())) foundImage++;
         takenImage++;
 
         turnBotDirection(currentDirection);
@@ -295,7 +299,7 @@ public class ImageProcessingAlgo {
 
         turnBotDirection(DIRECTION.SOUTH);
 
-        bot.takePhoto(cellRow, currentColumn, DIRECTION.NORTH.toString());
+        if(bot.takePhoto(cellRow, currentColumn, DIRECTION.NORTH.toString())) foundImage++;;
         takenImage++;
 
         turnBotDirection(currentDirection);
@@ -335,7 +339,7 @@ public class ImageProcessingAlgo {
 
         turnBotDirection(DIRECTION.WEST);
 
-        bot.takePhoto(currentRow, cellColumn, DIRECTION.EAST.toString());
+        if(bot.takePhoto(currentRow, cellColumn, DIRECTION.EAST.toString())) foundImage++;;
         takenImage++;
 
         turnBotDirection(currentDirection);

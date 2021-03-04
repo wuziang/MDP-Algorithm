@@ -38,7 +38,8 @@ public class MazeRunner {
     private static int coverageLimit = 300;         // coverage limit
 
     private static final CommMgr comm = CommMgr.getCommMgr();
-    private static final boolean realRun = false;
+    private static final boolean connect = true;
+    private static final boolean realBot = false;
 
     private static final String filename = "MD1";
 
@@ -46,9 +47,9 @@ public class MazeRunner {
      * Initialises the different maps and displays the application.
      */
     public static void main(String[] args) {
-        if (realRun) comm.openConnection();
+        if (connect) comm.openConnection();
 
-        bot = new Robot(RobotConstants.START_ROW, RobotConstants.START_COL, true);
+        bot = new Robot(RobotConstants.START_ROW, RobotConstants.START_COL, realBot);
 
         realMap = new Map(bot);
         realMap.setAllUnexplored();
@@ -133,7 +134,7 @@ public class MazeRunner {
             protected Integer doInBackground() throws Exception {
                 bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
 
-                if (realRun) {
+                if (connect) {
                     String msg = comm.recvMsg();
                     if(!msg.isEmpty()){
                         waypointX=Integer.parseInt(msg.substring(0, msg.indexOf(',')));
@@ -153,6 +154,31 @@ public class MazeRunner {
 
                 comm.sendMsg(output1+output2, CommMgr.AR);
                 comm.sendMsg("FP_START", CommMgr.AN);
+
+                bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
+                while(bot.getRobotPosRow()!=RobotConstants.GOAL_ROW || bot.getRobotPosCol()!=RobotConstants.GOAL_COL){
+                    String msg = comm.recvMsg();
+                    RobotConstants.MOVEMENT x;
+                    int moveCount = 1;
+
+                    switch (msg.charAt(0)) {
+                        case 'L':
+                            x = RobotConstants.MOVEMENT.LEFT;
+                            break;
+                        case 'R':
+                            x = RobotConstants.MOVEMENT.RIGHT;
+                            break;
+                        default:
+                            x = RobotConstants.MOVEMENT.FORWARD;
+                            moveCount = Integer.parseInt(msg);
+                            break;
+                    }
+
+                    for(int i=0;i<moveCount;i++){
+                        bot.move(x);
+                    }
+                    realMap.repaint();
+                }
 
                 return 222;
             }
@@ -186,14 +212,10 @@ public class MazeRunner {
                 ExplorationAlgo exploration;
                 exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
-                if (realRun) {
-                    CommMgr.getCommMgr().sendMsg(null, CommMgr.AR);
-                }
-
                 exploration.runExploration();
                 generateMapDescriptor(exploredMap);
 
-                if (realRun) {
+                if (connect) {
                     new FastestPath().execute();
                 }
 
@@ -215,14 +237,14 @@ public class MazeRunner {
                 ImageExplorationAlgo image_exploration;
                 image_exploration = new ImageExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
-                if (realRun) {
+                if (connect) {
                     CommMgr.getCommMgr().sendMsg(null, CommMgr.AR);
                 }
 
                 image_exploration.runExploration();
                 generateMapDescriptor(exploredMap);
 
-                if (realRun) {
+                if (connect) {
                     new FastestPath().execute();
                 }
 

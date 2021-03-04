@@ -107,7 +107,7 @@ public class ExplorationAlgo {
             }
         } while (areaExplored <= coverageLimit && System.currentTimeMillis() <= endTime);
 
-        goHome();
+        //goHome();
     }
 
     /**
@@ -115,57 +115,6 @@ public class ExplorationAlgo {
      */
     private void nextMove() {
         System.out.println("nextMove activated");
-
-        // Insert pledge algorithm here
-        /*
-        General flow:
-        - If an obstacle is detected to the robot's left/right, begin pledge algorithm
-        - This will be inside a while loop (or maybe not) and will continue until the very starting waypoint is reached again
-        - The starting waypoint should not be visited and this should be the main condition to start the pledge algorithm
-         */
-
-        /*if (bot.getRobotPosCol() != 1 & bot.getRobotPosRow() != 1) {
-            int currentColumn = 0;
-            int currentRow = 0;
-            DIRECTION currentDirection = null;
-
-            int startColumn = bot.getRobotPosCol();
-            int startRow = bot.getRobotPosRow();
-
-            DIRECTION startDirection = bot.getRobotCurDir();
-
-            int[] current_SensorData = bot.sense(exploredMap, realMap);
-
-            if (current_SensorData[0] == 1){
-                boolean flag = false;
-
-                System.out.println("Entering Pledge");
-
-                while (flag == false){
-
-                    int[] sensorData = bot.sense(exploredMap, realMap);
-                    currentColumn = bot.getRobotPosCol();
-                    currentRow = bot.getRobotPosRow();
-                    currentDirection = bot.getRobotCurDir();
-
-                    if (sensorData[0]==-1 & lookLeft()) {
-                        moveBot(MOVEMENT.FORCEDLEFT);
-                    }
-                    else if (sensorData[0]>-1 & lookForward()) {
-                        moveBot(MOVEMENT.FORWARD);
-                    }
-                    else if (sensorData[0]>-1 & lookRight() & !lookForward()){
-                        moveBot(MOVEMENT.FORCEDRIGHT);
-                    }
-
-                    *//*if (currentColumn == startColumn & currentRow == startRow & currentDirection == startDirection) {
-                        flag = true;
-                        System.out.println("Exited the Pledge");
-                    }*//*
-                }
-                System.out.println("Exited the Pledge");
-            }
-        }*/
 
         if (lookRight()) {
             moveBot(MOVEMENT.RIGHT);
@@ -273,7 +222,7 @@ public class ExplorationAlgo {
     /**
      * Returns the robot to START after exploration and points the bot northwards.
      */
-    private void goHome() {
+    /*private void goHome() {
         // System.out.println("Exploration complete!");
 
         if (!bot.getTouchedGoal() && coverageLimit == 300 && timeLimit == 3600) {
@@ -301,7 +250,7 @@ public class ExplorationAlgo {
             moveBot(MOVEMENT.CALIBRATE);
         }
         turnBotDirection(DIRECTION.NORTH);
-    }
+    }*/
 
     /**
      * Returns true for cells that are explored and not obstacles.
@@ -347,6 +296,59 @@ public class ExplorationAlgo {
      */
     private void moveBot(MOVEMENT m) {
         System.out.println("moveBot (Algo) Activated");
+
+        // Insert pledge algorithm here
+        /*
+        General flow:
+        - If an obstacle is detected to the robot's left/right, begin pledge algorithm
+        - This will be inside a while loop (or maybe not) and will continue until the very starting waypoint is reached again
+        - The starting waypoint should not be visited and this should be the main condition to start the pledge algorithm
+         */
+
+        if (bot.getRobotPosCol() != 1 & bot.getRobotPosRow() != 1) {
+            int currentColumn = 0;
+            int currentRow = 0;
+            DIRECTION currentDirection = null;
+
+            int startColumn = bot.getRobotPosCol();
+            int startRow = bot.getRobotPosRow();
+
+            DIRECTION startDirection = bot.getRobotCurDir();
+
+            int[] current_SensorData = bot.sense(exploredMap, realMap);
+
+            if (current_SensorData[0] == 1){
+                boolean flag = false;
+
+                System.out.println("Entering Pledge");
+
+                while (flag == false) {
+
+                    int[] sensorData = bot.sense(exploredMap, realMap);
+                    currentColumn = bot.getRobotPosCol();
+                    currentRow = bot.getRobotPosRow();
+                    currentDirection = bot.getRobotCurDir();
+
+                    if (sensorData[0] == -1 & lookLeft()) {
+                        bot.move(MOVEMENT.FORCEDLEFT);
+                    } else if (sensorData[0] > -1 & lookForward()) {
+                        bot.move(MOVEMENT.FORWARD);
+                    } else if (sensorData[0] > -1 & lookRight() & !lookForward()) {
+                        bot.move(MOVEMENT.FORCEDRIGHT);
+                    } else {
+                        System.out.println("Exited the Pledge");
+                        break;
+                    }
+
+                    /*if (currentColumn == startColumn & currentRow == startRow & currentDirection == startDirection) {
+                        flag = true;
+                        System.out.println("Exited the Pledge");
+                    }*/
+                }
+                System.out.println("Exited the Pledge");
+            }
+        }
+
         bot.move(m);
         exploredMap.repaint();
 

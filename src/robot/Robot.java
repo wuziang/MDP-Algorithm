@@ -328,14 +328,14 @@ public class Robot {
 
             // Convert the values in the incoming message from strings to double
             double[] msgArr2 = new double[6];
-            for (int i=0; i<6; i++){
+            for (int i=0; i<5; i++){
                 msgArr2[i] = Double.parseDouble(msgArr[i]);
             }
 
             // Process the double values to the values the algorithm will use
             int[] msgArr3 = new int[6];
-            for (int i=0; i<6; i++){
-                if (msgArr2[i] == 0){
+            for (int i=0; i<5; i++){
+                if (msgArr2[i] > 41){
                     msgArr3[i] = -1;
                 }
                 else {

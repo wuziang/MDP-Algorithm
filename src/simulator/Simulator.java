@@ -37,6 +37,8 @@ public class Simulator {
     private static int timeLimit = 3600;            // time limit
     private static int coverageLimit = 300;         // coverage limit
 
+    private static String filename = "MD5";
+
     /**
      * Initialises the different maps and displays the application.
      */
@@ -242,6 +244,9 @@ public class Simulator {
         formatButton(btn_Exploration);
         btn_Exploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
+                loadMapDescriptorFromDisk(realMap, filename);
+                realMap.repaint();
+
                 CardLayout cl = ((CardLayout) _mapCards.getLayout());
                 cl.show(_mapCards, "EXPLORATION");
                 new Exploration().execute();

@@ -11,12 +11,12 @@ public class RobotConstants {
     public static final int START_COL = 1;                          // col no. of start cell
     public static final int MOVE_COST = 10;                         // cost of FORWARD, BACKWARD movement
     public static final int TURN_COST = 20;                         // cost of RIGHT, LEFT movement
-    public static final int SPEED = 100;                            // delay between movements (ms)
+    public static final int SPEED = 300;                            // delay between movements (ms)
     public static final DIRECTION START_DIR = DIRECTION.NORTH;      // start direction
-    public static final int SENSOR_SHORT_RANGE_L = 1;               // range of short range sensor (cells)
-    public static final int SENSOR_SHORT_RANGE_H = 2;               // range of short range sensor (cells)
-    public static final int SENSOR_LONG_RANGE_L = 3;                // range of long range sensor (cells)
-    public static final int SENSOR_LONG_RANGE_H = 4;                // range of long range sensor (cells)
+    public static final int SENSOR_SHORT_RANGE_L = 1;               // lower range of short range sensor (cells)
+    public static final int SENSOR_SHORT_RANGE_H = 4;               // upper range of short range sensor (cells)
+    //public static final int SENSOR_LONG_RANGE_L = 3;                // lower range of long range sensor (cells)
+    //public static final int SENSOR_LONG_RANGE_H = 5;                // upper range of long range sensor (cells)
 
     public static final int INFINITE_COST = 9999;
 
@@ -48,7 +48,7 @@ public class RobotConstants {
     }
 
     public enum MOVEMENT {
-        FORWARD, BACKWARD, RIGHT, LEFT, CALIBRATE, ERROR;
+        FORWARD, BACKWARD, RIGHT, LEFT, CALIBRATE, FORCEDLEFT, FORCEDRIGHT, ERROR;
 
         public static char print(MOVEMENT m) {
             switch (m) {
@@ -60,6 +60,10 @@ public class RobotConstants {
                     return 'R';
                 case LEFT:
                     return 'L';
+                case FORCEDLEFT:
+                    return 'A';
+                case FORCEDRIGHT:
+                    return 'D';
                 case CALIBRATE:
                     return 'C';
                 case ERROR:

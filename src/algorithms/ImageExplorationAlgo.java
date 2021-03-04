@@ -43,20 +43,21 @@ public class ImageExplorationAlgo {
             System.out.println("Starting calibration...");
 
             // This is a communication with the Rpi
-            CommMgr.getCommMgr().recvMsg();
+            //CommMgr.getCommMgr().recvMsg();
+
             if (bot.getRealBot()) {
                 bot.move(MOVEMENT.LEFT, false);
-                CommMgr.getCommMgr().recvMsg();
+                //CommMgr.getCommMgr().recvMsg();
                 bot.move(MOVEMENT.CALIBRATE, false);
-                CommMgr.getCommMgr().recvMsg();
+                //CommMgr.getCommMgr().recvMsg();
                 bot.move(MOVEMENT.LEFT, false);
-                CommMgr.getCommMgr().recvMsg();
+                //CommMgr.getCommMgr().recvMsg();
                 bot.move(MOVEMENT.CALIBRATE, false);
-                CommMgr.getCommMgr().recvMsg();
+                //CommMgr.getCommMgr().recvMsg();
                 bot.move(MOVEMENT.RIGHT, false);
-                CommMgr.getCommMgr().recvMsg();
+                //CommMgr.getCommMgr().recvMsg();
                 bot.move(MOVEMENT.CALIBRATE, false);
-                CommMgr.getCommMgr().recvMsg();
+                //CommMgr.getCommMgr().recvMsg();
                 bot.move(MOVEMENT.RIGHT, false);
             }
 
@@ -94,9 +95,6 @@ public class ImageExplorationAlgo {
      */
     private void explorationLoop(int r, int c) {
         do {
-            // Check current surroundings to see if there is a need to turn to the obstacle
-            currentPosition();
-
             // This will determine the robot's next move to make
             nextMove();
 
@@ -109,6 +107,13 @@ public class ImageExplorationAlgo {
                     break;
                 }
             }
+
+            int[] sensor_Data = bot.sense(exploredMap, realMap);
+            // Check whether or not are there obstacles next to the robot
+            currentPosition(sensor_Data);
+
+            System.out.println("This is the end of one move\n");
+
         } while (areaExplored <= coverageLimit && System.currentTimeMillis() <= endTime);
 
         //goHome();
@@ -118,6 +123,7 @@ public class ImageExplorationAlgo {
      * Determines the next move for the robot and executes it accordingly.
      */
     private void nextMove() {
+        System.out.println("nextMove activated");
         if (lookRight()) {
             moveBot(MOVEMENT.RIGHT);
             if (lookForward()) moveBot(MOVEMENT.FORWARD);
@@ -135,46 +141,59 @@ public class ImageExplorationAlgo {
     /**
      * Checks whether there are obstacles to turn towards for image finding
      */
-    public void currentPosition(){
-        DIRECTION originalDirection = bot.getRobotCurDir();
+    public void currentPosition(int[] sensorData){
+        System.out.println("currentPosition activated");
 
-        if (northBlocked()){
+        DIRECTION originalDirection = bot.getRobotCurDir();
+        int currentRow = bot.getRobotPosRow();
+        int currentCol = bot.getRobotPosCol();
+        int[] sensor_Data = sensorData;
+
+        if (northBlocked(sensor_Data)){
             turnBotDirection(DIRECTION.NORTH);
 
             // Send message to Rpi to take photo
-            String capture = "TakePhoto";
-            CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
-
+            if(bot.getRealBot()) {
+                String capture = "TakePhoto";
+                CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
+                CommMgr.getCommMgr().sendMsg("(" + String.valueOf(currentRow) + "," + String.valueOf(currentCol) + ")", CommMgr.IR);
+            }
             // Return back to original direction
             turnBotDirection(originalDirection);
         }
-        if (eastBlocked()){
+        if (eastBlocked(sensor_Data)){
             turnBotDirection(DIRECTION.EAST);
 
             // Send message to Rpi to take photo
-            String capture = "TakePhoto";
-            CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
-
+            if(bot.getRealBot()) {
+                String capture = "TakePhoto";
+                CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
+                CommMgr.getCommMgr().sendMsg("(" + String.valueOf(currentRow) + "," + String.valueOf(currentCol) + ")", CommMgr.IR);
+            }
             // Return back to original direction
             turnBotDirection(originalDirection);
         }
-        if (southBlocked()){
+        if (southBlocked(sensor_Data)){
             turnBotDirection(DIRECTION.SOUTH);
 
             // Send message to Rpi to take photo
-            String capture = "TakePhoto";
-            CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
-
+            if(bot.getRealBot()) {
+                String capture = "TakePhoto";
+                CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
+                CommMgr.getCommMgr().sendMsg("(" + String.valueOf(currentRow) + "," + String.valueOf(currentCol) + ")", CommMgr.IR);
+            }
             // Return back to original direction
             turnBotDirection(originalDirection);
         }
-        if (westBlocked()){
+        if (westBlocked(sensor_Data)){
             turnBotDirection(DIRECTION.WEST);
 
             // Send message to Rpi to take photo
-            String capture = "TakePhoto";
-            CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
-
+            if(bot.getRealBot()) {
+                String capture = "TakePhoto";
+                CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
+                CommMgr.getCommMgr().sendMsg("(" + String.valueOf(currentRow) + "," + String.valueOf(currentCol) + ")", CommMgr.IR);
+            }
             // Return back to original direction
             turnBotDirection(originalDirection);
         }
@@ -274,22 +293,22 @@ public class ImageExplorationAlgo {
     /**
      * Returns true if the North cell has an obstacle
      */
-    private boolean northBlocked(){
+    private boolean northBlocked(int[] sensor_Data){
         DIRECTION currentDirection = bot.getRobotCurDir();
-        int[] sensorData = bot.sense(exploredMap, realMap);
+        int[] sensorData = sensor_Data;
 
         // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
         int currentRow = bot.getRobotPosRow();
         int currentColumn = bot.getRobotPosCol();
 
         // We consider different scenarios where the North side may be blocked
-        if (sensorData[1]>0 & currentDirection==DIRECTION.NORTH & currentRow != 18){
+        if (sensorData[2]==1 & currentDirection==DIRECTION.NORTH & currentRow != 18){
             return true;
         }
-        if (sensorData[3]>0 & currentDirection==DIRECTION.EAST & currentRow != 18){
+        if (sensorData[0]==1 & currentDirection==DIRECTION.EAST & currentRow != 18){
             return true;
         }
-        if (sensorData[4]>0 & currentDirection==DIRECTION.WEST & currentRow != 18){
+        if (sensorData[4]==1 & currentDirection==DIRECTION.WEST & currentRow != 18){
             return true;
         }
         return false;
@@ -298,19 +317,19 @@ public class ImageExplorationAlgo {
     /**
      * Returns true if the East cell has an obstacle
      */
-    private boolean eastBlocked(){
+    private boolean eastBlocked(int[] sensor_Data){
         DIRECTION currentDirection = bot.getRobotCurDir();
-        int[] sensorData = bot.sense(exploredMap, realMap);
+        int[] sensorData = sensor_Data;
 
         // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
         int currentRow = bot.getRobotPosRow();
         int currentColumn = bot.getRobotPosCol();
 
         // We consider different scenarios where the East side may be blocked
-        if (sensorData[4]>0 & currentDirection==DIRECTION.NORTH & currentColumn != 13){
+        if (sensorData[4]==1 & currentDirection==DIRECTION.NORTH & currentColumn != 13){
             return true;
         }
-        if (sensorData[3]>0 & currentDirection==DIRECTION.SOUTH & currentColumn != 13){
+        if (sensorData[0]==1 & currentDirection==DIRECTION.SOUTH & currentColumn != 13){
             return true;
         }
         return false;
@@ -319,22 +338,22 @@ public class ImageExplorationAlgo {
     /**
      * Returns true if the South cell has an obstacle
      */
-    private boolean southBlocked(){
+    private boolean southBlocked(int[] sensor_Data){
         DIRECTION currentDirection = bot.getRobotCurDir();
-        int[] sensorData = bot.sense(exploredMap, realMap);
+        int[] sensorData = sensor_Data;
 
         // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
         int currentRow = bot.getRobotPosRow();
         int currentColumn = bot.getRobotPosCol();
 
         // We consider different scenarios where the South side may be blocked
-        if (sensorData[1]>0 & currentDirection==DIRECTION.SOUTH & currentRow != 1){
+        if (sensorData[2]==1 & currentDirection==DIRECTION.SOUTH & currentRow != 1){
             return true;
         }
-        if (sensorData[4]>0 & currentDirection==DIRECTION.EAST & currentRow != 1){
+        if (sensorData[4]==1 & currentDirection==DIRECTION.EAST & currentRow != 1){
             return true;
         }
-        if (sensorData[3]>0 & currentDirection==DIRECTION.WEST & currentRow != 1){
+        if (sensorData[0]==1 & currentDirection==DIRECTION.WEST & currentRow != 1){
             return true;
         }
         return false;
@@ -343,19 +362,19 @@ public class ImageExplorationAlgo {
     /**
      * Returns true if the West cell has an obstacle
      */
-    private boolean westBlocked(){
+    private boolean westBlocked(int[] sensor_Data){
         DIRECTION currentDirection = bot.getRobotCurDir();
-        int[] sensorData = bot.sense(exploredMap, realMap);
+        int[] sensorData = sensor_Data;
 
         // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
         int currentRow = bot.getRobotPosRow();
         int currentColumn = bot.getRobotPosCol();
 
         // We consider different scenarios where the West side may be blocked
-        if (sensorData[3]>0 & currentDirection==DIRECTION.NORTH & currentColumn != 1){
+        if (sensorData[0]==1 & currentDirection==DIRECTION.NORTH & currentColumn != 1){
             return true;
         }
-        if (sensorData[4]>0 & currentDirection==DIRECTION.SOUTH & currentColumn != 1){
+        if (sensorData[4]==1 & currentDirection==DIRECTION.SOUTH & currentColumn != 1){
             return true;
         }
         return false;
@@ -442,6 +461,7 @@ public class ImageExplorationAlgo {
      * Moves the bot, repaints the map and calls senseAndRepaint().
      */
     private void moveBot(MOVEMENT m) {
+        System.out.println("moveBot activated");
         bot.move(m);
         exploredMap.repaint();
         if (m != MOVEMENT.CALIBRATE) {
@@ -476,6 +496,7 @@ public class ImageExplorationAlgo {
      * Sets the bot's sensors, processes the sensor data and repaints the map.
      */
     private void senseAndRepaint() {
+        System.out.println("senseAndRepaint activated");
         bot.setSensors();
         bot.sense(exploredMap, realMap);
         exploredMap.repaint();

@@ -39,8 +39,8 @@ public class MazeRunner {
     private static final CommMgr comm = CommMgr.getCommMgr();
 
     private static final boolean connected = false;
+    private static final boolean realBot = false;
 
-    private static final boolean loadedMap = true;
     private static final String filename = "MD1";
 
     /**
@@ -49,7 +49,7 @@ public class MazeRunner {
     public static void main(String[] args) {
         if (connected) comm.openConnection();
 
-        bot = new Robot(RobotConstants.START_ROW, RobotConstants.START_COL, !loadedMap);
+        bot = new Robot(RobotConstants.START_ROW, RobotConstants.START_COL, realBot);
 
         realMap = new Map(bot);
         realMap.setAllUnexplored();

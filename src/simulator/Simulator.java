@@ -36,7 +36,7 @@ public class Simulator {
     private static int timeLimit = 3600;            // time limit
     private static int coverageLimit = 300;         // coverage limit
 
-    private static String filename = "MD1";
+    private static String filename = "MD5";
 
     /**
      * Initialises the different maps and displays the application.

@@ -192,10 +192,16 @@ public class Robot {
     }
 
     // TODO: Signal to Camera
-    public void takePhoto(){
-        String capture = "TakePhoto";
-        CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
-        CommMgr.getCommMgr().sendMsg("(" + String.valueOf(this.posRow) + "," + String.valueOf(this.posCol) + ")", CommMgr.IR);
+    public void takePhoto(int targetRow, int targetCol, String side){
+        String coordinate = String.valueOf(targetRow) + "," + String.valueOf(targetCol);
+        if(realBot){
+            String capture = "TakePhoto";
+            CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
+            CommMgr.getCommMgr().sendMsg(coordinate, CommMgr.IR);
+        }
+        else {
+            System.out.println("Take Image: " + coordinate + " ("+ side +")");
+        }
     }
 
     /**
@@ -312,7 +318,6 @@ public class Robot {
         }
 
         // System.out.println(Arrays.toString(result));
-
         return result;
     }
 }

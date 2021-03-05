@@ -110,7 +110,7 @@ public class CommMgr {
 
             if (input != null && input.length() > 0) {
                 sb.append(input);
-                System.out.print("Message received: " + sb.toString());
+                System.out.println("Message received: " + sb.toString());
                 return sb.toString();
             }
         } catch (IOException e) {

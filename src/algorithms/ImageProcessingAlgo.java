@@ -49,18 +49,27 @@ public class ImageProcessingAlgo extends ExplorationAlgo {
             CommMgr.getCommMgr().recvMsg();
 
             bot.move(MOVEMENT.LEFT);
+            CommMgr.getCommMgr().recvMsg();
             bot.move(MOVEMENT.CALIBRATE);
+
             bot.move(MOVEMENT.LEFT);
+            CommMgr.getCommMgr().recvMsg();
             bot.move(MOVEMENT.CALIBRATE);
+
             bot.move(MOVEMENT.RIGHT);
+            CommMgr.getCommMgr().recvMsg();
             bot.move(MOVEMENT.CALIBRATE);
+
             bot.move(MOVEMENT.RIGHT);
+            CommMgr.getCommMgr().recvMsg();
         }
 
         startTime = System.currentTimeMillis();
         endTime = startTime + (timeLimit * 1000);
 
+        CommMgr.getCommMgr().sendMsg("S", CommMgr.AR);
         senseAndRepaint();
+
         imageLoop(bot.getRobotPosRow(), bot.getRobotPosCol());
     }
 
@@ -436,12 +445,10 @@ public class ImageProcessingAlgo extends ExplorationAlgo {
      */
     private void moveBot(MOVEMENT m) {
         bot.move(m);
+        exploredMap.repaint();
 
         if (m != MOVEMENT.CALIBRATE) {
             senseAndRepaint();
-        } else {
-            CommMgr commMgr = CommMgr.getCommMgr();
-            commMgr.recvMsg();
         }
 
         if (bot.getRealBot() && !calibrationMode) {
@@ -463,17 +470,16 @@ public class ImageProcessingAlgo extends ExplorationAlgo {
 
             calibrationMode = false;
         }
-
-        senseAndRepaint();
     }
 
     /**
      * Sets the bot's sensors, processes the sensor data and repaints the map.
      */
     private void senseAndRepaint() {
-        exploredMap.repaint();
         bot.setSensors();
         sensorData = bot.sense(exploredMap, realMap);
+
+        exploredMap.repaint();
     }
 
     /**

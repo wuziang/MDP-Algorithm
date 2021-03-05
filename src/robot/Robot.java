@@ -182,10 +182,8 @@ public class Robot {
         }
 
         if (realBot){
-            // TODO: Movement to Arduino
             CommMgr comm = CommMgr.getCommMgr();
             comm.sendMsg(Character.toString(MOVEMENT.print(m)), CommMgr.AR);
-            comm.recvMsg();
         }
         // else System.out.println("Move: " + MOVEMENT.print(m));
 
@@ -254,8 +252,6 @@ public class Robot {
             result[3] = SRFrontRight.sense(explorationMap, realMap);
             result[4] = SRRight.sense(explorationMap, realMap);
         } else {
-            // TODO: Sense from Arduino
-            CommMgr.getCommMgr().sendMsg("S", CommMgr.AR);
             // Input in the form of xx, xx, xx, xx, xx, xx
             String msg = CommMgr.getCommMgr().recvMsg();
 
@@ -265,16 +261,12 @@ public class Robot {
             // Convert the values in the incoming message from strings to double
             for (int i=0; i<5; i++){
                 double distance = Double.parseDouble(msgArr[i]);
-                if(distance>RobotConstants.SENSOR_SHORT_RANGE_H*10){
+                if(distance>RobotConstants.SENSOR_SHORT_RANGE_H*10 || distance<5){
                     result[i] = -1;
                 }
                 else
-                    result[i] = (int) Math.rint(distance/10);
+                    result[i] = (int) distance/10+1;
             }
-
-//            for (int i=0; i<5; i++){
-//                result[i] = Integer.parseInt(msgArr[i]);
-//            }
 
             SRLeft.senseReal(explorationMap, result[0]);
             SRFrontLeft.senseReal(explorationMap, result[1]);

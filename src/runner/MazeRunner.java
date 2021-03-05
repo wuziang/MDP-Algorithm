@@ -218,7 +218,6 @@ public class MazeRunner {
         class Exploration extends SwingWorker<Integer, String> {
             protected Integer doInBackground() throws Exception {
                 bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
-                exploredMap.repaint();
 
                 ExplorationAlgo exploration;
                 exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
@@ -243,7 +242,6 @@ public class MazeRunner {
         class ImageProcessing extends SwingWorker<Integer, String> {
             protected Integer doInBackground() throws Exception {
                 bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
-                exploredMap.repaint();
 
                 ImageProcessingAlgo image;
                 image = new ImageProcessingAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);

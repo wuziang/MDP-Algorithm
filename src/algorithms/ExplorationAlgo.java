@@ -49,17 +49,25 @@ public class ExplorationAlgo {
             CommMgr.getCommMgr().recvMsg();
 
             bot.move(MOVEMENT.LEFT);
+            CommMgr.getCommMgr().recvMsg();
             bot.move(MOVEMENT.CALIBRATE);
+
             bot.move(MOVEMENT.LEFT);
+            CommMgr.getCommMgr().recvMsg();
             bot.move(MOVEMENT.CALIBRATE);
+
             bot.move(MOVEMENT.RIGHT);
+            CommMgr.getCommMgr().recvMsg();
             bot.move(MOVEMENT.CALIBRATE);
+
             bot.move(MOVEMENT.RIGHT);
+            CommMgr.getCommMgr().recvMsg();
         }
 
         startTime = System.currentTimeMillis();
         endTime = startTime + (timeLimit * 1000);
 
+        CommMgr.getCommMgr().sendMsg("S", CommMgr.AR);
         senseAndRepaint();
 
         areaExplored = calculateAreaExplored();
@@ -79,12 +87,15 @@ public class ExplorationAlgo {
 
             // This is the stopping condition where r and c are the robot's starting positions
             if (bot.getRobotPosRow() == r && bot.getRobotPosCol() == c) {
-                break;
+                if(areaExplored>=100) {
+                    break;
+                }
             }
         } while (areaExplored <= coverageLimit && System.currentTimeMillis() <= endTime);
 
         areaExplored = calculateAreaExplored();
         System.out.printf("\nExploration Coverage %.2f%%\n", (areaExplored / 300.0) * 100.0);
+
         String[] mapStrings = MapDescriptor.generateMapDescriptor(exploredMap);
         System.out.println("P1: " + mapStrings[0]);
         System.out.println("P2: " + mapStrings[1]);
@@ -201,7 +212,6 @@ public class ExplorationAlgo {
      * Returns true for cells that are explored and not obstacles.
      */
     private boolean isExploredNotObstacle(int r, int c) {
-        //System.out.println("isExploredNotObstacle Checked");
         if (exploredMap.checkValidCoordinates(r, c)) {
             Cell tmp = exploredMap.getCell(r, c);
             return (tmp.getIsExplored() && !tmp.getIsObstacle());
@@ -213,7 +223,6 @@ public class ExplorationAlgo {
      * Returns true for cells that are explored, not virtual walls and not obstacles.
      */
     private boolean isExploredAndFree(int r, int c) {
-        //System.out.println("isExploredAndFree Checked");
         if (exploredMap.checkValidCoordinates(r, c)) {
             Cell b = exploredMap.getCell(r, c);
             return (b.getIsExplored() && !b.getIsVirtualWall() && !b.getIsObstacle());
@@ -244,9 +253,6 @@ public class ExplorationAlgo {
 
         if (m != MOVEMENT.CALIBRATE) {
             senseAndRepaint();
-        } else {
-            CommMgr commMgr = CommMgr.getCommMgr();
-            commMgr.recvMsg();
         }
 
         if (bot.getRealBot() && !calibrationMode) {
@@ -268,28 +274,25 @@ public class ExplorationAlgo {
 
             calibrationMode = false;
         }
-
-        senseAndRepaint();
     }
 
     /**
      * Sets the bot's sensors, processes the sensor data and repaints the map.
      */
     private void senseAndRepaint() {
-        exploredMap.repaint();
-
         bot.setSensors();
         bot.sense(exploredMap, realMap);
 
-//        // TODO: Map String to Android
-//        if(bot.getRealBot()) {
-//            String[] mapStrings = MapDescriptor.generateMapDescriptor(exploredMap);
-//            String robotRow = String.valueOf(bot.getRobotPosRow());
-//            String robotCol = String.valueOf(bot.getRobotPosCol());
-//            String robotDir = Character.toString(DIRECTION.print(bot.getRobotCurDir()));
-//
-//            CommMgr.getCommMgr().sendMsg(mapStrings[0] + "," + mapStrings[1] + "," + robotCol + "," + robotRow + "," + robotDir, CommMgr.AN);
-//        }
+        exploredMap.repaint();
+        // TODO: Map String to Android
+        if(bot.getRealBot()) {
+            String[] mapStrings = MapDescriptor.generateMapDescriptor(exploredMap);
+            String robotRow = String.valueOf(bot.getRobotPosRow());
+            String robotCol = String.valueOf(bot.getRobotPosCol());
+            String robotDir = Character.toString(DIRECTION.print(bot.getRobotCurDir()));
+
+            CommMgr.getCommMgr().sendMsg(mapStrings[0] + "," + mapStrings[1] + "," + robotCol + "," + robotRow + "," + robotDir, CommMgr.AN);
+        }
     }
 
     /**

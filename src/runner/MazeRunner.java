@@ -202,8 +202,7 @@ public class MazeRunner {
         formatButton(btn_FastestPath);
         btn_FastestPath.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-//                loadMapFromDisk(realMap, filename);
-                loadMapDescriptorFromDisk(realMap, filename);
+                loadMap(realMap, filename);
                 realMap.repaint();
 
                 CardLayout cl = ((CardLayout) _mapCards.getLayout());

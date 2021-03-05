@@ -273,9 +273,10 @@ public class Robot {
             SRFrontCenter.senseReal(explorationMap, result[2]);
             SRFrontRight.senseReal(explorationMap, result[3]);
             SRRight.senseReal(explorationMap, result[4]);
+
+            System.out.println("\n"+Arrays.toString(result));
         }
 
-        System.out.println("\n"+Arrays.toString(result));
         return result;
     }
 }

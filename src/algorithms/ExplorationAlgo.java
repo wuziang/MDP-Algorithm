@@ -62,12 +62,13 @@ public class ExplorationAlgo {
 
             bot.move(MOVEMENT.RIGHT);
             CommMgr.getCommMgr().recvMsg();
+
+            CommMgr.getCommMgr().sendMsg("S", CommMgr.AR);
         }
 
         startTime = System.currentTimeMillis();
         endTime = startTime + (timeLimit * 1000);
 
-        CommMgr.getCommMgr().sendMsg("S", CommMgr.AR);
         senseAndRepaint();
 
         areaExplored = calculateAreaExplored();

@@ -36,7 +36,7 @@ public class Simulator {
     private static int timeLimit = 3600;            // time limit
     private static int coverageLimit = 300;         // coverage limit
 
-    private static String filename = "MD5";
+    private static String filename = "M1";
 
     /**
      * Initialises the different maps and displays the application.
@@ -140,7 +140,7 @@ public class Simulator {
                 loadMapButton.addMouseListener(new MouseAdapter() {
                     public void mousePressed(MouseEvent e) {
                         loadMapDialog.setVisible(false);
-                        loadMapDescriptorFromDisk(realMap, loadTF.getText());
+                        loadMap(realMap, loadTF.getText());
 
                         String waypoint=loadWaypoint.getText();
                         waypointX=Integer.parseInt(waypoint.substring(0, waypoint.indexOf(',')));
@@ -243,7 +243,7 @@ public class Simulator {
         formatButton(btn_Exploration);
         btn_Exploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-                loadMapDescriptorFromDisk(realMap, filename);
+                loadMap(realMap, filename);
                 realMap.repaint();
 
                 CardLayout cl = ((CardLayout) _mapCards.getLayout());
@@ -258,7 +258,7 @@ public class Simulator {
         formatButton(btn_Image_Exploration);
         btn_Image_Exploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-                loadMapDescriptorFromDisk(realMap, filename);
+                loadMap(realMap, filename);
                 realMap.repaint();
 
                 CardLayout cl = ((CardLayout) _mapCards.getLayout());

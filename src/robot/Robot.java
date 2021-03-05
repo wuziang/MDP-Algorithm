@@ -5,6 +5,8 @@ import map.MapConstants;
 import robot.RobotConstants.DIRECTION;
 import robot.RobotConstants.MOVEMENT;
 import utils.CommMgr;
+
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 // @formatter:off
@@ -252,6 +254,8 @@ public class Robot {
             result[3] = SRFrontRight.sense(explorationMap, realMap);
             result[4] = SRRight.sense(explorationMap, realMap);
         } else {
+            // TODO: Sense from Arduino
+            CommMgr.getCommMgr().sendMsg("S", CommMgr.AR);
             // Input in the form of xx, xx, xx, xx, xx, xx
             String msg = CommMgr.getCommMgr().recvMsg();
 
@@ -261,11 +265,11 @@ public class Robot {
             // Convert the values in the incoming message from strings to double
             for (int i=0; i<5; i++){
                 double distance = Double.parseDouble(msgArr[i]);
-                if(distance>41){
+                if(distance>RobotConstants.SENSOR_SHORT_RANGE_H*10){
                     result[i] = -1;
                 }
                 else
-                    result[i] = (int) Math.rint(distance);
+                    result[i] = (int) Math.rint(distance/10);
             }
 
 //            for (int i=0; i<5; i++){
@@ -279,7 +283,7 @@ public class Robot {
             SRRight.senseReal(explorationMap, result[4]);
         }
 
-        // System.out.println(Arrays.toString(result));
+        System.out.println("\n"+Arrays.toString(result));
         return result;
     }
 }

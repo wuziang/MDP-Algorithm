@@ -18,8 +18,8 @@ public class RobotConstants {
     public static final DIRECTION START_DIR = DIRECTION.NORTH;      // start direction
 
     public static final int SENSOR_SHORT_RANGE_L = 1;               // lower range of short range sensor (cells)
-    public static final int SENSOR_SHORT_RANGE_H = 4;               // upper range of short range sensor (cells)
-    public static final int CAMERA_RANGE = 3;                       // upper range of camera (cells)
+    public static final int SENSOR_SHORT_RANGE_H = 3;               // upper range of short range sensor (cells)
+    public static final int CAMERA_RANGE = 2;                       // upper range of camera (cells)
 
     public static final int INFINITE_COST = 9999;
 

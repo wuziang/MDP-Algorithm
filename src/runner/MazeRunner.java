@@ -38,8 +38,8 @@ public class MazeRunner {
 
     private static final CommMgr comm = CommMgr.getCommMgr();
 
-    private static final boolean connected = false;
-    private static final boolean realBot = false;
+    private static final boolean connected = true;
+    private static final boolean realBot = true;
 
     private static final String filename = "MD1";
 

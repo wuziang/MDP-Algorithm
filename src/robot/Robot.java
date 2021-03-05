@@ -5,7 +5,6 @@ import map.MapConstants;
 import robot.RobotConstants.DIRECTION;
 import robot.RobotConstants.MOVEMENT;
 import utils.CommMgr;
-import utils.MapDescriptor;
 import java.util.concurrent.TimeUnit;
 
 // @formatter:off
@@ -191,19 +190,6 @@ public class Robot {
         updateTouchedGoal();
     }
 
-    // TODO: Signal to Camera
-    public boolean takePhoto(int targetRow, int targetCol, String side){
-        String coordinate = String.valueOf(targetRow) + "," + String.valueOf(targetCol);
-        if(realBot){
-            String capture = "TakePhoto";
-            CommMgr.getCommMgr().sendMsg(capture, CommMgr.IR);
-            CommMgr.getCommMgr().sendMsg(coordinate, CommMgr.IR);
-        }
-        // else System.out.println("Take Photo: " + coordinate + " ("+ side +")");
-
-        return false;
-    }
-
     /**
      * Sets the sensors' position and direction values according to the robot's current position and direction.
      */
@@ -267,54 +253,30 @@ public class Robot {
             result[4] = SRRight.sense(explorationMap, realMap);
         } else {
             // Input in the form of xx, xx, xx, xx, xx, xx
-            CommMgr comm = CommMgr.getCommMgr();
-            String msg = comm.recvMsg();
+            String msg = CommMgr.getCommMgr().recvMsg();
 
             // Splits the incoming message into an array based on the position of ','
             String[] msgArr = msg.split(",");
 
-//            // Convert the values in the incoming message from strings to double
-//            double[] msgArr2 = new double[6];
-//            for (int i=0; i<5; i++){
-//                msgArr2[i] = Double.parseDouble(msgArr[i]);
-//            }
-//
-//            // Process the double values to the values the algorithm will use
-//            int[] msgArr3 = new int[6];
-//            for (int i=0; i<5; i++){
-//                if (msgArr2[i] > 41){
-//                    msgArr3[i] = -1;
-//                }
-//                else {
-//                    msgArr3[i] = (int) (msgArr2[i]/10);
-//                }
-//            }
-//
-//            if (msgArr[0].equals(CommMgr.AR)) {
-//                result[0] = msgArr3[0];
-//                result[1] = msgArr3[1];
-//                result[2] = msgArr3[2];
-//                result[3] = msgArr3[3];
-//                result[4] = msgArr3[4];
-//            }
-
+            // Convert the values in the incoming message from strings to double
             for (int i=0; i<5; i++){
-                result[i] = Integer.parseInt(msgArr[i]);
+                double distance = Double.parseDouble(msgArr[i]);
+                if(distance>41){
+                    result[i] = -1;
+                }
+                else
+                    result[i] = (int) Math.rint(distance);
             }
+
+//            for (int i=0; i<5; i++){
+//                result[i] = Integer.parseInt(msgArr[i]);
+//            }
 
             SRLeft.senseReal(explorationMap, result[0]);
             SRFrontLeft.senseReal(explorationMap, result[1]);
             SRFrontCenter.senseReal(explorationMap, result[2]);
             SRFrontRight.senseReal(explorationMap, result[3]);
             SRRight.senseReal(explorationMap, result[4]);
-
-            // TODO: Map String to Android
-//            String[] mapStrings = MapDescriptor.generateMapDescriptor(explorationMap);
-//            String robotRow = String.valueOf(this.getRobotPosRow());
-//            String robotCol = String.valueOf(this.getRobotPosCol());
-//            String robotDir = Character.toString(DIRECTION.print(this.getRobotCurDir()));
-//
-//            comm.sendMsg(mapStrings[0] + "," + mapStrings[1] + "," + robotCol + "," + robotRow + "," + robotDir, CommMgr.AN);
         }
 
         // System.out.println(Arrays.toString(result));

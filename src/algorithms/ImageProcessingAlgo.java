@@ -217,9 +217,9 @@ public class ImageProcessingAlgo {
 
         exploredMap.getCell(cellRow, currentColumn).setIsProcessed(index, true);
 
-        turnBotDirection(DIRECTION.NORTH);
+        turnCameraDirection(DIRECTION.NORTH);
 
-        if(bot.takePhoto(cellRow, currentColumn, DIRECTION.SOUTH.toString())) foundImage++;;
+        if(takePhoto(cellRow, currentColumn, DIRECTION.SOUTH.toString())) foundImage++;;
         takenImage++;
 
         turnBotDirection(currentDirection);
@@ -257,9 +257,9 @@ public class ImageProcessingAlgo {
 
         exploredMap.getCell(currentRow, cellColumn).setIsProcessed(index, true);
 
-        turnBotDirection(DIRECTION.EAST);
+        turnCameraDirection(DIRECTION.EAST);
 
-        if(bot.takePhoto(currentRow, cellColumn, DIRECTION.WEST.toString())) foundImage++;
+        if(takePhoto(currentRow, cellColumn, DIRECTION.WEST.toString())) foundImage++;
         takenImage++;
 
         turnBotDirection(currentDirection);
@@ -297,9 +297,9 @@ public class ImageProcessingAlgo {
 
         exploredMap.getCell(cellRow, currentColumn).setIsProcessed(index, true);
 
-        turnBotDirection(DIRECTION.SOUTH);
+        turnCameraDirection(DIRECTION.SOUTH);
 
-        if(bot.takePhoto(cellRow, currentColumn, DIRECTION.NORTH.toString())) foundImage++;;
+        if(takePhoto(cellRow, currentColumn, DIRECTION.NORTH.toString())) foundImage++;;
         takenImage++;
 
         turnBotDirection(currentDirection);
@@ -337,12 +337,26 @@ public class ImageProcessingAlgo {
 
         exploredMap.getCell(currentRow, cellColumn).setIsProcessed(index, true);
 
-        turnBotDirection(DIRECTION.WEST);
+        turnCameraDirection(DIRECTION.WEST);
 
-        if(bot.takePhoto(currentRow, cellColumn, DIRECTION.EAST.toString())) foundImage++;;
+        if(takePhoto(currentRow, cellColumn, DIRECTION.EAST.toString())) foundImage++;;
         takenImage++;
 
         turnBotDirection(currentDirection);
+    }
+
+
+    public boolean takePhoto(int targetRow, int targetCol, String side){
+        String coordinate = String.valueOf(targetRow) + "," + String.valueOf(targetCol);
+
+        // TODO: Signal to Camera
+        if(bot.getRealBot()){
+            CommMgr.getCommMgr().sendMsg(coordinate, CommMgr.IR);
+            CommMgr.getCommMgr().recvMsg();
+        }
+        else System.out.println("Take Photo: " + coordinate + " ("+ side +")");
+
+        return false;
     }
 
     /**
@@ -438,5 +452,12 @@ public class ImageProcessingAlgo {
             moveBot(MOVEMENT.RIGHT);
             moveBot(MOVEMENT.RIGHT);
         }
+    }
+
+    /**
+     * Turns the left-handed camera to the required direction.
+     */
+    private void turnCameraDirection(DIRECTION targetDir) {
+        turnBotDirection(targetDir);
     }
 }

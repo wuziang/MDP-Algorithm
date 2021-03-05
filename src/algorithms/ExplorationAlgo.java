@@ -240,5 +240,15 @@ public class ExplorationAlgo {
 
         bot.setSensors();
         bot.sense(exploredMap, realMap);
+
+        // TODO: Map String to Android
+        if(bot.getRealBot()) {
+            String[] mapStrings = MapDescriptor.generateMapDescriptor(exploredMap);
+            String robotRow = String.valueOf(bot.getRobotPosRow());
+            String robotCol = String.valueOf(bot.getRobotPosCol());
+            String robotDir = Character.toString(DIRECTION.print(bot.getRobotCurDir()));
+
+            CommMgr.getCommMgr().sendMsg(mapStrings[0] + "," + mapStrings[1] + "," + robotCol + "," + robotRow + "," + robotDir, CommMgr.AN);
+        }
     }
 }

@@ -410,166 +410,6 @@ public class ExplorationAlgo {
         return (isExploredNotObstacle(botRow - 1, botCol - 1) && isExploredAndFree(botRow, botCol - 1) && isExploredNotObstacle(botRow + 1, botCol - 1));
     }
 
-    private void northProcess(){
-        DIRECTION currentDirection = bot.getRobotCurDir();
-
-        // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
-        int currentRow = bot.getRobotPosRow();
-        int currentColumn = bot.getRobotPosCol();
-
-        int distance = -1;
-        // We consider different scenarios where the North side may be blocked
-        if (sensorData[2]!=-1 & currentDirection==DIRECTION.NORTH){
-            distance = sensorData[2];
-        }
-        if (sensorData[0]!=-1 & currentDirection==DIRECTION.EAST){
-            distance = sensorData[0];
-        }
-        if (sensorData[4]!=-1 & currentDirection==DIRECTION.WEST){
-            distance = sensorData[4];
-        }
-
-        if(distance==-1 || distance>RobotConstants.CAMERA_RANGE) return;
-
-        int cellRow = currentRow+1+distance;
-        if(cellRow>=MapConstants.MAP_ROWS) return;
-
-        int index = DIRECTION.SOUTH.getIndex();
-        if(exploredMap.getCell(cellRow, currentColumn).getIsProcessed(index)) return;
-
-        exploredMap.getCell(cellRow, currentColumn).setIsProcessed(index, true);
-
-        turnCameraDirection(DIRECTION.NORTH);
-
-        if(takePhoto(cellRow, currentColumn, DIRECTION.SOUTH.toString())) foundImage++;;
-        takenImage++;
-
-        turnBotDirection(currentDirection);
-    }
-
-    private void eastProcess(){
-        DIRECTION currentDirection = bot.getRobotCurDir();
-
-        // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
-        int currentRow = bot.getRobotPosRow();
-        int currentColumn = bot.getRobotPosCol();
-
-        int distance = -1;
-        // We consider different scenarios where the East side may be blocked
-        if (sensorData[2]!=-1 & currentDirection==DIRECTION.EAST){
-            distance = sensorData[2];
-        }
-        if (sensorData[4]!=-1 & currentDirection==DIRECTION.NORTH){
-            distance = sensorData[4];
-        }
-        if (sensorData[0]!=-1 & currentDirection==DIRECTION.SOUTH){
-            distance = sensorData[0];
-        }
-
-        if(distance==-1 || distance>RobotConstants.CAMERA_RANGE) return;
-
-        int cellColumn = currentColumn+1+distance;
-        if(cellColumn>=MapConstants.MAP_COLS) return;
-
-        int index = DIRECTION.WEST.getIndex();
-        if(exploredMap.getCell(currentRow, cellColumn).getIsProcessed(index)) return;
-
-        exploredMap.getCell(currentRow, cellColumn).setIsProcessed(index, true);
-
-        turnCameraDirection(DIRECTION.EAST);
-
-        if(takePhoto(currentRow, cellColumn, DIRECTION.WEST.toString())) foundImage++;
-        takenImage++;
-
-        turnBotDirection(currentDirection);
-    }
-
-    private void southProcess(){
-        DIRECTION currentDirection = bot.getRobotCurDir();
-
-        // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
-        int currentRow = bot.getRobotPosRow();
-        int currentColumn = bot.getRobotPosCol();
-
-        int distance = -1;
-        // We consider different scenarios where the South side may be blocked
-        if (sensorData[2]!=-1 & currentDirection==DIRECTION.SOUTH){
-            distance = sensorData[2];
-        }
-        if (sensorData[4]!=-1 & currentDirection==DIRECTION.EAST){
-            distance = sensorData[4];
-        }
-        if (sensorData[0]!=-1 & currentDirection==DIRECTION.WEST){
-            distance = sensorData[0];
-        }
-
-        if(distance==-1 || distance>RobotConstants.CAMERA_RANGE) return;
-
-        int cellRow = currentRow-1-distance;
-        if(cellRow<0) return;
-
-        int index = DIRECTION.NORTH.getIndex();
-        if(exploredMap.getCell(cellRow, currentColumn).getIsProcessed(index)) return;
-
-        exploredMap.getCell(cellRow, currentColumn).setIsProcessed(index, true);
-
-        turnCameraDirection(DIRECTION.SOUTH);
-
-        if(takePhoto(cellRow, currentColumn, DIRECTION.NORTH.toString())) foundImage++;;
-        takenImage++;
-
-        turnBotDirection(currentDirection);
-    }
-
-    private void westProcess(){
-        DIRECTION currentDirection = bot.getRobotCurDir();
-
-        // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
-        int currentRow = bot.getRobotPosRow();
-        int currentColumn = bot.getRobotPosCol();
-
-        int distance=-1;
-        // We consider different scenarios where the West side may be blocked
-        if (sensorData[2]!=-1 & currentDirection==DIRECTION.WEST){
-            distance = sensorData[2];
-        }
-        if (sensorData[0]!=-1 & currentDirection==DIRECTION.NORTH){
-            distance=sensorData[0];
-        }
-        if (sensorData[4]!=-1 & currentDirection==DIRECTION.SOUTH){
-            distance=sensorData[4];
-        }
-
-        if(distance==-1 || distance>RobotConstants.CAMERA_RANGE) return;
-
-        int cellColumn = currentColumn-1-distance;
-        if(cellColumn<0) return;
-
-        int index = DIRECTION.EAST.getIndex();
-        if(exploredMap.getCell(currentRow, cellColumn).getIsProcessed(index)) return;
-
-        exploredMap.getCell(currentRow, cellColumn).setIsProcessed(index, true);
-
-        turnCameraDirection(DIRECTION.WEST);
-
-        if(takePhoto(currentRow, cellColumn, DIRECTION.EAST.toString())) foundImage++;;
-        takenImage++;
-
-        turnBotDirection(currentDirection);
-    }
-
-    private boolean takePhoto(int targetRow, int targetCol, String side){
-        String coordinate = String.valueOf(targetRow) + "," + String.valueOf(targetCol);
-
-        if(bot.getRealBot()){
-            CommMgr.getCommMgr().sendMsg(coordinate, CommMgr.IR);
-            CommMgr.getCommMgr().recvMsg();
-        }
-        else System.out.println("Take Photo: " + coordinate + " ("+ side +")");
-
-        return false;
-    }
-
     /**
      * Returns true for cells that are explored and not obstacles.
      */
@@ -763,6 +603,166 @@ public class ExplorationAlgo {
             moveBot(MOVEMENT.RIGHT);
             moveBot(MOVEMENT.RIGHT);
         }
+    }
+
+    private void northProcess(){
+        DIRECTION currentDirection = bot.getRobotCurDir();
+
+        // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
+        int currentRow = bot.getRobotPosRow();
+        int currentColumn = bot.getRobotPosCol();
+
+        int distance = -1;
+        // We consider different scenarios where the North side may be blocked
+        if (sensorData[2]!=-1 & currentDirection==DIRECTION.NORTH){
+            distance = sensorData[2];
+        }
+        if (sensorData[0]!=-1 & currentDirection==DIRECTION.EAST){
+            distance = sensorData[0];
+        }
+        if (sensorData[4]!=-1 & currentDirection==DIRECTION.WEST){
+            distance = sensorData[4];
+        }
+
+        if(distance==-1 || distance>RobotConstants.CAMERA_RANGE) return;
+
+        int cellRow = currentRow+1+distance;
+        if(cellRow>=MapConstants.MAP_ROWS) return;
+
+        int index = DIRECTION.SOUTH.getIndex();
+        if(exploredMap.getCell(cellRow, currentColumn).getIsProcessed(index)) return;
+
+        exploredMap.getCell(cellRow, currentColumn).setIsProcessed(index, true);
+
+        turnCameraDirection(DIRECTION.NORTH);
+
+        if(takePhoto(cellRow, currentColumn, DIRECTION.SOUTH.toString())) foundImage++;;
+        takenImage++;
+
+        turnBotDirection(currentDirection);
+    }
+
+    private void eastProcess(){
+        DIRECTION currentDirection = bot.getRobotCurDir();
+
+        // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
+        int currentRow = bot.getRobotPosRow();
+        int currentColumn = bot.getRobotPosCol();
+
+        int distance = -1;
+        // We consider different scenarios where the East side may be blocked
+        if (sensorData[2]!=-1 & currentDirection==DIRECTION.EAST){
+            distance = sensorData[2];
+        }
+        if (sensorData[4]!=-1 & currentDirection==DIRECTION.NORTH){
+            distance = sensorData[4];
+        }
+        if (sensorData[0]!=-1 & currentDirection==DIRECTION.SOUTH){
+            distance = sensorData[0];
+        }
+
+        if(distance==-1 || distance>RobotConstants.CAMERA_RANGE) return;
+
+        int cellColumn = currentColumn+1+distance;
+        if(cellColumn>=MapConstants.MAP_COLS) return;
+
+        int index = DIRECTION.WEST.getIndex();
+        if(exploredMap.getCell(currentRow, cellColumn).getIsProcessed(index)) return;
+
+        exploredMap.getCell(currentRow, cellColumn).setIsProcessed(index, true);
+
+        turnCameraDirection(DIRECTION.EAST);
+
+        if(takePhoto(currentRow, cellColumn, DIRECTION.WEST.toString())) foundImage++;
+        takenImage++;
+
+        turnBotDirection(currentDirection);
+    }
+
+    private void southProcess(){
+        DIRECTION currentDirection = bot.getRobotCurDir();
+
+        // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
+        int currentRow = bot.getRobotPosRow();
+        int currentColumn = bot.getRobotPosCol();
+
+        int distance = -1;
+        // We consider different scenarios where the South side may be blocked
+        if (sensorData[2]!=-1 & currentDirection==DIRECTION.SOUTH){
+            distance = sensorData[2];
+        }
+        if (sensorData[4]!=-1 & currentDirection==DIRECTION.EAST){
+            distance = sensorData[4];
+        }
+        if (sensorData[0]!=-1 & currentDirection==DIRECTION.WEST){
+            distance = sensorData[0];
+        }
+
+        if(distance==-1 || distance>RobotConstants.CAMERA_RANGE) return;
+
+        int cellRow = currentRow-1-distance;
+        if(cellRow<0) return;
+
+        int index = DIRECTION.NORTH.getIndex();
+        if(exploredMap.getCell(cellRow, currentColumn).getIsProcessed(index)) return;
+
+        exploredMap.getCell(cellRow, currentColumn).setIsProcessed(index, true);
+
+        turnCameraDirection(DIRECTION.SOUTH);
+
+        if(takePhoto(cellRow, currentColumn, DIRECTION.NORTH.toString())) foundImage++;;
+        takenImage++;
+
+        turnBotDirection(currentDirection);
+    }
+
+    private void westProcess(){
+        DIRECTION currentDirection = bot.getRobotCurDir();
+
+        // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
+        int currentRow = bot.getRobotPosRow();
+        int currentColumn = bot.getRobotPosCol();
+
+        int distance=-1;
+        // We consider different scenarios where the West side may be blocked
+        if (sensorData[2]!=-1 & currentDirection==DIRECTION.WEST){
+            distance = sensorData[2];
+        }
+        if (sensorData[0]!=-1 & currentDirection==DIRECTION.NORTH){
+            distance=sensorData[0];
+        }
+        if (sensorData[4]!=-1 & currentDirection==DIRECTION.SOUTH){
+            distance=sensorData[4];
+        }
+
+        if(distance==-1 || distance>RobotConstants.CAMERA_RANGE) return;
+
+        int cellColumn = currentColumn-1-distance;
+        if(cellColumn<0) return;
+
+        int index = DIRECTION.EAST.getIndex();
+        if(exploredMap.getCell(currentRow, cellColumn).getIsProcessed(index)) return;
+
+        exploredMap.getCell(currentRow, cellColumn).setIsProcessed(index, true);
+
+        turnCameraDirection(DIRECTION.WEST);
+
+        if(takePhoto(currentRow, cellColumn, DIRECTION.EAST.toString())) foundImage++;;
+        takenImage++;
+
+        turnBotDirection(currentDirection);
+    }
+
+    private boolean takePhoto(int targetRow, int targetCol, String side){
+        String coordinate = String.valueOf(targetRow) + "," + String.valueOf(targetCol);
+
+        if(bot.getRealBot()){
+            CommMgr.getCommMgr().sendMsg(coordinate, CommMgr.IR);
+            CommMgr.getCommMgr().recvMsg();
+        }
+        else System.out.println("Take Photo: " + coordinate + " ("+ side +")");
+
+        return false;
     }
 
     /**

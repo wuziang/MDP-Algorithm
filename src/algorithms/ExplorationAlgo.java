@@ -19,16 +19,27 @@ public class ExplorationAlgo {
     private final Map realMap;
     private final Robot bot;
 
+    private boolean imageProcessing;
+
     private final int coverageLimit;
     private final int timeLimit;
 
     private int areaExplored;
+
+    private int[] sensorData;
+    private int foundImage=0;
+    private int takenImage=0;
 
     private long startTime;
     private long endTime;
 
     private int lastCalibrate;
     private boolean calibrationMode;
+
+    private boolean pledgeEnabled;
+    private boolean pledgeMode;
+
+    private boolean sendToAndroid;
 
     public ExplorationAlgo(Map exploredMap, Map realMap, Robot bot, int coverageLimit, int timeLimit) {
         this.exploredMap = exploredMap;
@@ -38,6 +49,16 @@ public class ExplorationAlgo {
         this.timeLimit = timeLimit;
     }
 
+    public void setSendToAndroid(boolean sendToAndroid){ this.sendToAndroid = sendToAndroid; }
+
+    public void setImageProcessing(boolean imageProcessing){
+        this.imageProcessing = imageProcessing;
+    }
+
+    public void setPledgeEnabled(boolean pledgeEnabled){
+        this.pledgeEnabled = pledgeEnabled;
+    }
+
     /**
      * Main method that is called to start the exploration.
      */
@@ -45,8 +66,9 @@ public class ExplorationAlgo {
         System.out.println("\nExploring...");
 
         if (bot.getRealBot()) {
-            // TODO: Start from Android
-            CommMgr.getCommMgr().recvMsg();
+            if (sendToAndroid) {
+                CommMgr.getCommMgr().recvMsg();
+            }
 
             bot.move(MOVEMENT.LEFT);
             CommMgr.getCommMgr().recvMsg();
@@ -92,14 +114,29 @@ public class ExplorationAlgo {
                     break;
                 }
             }
+
+            if(pledgeEnabled) {
+                runPledgeAlgo();
+            }
+
         } while (areaExplored <= coverageLimit && System.currentTimeMillis() <= endTime);
 
-        areaExplored = calculateAreaExplored();
-        System.out.printf("\nExploration Coverage %.2f%%\n", (areaExplored / 300.0) * 100.0);
+        if(!imageProcessing) {
+            areaExplored = calculateAreaExplored();
+            System.out.printf("\nExploration Coverage %.2f%%\n", (areaExplored / 300.0) * 100.0);
 
-        String[] mapStrings = MapDescriptor.generateMapDescriptor(exploredMap);
-        System.out.println("P1: " + mapStrings[0]);
-        System.out.println("P2: " + mapStrings[1]);
+            String[] mapStrings = MapDescriptor.generateMapDescriptor(exploredMap);
+            System.out.println("P1: " + mapStrings[0]);
+            System.out.println("P2: " + mapStrings[1]);
+        }
+        else {
+            double sides = calculateSidesPossible();
+            System.out.printf("\nImage Processing Coverage %.2f%%", (takenImage / sides) * 100.0);
+
+            if (bot.getRealBot()) {
+                System.out.printf("\nImages Found: %d\n", foundImage);
+            }
+        }
     }
 
     /**
@@ -120,6 +157,170 @@ public class ExplorationAlgo {
             moveBot(MOVEMENT.RIGHT);
             moveBot(MOVEMENT.RIGHT);
         }
+    }
+
+    /**
+     * Pledge algorithm
+     * General flow:
+     * - If an obstacle is detected to the robot's left/right, begin pledge algorithm
+     * - This will be inside a while loop (or maybe not) and will continue until the very starting waypoint is reached again
+     * - The starting waypoint should not be visited and this should be the main condition to start the pledge algorithm
+     **/
+    private void runPledgeAlgo() {
+        pledgeMode=true;
+        if (bot.getRobotPosCol() != 1 & bot.getRobotPosRow() != 1) {
+            int currentColumn = 0;
+            int currentRow = 0;
+            DIRECTION currentDirection = bot.getRobotCurDir();
+
+            if (sensorData[0] == 1){
+                int startColumn = bot.getRobotPosCol();
+                int startRow = bot.getRobotPosRow();
+
+                if(exploredMap.getCell(startRow, startColumn).getIsPledged()) return;
+
+                boolean flag = false;
+
+                moveBot(MOVEMENT.BACKWARD);
+
+                // For increase if the robot is still stuck
+                switch (currentDirection) {
+                    case NORTH:
+                        turnBotDirection(DIRECTION.WEST);
+                        break;
+                    case EAST:
+                        turnBotDirection(DIRECTION.NORTH);
+                        break;
+                    case SOUTH:
+                        turnBotDirection(DIRECTION.EAST);
+                        break;
+                    case WEST:
+                        turnBotDirection(DIRECTION.SOUTH);
+                        break;
+                }
+
+                int[] sensorBackwardData = bot.sense(exploredMap, realMap);
+                while (sensorBackwardData[1]!=-1 & sensorBackwardData[1]<=2 | sensorBackwardData[2]!=-1 & sensorBackwardData[2]<=2 | sensorBackwardData[3]!=-1 & sensorBackwardData[3]<=2){
+                    turnBotDirection(currentDirection);
+                    moveBot(MOVEMENT.BACKWARD);
+
+                    switch (currentDirection) {
+                        case NORTH:
+                            turnBotDirection(DIRECTION.WEST);
+                            sensorBackwardData = bot.sense(exploredMap, realMap);
+                            break;
+                        case EAST:
+                            turnBotDirection(DIRECTION.NORTH);
+                            sensorBackwardData = bot.sense(exploredMap, realMap);
+                            break;
+                        case SOUTH:
+                            turnBotDirection(DIRECTION.EAST);
+                            sensorBackwardData = bot.sense(exploredMap, realMap);
+                            break;
+                        case WEST:
+                            turnBotDirection(DIRECTION.SOUTH);
+                            sensorBackwardData = bot.sense(exploredMap, realMap);
+                            break;
+                    }
+                }
+
+                // Make the bot move forward so it will have an obstacle on it's right side
+                moveBot(MOVEMENT.FORWARD);
+                moveBot(MOVEMENT.FORWARD);
+
+                // Then we start making the robot traverse across the perimeter of the obstacle
+                while (flag == false) {
+                    int[] sensorDataPledge = bot.sense(exploredMap, realMap);
+                    currentColumn = bot.getRobotPosCol();
+                    currentRow = bot.getRobotPosRow();
+                    currentDirection = bot.getRobotCurDir();
+
+                    switch (currentDirection) {
+                        case NORTH:
+                            if (lookRight()) {
+                                turnBotDirection(DIRECTION.EAST);
+                                moveBot(MOVEMENT.FORWARD);
+                                moveBot(MOVEMENT.FORWARD);
+                            } else if (sensorDataPledge[4] > -1 & lookForward()) {
+                                moveBot(MOVEMENT.FORWARD);
+                            } else if (sensorDataPledge[4] > -1 & lookLeft() & !lookForward()) {
+                                turnBotDirection(DIRECTION.WEST);
+                            } else {
+                                moveBot(MOVEMENT.FORWARD);
+                            }
+                            break;
+                        case EAST:
+                            if (lookRight()) {
+                                turnBotDirection(DIRECTION.SOUTH);
+                                moveBot(MOVEMENT.FORWARD);
+                                moveBot(MOVEMENT.FORWARD);
+                            } else if (sensorDataPledge[4] > -1 & lookForward()) {
+                                moveBot(MOVEMENT.FORWARD);
+                            } else if (sensorDataPledge[4] > -1 & lookLeft() & !lookForward()) {
+                                turnBotDirection(DIRECTION.NORTH);
+                            } else {
+                                moveBot(MOVEMENT.FORWARD);
+                            }
+                            break;
+                        case SOUTH:
+                            if (lookRight()) {
+                                turnBotDirection(DIRECTION.WEST);
+                                moveBot(MOVEMENT.FORWARD);
+                                moveBot(MOVEMENT.FORWARD);
+                            } else if (sensorDataPledge[4] > -1 & lookForward()) {
+                                moveBot(MOVEMENT.FORWARD);
+                            } else if (sensorDataPledge[4] > -1 & lookLeft() & !lookForward()) {
+                                turnBotDirection(DIRECTION.EAST);
+                            } else {
+                                moveBot(MOVEMENT.FORWARD);
+                            }
+                            break;
+                        case WEST:
+                            if (lookRight()) {
+                                turnBotDirection(DIRECTION.NORTH);
+                                moveBot(MOVEMENT.FORWARD);
+                                moveBot(MOVEMENT.FORWARD);
+                            } else if (sensorDataPledge[4] > -1 & lookForward()) {
+                                moveBot(MOVEMENT.FORWARD);
+                            } else if (sensorDataPledge[4] > -1 & lookLeft() & !lookForward()) {
+                                turnBotDirection(DIRECTION.SOUTH);
+                            } else {
+                                moveBot(MOVEMENT.FORWARD);
+                            }
+                            break;
+                    }
+
+                    if (currentColumn == startColumn & currentRow == startRow) {
+                        // Make Robot face the front once again
+                        switch (currentDirection) {
+                            case NORTH:
+                                turnBotDirection(DIRECTION.SOUTH);
+                                break;
+                            case EAST:
+                                turnBotDirection(DIRECTION.WEST);
+                                break;
+                            case SOUTH:
+                                turnBotDirection(DIRECTION.NORTH);
+                                break;
+                            case WEST:
+                                turnBotDirection(DIRECTION.EAST);
+                                break;
+                        }
+
+                        int[] sensorEndingPledge = bot.sense(exploredMap, realMap);
+
+                        while (sensorEndingPledge[0]!=-1){
+                            moveBot(MOVEMENT.FORWARD);
+                            sensorEndingPledge = bot.sense(exploredMap, realMap);
+                        }
+                        moveBot(MOVEMENT.FORWARD);
+
+                        flag = true;
+                    }
+                }
+            }
+        }
+        pledgeMode=false;
     }
 
     /**
@@ -209,6 +410,176 @@ public class ExplorationAlgo {
         return (isExploredNotObstacle(botRow - 1, botCol - 1) && isExploredAndFree(botRow, botCol - 1) && isExploredNotObstacle(botRow + 1, botCol - 1));
     }
 
+    private void northProcess(){
+        DIRECTION currentDirection = bot.getRobotCurDir();
+
+        // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
+        int currentRow = bot.getRobotPosRow();
+        int currentColumn = bot.getRobotPosCol();
+
+        int distance = -1;
+        // We consider different scenarios where the North side may be blocked
+        if (sensorData[2]!=-1 & currentDirection==DIRECTION.NORTH){
+            distance = sensorData[2];
+        }
+        if (sensorData[0]!=-1 & currentDirection==DIRECTION.EAST){
+            distance = sensorData[0];
+        }
+        if (sensorData[4]!=-1 & currentDirection==DIRECTION.WEST){
+            distance = sensorData[4];
+        }
+
+        if(distance==-1 || distance>RobotConstants.CAMERA_RANGE) return;
+
+        int cellRow = currentRow+1+distance;
+        if(cellRow>=MapConstants.MAP_ROWS) return;
+
+        int index = DIRECTION.SOUTH.getIndex();
+        if(exploredMap.getCell(cellRow, currentColumn).getIsProcessed(index)) return;
+
+        exploredMap.getCell(cellRow, currentColumn).setIsProcessed(index, true);
+
+        turnCameraDirection(DIRECTION.NORTH);
+
+        if(takePhoto(cellRow, currentColumn, DIRECTION.SOUTH.toString())) foundImage++;;
+        takenImage++;
+
+        turnBotDirection(currentDirection);
+    }
+
+    /**
+     * Returns true if the East cell has an obstacle
+     */
+    private void eastProcess(){
+        DIRECTION currentDirection = bot.getRobotCurDir();
+
+        // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
+        int currentRow = bot.getRobotPosRow();
+        int currentColumn = bot.getRobotPosCol();
+
+        int distance = -1;
+        // We consider different scenarios where the East side may be blocked
+        if (sensorData[2]!=-1 & currentDirection==DIRECTION.EAST){
+            distance = sensorData[2];
+        }
+        if (sensorData[4]!=-1 & currentDirection==DIRECTION.NORTH){
+            distance = sensorData[4];
+        }
+        if (sensorData[0]!=-1 & currentDirection==DIRECTION.SOUTH){
+            distance = sensorData[0];
+        }
+
+        if(distance==-1 || distance>RobotConstants.CAMERA_RANGE) return;
+
+        int cellColumn = currentColumn+1+distance;
+        if(cellColumn>=MapConstants.MAP_COLS) return;
+
+        int index = DIRECTION.WEST.getIndex();
+        if(exploredMap.getCell(currentRow, cellColumn).getIsProcessed(index)) return;
+
+        exploredMap.getCell(currentRow, cellColumn).setIsProcessed(index, true);
+
+        turnCameraDirection(DIRECTION.EAST);
+
+        if(takePhoto(currentRow, cellColumn, DIRECTION.WEST.toString())) foundImage++;
+        takenImage++;
+
+        turnBotDirection(currentDirection);
+    }
+
+    /**
+     * Returns true if the South cell has an obstacle
+     */
+    private void southProcess(){
+        DIRECTION currentDirection = bot.getRobotCurDir();
+
+        // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
+        int currentRow = bot.getRobotPosRow();
+        int currentColumn = bot.getRobotPosCol();
+
+        int distance = -1;
+        // We consider different scenarios where the South side may be blocked
+        if (sensorData[2]!=-1 & currentDirection==DIRECTION.SOUTH){
+            distance = sensorData[2];
+        }
+        if (sensorData[4]!=-1 & currentDirection==DIRECTION.EAST){
+            distance = sensorData[4];
+        }
+        if (sensorData[0]!=-1 & currentDirection==DIRECTION.WEST){
+            distance = sensorData[0];
+        }
+
+        if(distance==-1 || distance>RobotConstants.CAMERA_RANGE) return;
+
+        int cellRow = currentRow-1-distance;
+        if(cellRow<0) return;
+
+        int index = DIRECTION.NORTH.getIndex();
+        if(exploredMap.getCell(cellRow, currentColumn).getIsProcessed(index)) return;
+
+        exploredMap.getCell(cellRow, currentColumn).setIsProcessed(index, true);
+
+        turnCameraDirection(DIRECTION.SOUTH);
+
+        if(takePhoto(cellRow, currentColumn, DIRECTION.NORTH.toString())) foundImage++;;
+        takenImage++;
+
+        turnBotDirection(currentDirection);
+    }
+
+    /**
+     * Returns true if the West cell has an obstacle
+     */
+    private void westProcess(){
+        DIRECTION currentDirection = bot.getRobotCurDir();
+
+        // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
+        int currentRow = bot.getRobotPosRow();
+        int currentColumn = bot.getRobotPosCol();
+
+        int distance=-1;
+        // We consider different scenarios where the West side may be blocked
+        if (sensorData[2]!=-1 & currentDirection==DIRECTION.WEST){
+            distance = sensorData[2];
+        }
+        if (sensorData[0]!=-1 & currentDirection==DIRECTION.NORTH){
+            distance=sensorData[0];
+        }
+        if (sensorData[4]!=-1 & currentDirection==DIRECTION.SOUTH){
+            distance=sensorData[4];
+        }
+
+        if(distance==-1 || distance>RobotConstants.CAMERA_RANGE) return;
+
+        int cellColumn = currentColumn-1-distance;
+        if(cellColumn<0) return;
+
+        int index = DIRECTION.EAST.getIndex();
+        if(exploredMap.getCell(currentRow, cellColumn).getIsProcessed(index)) return;
+
+        exploredMap.getCell(currentRow, cellColumn).setIsProcessed(index, true);
+
+        turnCameraDirection(DIRECTION.WEST);
+
+        if(takePhoto(currentRow, cellColumn, DIRECTION.EAST.toString())) foundImage++;;
+        takenImage++;
+
+        turnBotDirection(currentDirection);
+    }
+
+
+    private boolean takePhoto(int targetRow, int targetCol, String side){
+        String coordinate = String.valueOf(targetRow) + "," + String.valueOf(targetCol);
+
+        if(bot.getRealBot()){
+            CommMgr.getCommMgr().sendMsg(coordinate, CommMgr.IR);
+            CommMgr.getCommMgr().recvMsg();
+        }
+        else System.out.println("Take Photo: " + coordinate + " ("+ side +")");
+
+        return false;
+    }
+
     /**
      * Returns true for cells that are explored and not obstacles.
      */
@@ -247,6 +618,32 @@ public class ExplorationAlgo {
     }
 
     /**
+     * Returns the number of sides possible to have image attached.
+     */
+    private int calculateSidesPossible() {
+        int result = 0;
+        for (int r = 0; r < MapConstants.MAP_ROWS; r++) {
+            for (int c = 0; c < MapConstants.MAP_COLS; c++) {
+                if(exploredMap.getCell(r,c).getIsExplored() && exploredMap.getCell(r,c).getIsObstacle()){
+                    if (r-1>=0 && exploredMap.getCell(r-1, c).getIsExplored() && !exploredMap.getCell(r-1, c).getIsObstacle()) {
+                        result++;
+                    }
+                    if (r+1<MapConstants.MAP_ROWS && exploredMap.getCell(r+1, c).getIsExplored() && !exploredMap.getCell(r+1, c).getIsObstacle()) {
+                        result++;
+                    }
+                    if (c-1>=0 && exploredMap.getCell(r, c-1).getIsExplored() && !exploredMap.getCell(r, c-1).getIsObstacle()) {
+                        result++;
+                    }
+                    if (c+1<MapConstants.MAP_COLS &&exploredMap.getCell(r, c+1).getIsExplored() && !exploredMap.getCell(r, c+1).getIsObstacle()) {
+                        result++;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
      * Moves the bot, repaints the map and calls senseAndRepaint().
      */
     private void moveBot(MOVEMENT m) {
@@ -254,6 +651,15 @@ public class ExplorationAlgo {
 
         if (m != MOVEMENT.CALIBRATE) {
             senseAndRepaint();
+
+            if(imageProcessing){
+                northProcess();
+                eastProcess();
+                southProcess();
+                westProcess();
+            }
+
+            if(pledgeMode) exploredMap.getCell(bot.getRobotPosRow(), bot.getRobotPosCol()).setIsPledged(true);
         }
 
         if (bot.getRealBot() && !calibrationMode) {
@@ -282,11 +688,10 @@ public class ExplorationAlgo {
      */
     private void senseAndRepaint() {
         bot.setSensors();
-        bot.sense(exploredMap, realMap);
+        sensorData = bot.sense(exploredMap, realMap);
 
         exploredMap.repaint();
-        // TODO: Map String to Android
-        if(bot.getRealBot()) {
+        if(bot.getRealBot() && sendToAndroid) {
             String[] mapStrings = MapDescriptor.generateMapDescriptor(exploredMap);
             String robotRow = String.valueOf(bot.getRobotPosRow());
             String robotCol = String.valueOf(bot.getRobotPosCol());
@@ -365,5 +770,12 @@ public class ExplorationAlgo {
             moveBot(MOVEMENT.RIGHT);
             moveBot(MOVEMENT.RIGHT);
         }
+    }
+
+    /**
+     * Turns the front camera to the required direction.
+     */
+    private void turnCameraDirection(DIRECTION targetDir) {
+        turnBotDirection(targetDir);
     }
 }

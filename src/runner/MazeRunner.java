@@ -2,7 +2,6 @@ package runner;
 
 import algorithms.ExplorationAlgo;
 import algorithms.FastestPathAlgo;
-import algorithms.ImageProcessingAlgo;
 import map.Map;
 import robot.Robot;
 import robot.RobotConstants;
@@ -38,8 +37,9 @@ public class MazeRunner {
 
     private static final CommMgr comm = CommMgr.getCommMgr();
 
-    private static final boolean connected = true;
-    private static final boolean realBot = true;
+    private static final boolean connectedToAndroid = false;
+    private static final boolean explorationMode = false;
+    private static boolean pledgeEnabled = false;
 
     private static final String filename = "MD1";
 
@@ -47,9 +47,8 @@ public class MazeRunner {
      * Initialises the different maps and displays the application.
      */
     public static void main(String[] args) {
-        if (connected) comm.openConnection();
-
-        bot = new Robot(RobotConstants.START_ROW, RobotConstants.START_COL, realBot);
+        comm.openConnection();
+        bot = new Robot(RobotConstants.START_ROW, RobotConstants.START_COL, explorationMode);
 
         realMap = new Map(bot);
         realMap.setAllUnexplored();
@@ -129,74 +128,6 @@ public class MazeRunner {
      * (for user input) for the different functions of the buttons.
      */
     private static void addButtons() {
-        // FastestPath Class for Multithreading
-        class FastestPath extends SwingWorker<Integer, String> {
-            protected Integer doInBackground() throws Exception {
-                bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
-
-                if (connected) {
-                    String msg = comm.recvMsg();
-                    if(!msg.isEmpty()){
-                        waypointX=Integer.parseInt(msg.substring(0, msg.indexOf(',')));
-                        waypointY=Integer.parseInt(msg.substring(msg.indexOf(',')+1));
-                    }
-                }
-
-                FastestPathAlgo fastestPathToWayPoint;
-                fastestPathToWayPoint = new FastestPathAlgo(realMap, bot);
-                String output1 = fastestPathToWayPoint.runFastestPath(waypointX,waypointY);
-
-                bot.setRobotPos(waypointX,waypointY);
-
-                FastestPathAlgo fastestPathToGoal;
-                fastestPathToGoal = new FastestPathAlgo(realMap, bot);
-                String output2 = fastestPathToGoal.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
-
-                String output;
-                if(output1.charAt(output1.length()-1)<='8'
-                        && output1.charAt(output1.length()-1)>='1'
-                        && output2.charAt(0)<='8'
-                        && output2.charAt(0)>='1'){
-                    output = output1.substring(0, output1.length()-1)
-                            + Character.toString(output1.charAt(output1.length()-1)+output2.charAt(0)-'0')
-                            + output2.substring(1);
-                }
-                else{
-                    output = output1+output2;
-                }
-
-                comm.sendMsg(output, CommMgr.AR);
-                comm.sendMsg("FP_START", CommMgr.AN);
-
-                bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
-                while(bot.getRobotPosRow()!=RobotConstants.GOAL_ROW || bot.getRobotPosCol()!=RobotConstants.GOAL_COL){
-                    String msg = comm.recvMsg();
-                    RobotConstants.MOVEMENT x;
-                    int moveCount = 1;
-
-                    switch (msg.charAt(0)) {
-                        case 'L':
-                            x = RobotConstants.MOVEMENT.LEFT;
-                            break;
-                        case 'R':
-                            x = RobotConstants.MOVEMENT.RIGHT;
-                            break;
-                        default:
-                            x = RobotConstants.MOVEMENT.FORWARD;
-                            moveCount = Integer.parseInt(msg);
-                            break;
-                    }
-
-                    for(int i=0;i<moveCount;i++){
-                        bot.move(x);
-                    }
-                    realMap.repaint();
-                }
-
-                return 222;
-            }
-        }
-
         // Fastest Path Button
         JButton btn_FastestPath = new JButton("Fastest Path");
         formatButton(btn_FastestPath);
@@ -213,20 +144,6 @@ public class MazeRunner {
         });
         _buttons.add(btn_FastestPath);
 
-        // Exploration Class for Multithreading
-        class Exploration extends SwingWorker<Integer, String> {
-            protected Integer doInBackground() throws Exception {
-                bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
-
-                ExplorationAlgo exploration;
-                exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
-
-                exploration.runExploration();
-
-                return 111;
-            }
-        }
-
         // Exploration Button
         JButton btn_Exploration = new JButton("Exploration");
         formatButton(btn_Exploration);
@@ -237,21 +154,6 @@ public class MazeRunner {
         });
         _buttons.add(btn_Exploration);
 
-        // Image Exploration Class for Multithreading
-        class ImageProcessing extends SwingWorker<Integer, String> {
-            protected Integer doInBackground() throws Exception {
-                bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
-
-                ImageProcessingAlgo image;
-                image = new ImageProcessingAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
-
-                image.runImage();
-                generateMapDescriptor(exploredMap);
-
-                return 333;
-            }
-        }
-
         // Image Exploration Button
         JButton btn_Image_Exploration = new JButton("Image Processing");
         formatButton(btn_Image_Exploration);
@@ -261,5 +163,109 @@ public class MazeRunner {
             }
         });
         _buttons.add(btn_Image_Exploration);
+    }
+
+    // FastestPath Class for Multithreading
+    private static class FastestPath extends SwingWorker<Integer, String> {
+        protected Integer doInBackground() throws Exception {
+            bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
+
+            if (connectedToAndroid) {
+                String msg = comm.recvMsg();
+                if(!msg.isEmpty()){
+                    waypointX=Integer.parseInt(msg.substring(0, msg.indexOf(',')));
+                    waypointY=Integer.parseInt(msg.substring(msg.indexOf(',')+1));
+                }
+            }
+
+            FastestPathAlgo fastestPathToWayPoint;
+            fastestPathToWayPoint = new FastestPathAlgo(realMap, bot);
+            String output1 = fastestPathToWayPoint.runFastestPath(waypointX,waypointY);
+
+            bot.setRobotPos(waypointX,waypointY);
+
+            FastestPathAlgo fastestPathToGoal;
+            fastestPathToGoal = new FastestPathAlgo(realMap, bot);
+            String output2 = fastestPathToGoal.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
+
+            String output;
+            if(output1.charAt(output1.length()-1)<='8'
+                    && output1.charAt(output1.length()-1)>='1'
+                    && output2.charAt(0)<='8'
+                    && output2.charAt(0)>='1'){
+                output = output1.substring(0, output1.length()-1)
+                        + Character.toString(output1.charAt(output1.length()-1)+output2.charAt(0)-'0')
+                        + output2.substring(1);
+            }
+            else{
+                output = output1+output2;
+            }
+
+            comm.sendMsg(output, CommMgr.AR);
+            comm.sendMsg("FP_START", CommMgr.AN);
+
+            bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
+            while(bot.getRobotPosRow()!=RobotConstants.GOAL_ROW || bot.getRobotPosCol()!=RobotConstants.GOAL_COL){
+                String msg = comm.recvMsg();
+                RobotConstants.MOVEMENT x;
+                int moveCount = 1;
+
+                switch (msg.charAt(0)) {
+                    case 'L':
+                        x = RobotConstants.MOVEMENT.LEFT;
+                        break;
+                    case 'R':
+                        x = RobotConstants.MOVEMENT.RIGHT;
+                        break;
+                    default:
+                        x = RobotConstants.MOVEMENT.FORWARD;
+                        moveCount = Integer.parseInt(msg);
+                        break;
+                }
+
+                for(int i=0;i<moveCount;i++){
+                    bot.move(x);
+                }
+                realMap.repaint();
+            }
+
+            return 222;
+        }
+    }
+
+    // Exploration Class for Multithreading
+    private static class Exploration extends SwingWorker<Integer, String> {
+        protected Integer doInBackground() throws Exception {
+            bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
+
+            ExplorationAlgo exploration;
+            exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+
+            exploration.setSendToAndroid(connectedToAndroid);
+            exploration.setPledgeEnabled(pledgeEnabled);
+
+            exploration.runExploration();
+
+            return 111;
+        }
+    }
+
+    // Image Exploration Class for Multithreading
+    private static class ImageProcessing extends SwingWorker<Integer, String> {
+        protected Integer doInBackground() throws Exception {
+            bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
+
+            ExplorationAlgo image;
+            image = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+
+            image.setSendToAndroid(connectedToAndroid);
+            image.setPledgeEnabled(pledgeEnabled);
+            image.setImageProcessing(true);
+
+            image.runExploration();
+            generateMapDescriptor(exploredMap);
+
+            return 333;
+        }
     }
 }

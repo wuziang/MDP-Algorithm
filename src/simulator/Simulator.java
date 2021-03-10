@@ -2,7 +2,6 @@ package simulator;
 
 import algorithms.ExplorationAlgo;
 import algorithms.FastestPathAlgo;
-import algorithms.ImageProcessingAlgo;
 import map.Map;
 import map.MapConstants;
 import robot.Robot;
@@ -30,13 +29,14 @@ public class Simulator {
     private static Map realMap = null;              // real map
     private static Map exploredMap = null;          // exploration map
 
-    private static int waypointX;
-    private static int waypointY;
+    private static int waypointX=1;
+    private static int waypointY=1;
 
     private static int timeLimit = 3600;            // time limit
     private static int coverageLimit = 300;         // coverage limit
+    private static boolean pledgeEnabled = true;
 
-    private static String filename = "M1";
+    private static String filename = "MD5";
 
     /**
      * Initialises the different maps and displays the application.
@@ -154,9 +154,11 @@ public class Simulator {
 
                 loadMapDialog.add(new JLabel("File: "));
                 loadMapDialog.add(loadTF);
+
                 loadMapDialog.add(new JLabel("Waypoint: "));
                 loadMapDialog.add(loadWaypoint);
                 loadMapDialog.add(loadMapButton);
+
                 loadMapDialog.setVisible(true);
             }
         });
@@ -198,6 +200,8 @@ public class Simulator {
                 ExplorationAlgo exploration;
                 exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
+                exploration.setPledgeEnabled(pledgeEnabled);
+
                 exploration.runExploration();
                 generateMapDescriptor(exploredMap);
 
@@ -216,10 +220,13 @@ public class Simulator {
                 bot.setRobotPos(row, col);
                 exploredMap.repaint();
 
-                ImageProcessingAlgo image;
-                image = new ImageProcessingAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+                ExplorationAlgo image;
+                image = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
-                image.runImage();
+                image.setImageProcessing(true);
+                image.setPledgeEnabled(pledgeEnabled);
+
+                image.runExploration();
                 generateMapDescriptor(exploredMap);
 
                 return 333;

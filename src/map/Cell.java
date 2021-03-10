@@ -10,6 +10,7 @@ public class Cell {
     private boolean isObstacle;
     private boolean isVirtualWall;
     private boolean isExplored;
+    private boolean isPledged;
     private boolean[] isProcessed;
 
     public Cell(int row, int col) {
@@ -55,6 +56,10 @@ public class Cell {
     public boolean getIsExplored() {
         return this.isExplored;
     }
+
+    public void setIsPledged(boolean val) { this.isPledged = val; }
+
+    public boolean getIsPledged() { return this.isPledged; }
 
     public void setIsProcessed(int index, boolean val) {
         this.isProcessed[index] = val;

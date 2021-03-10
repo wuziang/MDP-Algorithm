@@ -29,19 +29,20 @@ public class MazeRunner {
     private static Map realMap = null;              // real map
     private static Map exploredMap = null;          // exploration map
 
-    private static int waypointX = 12;
-    private static int waypointY = 9;
-
     private static int timeLimit = 3600;            // time limit
     private static int coverageLimit = 300;         // coverage limit
 
     private static final CommMgr comm = CommMgr.getCommMgr();
 
+    private static final String filename = "MD1";
+    private static int waypointRow = 12;
+    private static int waypointCol = 9;
+
     private static final boolean connectedToAndroid = false;
     private static final boolean explorationMode = false;
     private static boolean pledgeEnabled = false;
 
-    private static final String filename = "MD1";
+
 
     /**
      * Initialises the different maps and displays the application.
@@ -173,19 +174,19 @@ public class MazeRunner {
             if (connectedToAndroid) {
                 String msg = comm.recvMsg();
                 if(!msg.isEmpty()){
-                    waypointX=Integer.parseInt(msg.substring(0, msg.indexOf(',')));
-                    waypointY=Integer.parseInt(msg.substring(msg.indexOf(',')+1));
+                    waypointRow =Integer.parseInt(msg.substring(0, msg.indexOf(',')));
+                    waypointCol =Integer.parseInt(msg.substring(msg.indexOf(',')+1));
                 }
             }
 
-            realMap.setWaypoint(waypointX, waypointY);
+            realMap.setWaypoint(waypointRow, waypointCol);
             realMap.repaint();
 
             FastestPathAlgo fastestPathToWayPoint;
             fastestPathToWayPoint = new FastestPathAlgo(realMap, bot);
-            String output1 = fastestPathToWayPoint.runFastestPath(waypointX,waypointY);
+            String output1 = fastestPathToWayPoint.runFastestPath(waypointRow, waypointCol);
 
-            bot.setRobotPos(waypointX,waypointY);
+            bot.setRobotPos(waypointRow, waypointCol);
 
             FastestPathAlgo fastestPathToGoal;
             fastestPathToGoal = new FastestPathAlgo(realMap, bot);

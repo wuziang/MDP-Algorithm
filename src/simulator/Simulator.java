@@ -29,14 +29,15 @@ public class Simulator {
     private static Map realMap = null;              // real map
     private static Map exploredMap = null;          // exploration map
 
-    private static int waypointX=1;
-    private static int waypointY=1;
+    private static boolean loadedMap = false;
+    private static String filename = "M1";
+
+    private static int waypointRow = 12;
+    private static int waypointCol = 9;
 
     private static int timeLimit = 3600;            // time limit
     private static int coverageLimit = 300;         // coverage limit
     private static boolean pledgeEnabled = false;
-
-    private static String filename = "M1";
 
     /**
      * Initialises the different maps and displays the application.
@@ -110,6 +111,15 @@ public class Simulator {
         addButtons();
     }
 
+    private static void loadDefaultMap(){
+        if(!loadedMap) {
+            loadMap(realMap, filename);
+            realMap.setWaypoint(waypointRow, waypointCol);
+
+            realMap.repaint();
+        }
+    }
+
     /**
      * Helper method to set particular properties for all the JButtons.
      */
@@ -128,6 +138,8 @@ public class Simulator {
 
         btn_LoadMap.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
+                loadedMap = true;
+
                 JDialog loadMapDialog = new JDialog(_appFrame, "Load Map", true);
                 loadMapDialog.setSize(600, 80);
                 loadMapDialog.setLayout(new FlowLayout());
@@ -143,9 +155,9 @@ public class Simulator {
                         loadMap(realMap, loadTF.getText());
 
                         String waypoint=loadWaypoint.getText();
-                        waypointX=Integer.parseInt(waypoint.substring(0, waypoint.indexOf(',')));
-                        waypointY=Integer.parseInt(waypoint.substring(waypoint.indexOf(',')+1));
-                        realMap.setWaypoint(waypointX, waypointY);
+                        waypointRow =Integer.parseInt(waypoint.substring(0, waypoint.indexOf(',')));
+                        waypointCol =Integer.parseInt(waypoint.substring(waypoint.indexOf(',')+1));
+                        realMap.setWaypoint(waypointRow, waypointCol);
 
                         CardLayout cl = ((CardLayout) _mapCards.getLayout());
                         cl.show(_mapCards, "REAL_MAP");
@@ -174,9 +186,9 @@ public class Simulator {
 
                 FastestPathAlgo fastestPathToWayPoint;
                 fastestPathToWayPoint = new FastestPathAlgo(realMap, bot);
-                fastestPathToWayPoint.runFastestPath(waypointX,waypointY);
+                fastestPathToWayPoint.runFastestPath(waypointRow, waypointCol);
 
-                bot.setRobotPos(waypointX,waypointY);
+                bot.setRobotPos(waypointRow, waypointCol);
                 realMap.repaint();
 
                 FastestPathAlgo fastestPathToGoal;
@@ -239,6 +251,8 @@ public class Simulator {
         formatButton(btn_FastestPath);
         btn_FastestPath.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
+                loadDefaultMap();
+
                 CardLayout cl = ((CardLayout) _mapCards.getLayout());
                 cl.show(_mapCards, "REAL_MAP");
                 new FastestPath().execute();
@@ -251,8 +265,7 @@ public class Simulator {
         formatButton(btn_Exploration);
         btn_Exploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-                loadMap(realMap, filename);
-                realMap.repaint();
+                loadDefaultMap();
 
                 CardLayout cl = ((CardLayout) _mapCards.getLayout());
                 cl.show(_mapCards, "EXPLORATION");
@@ -266,8 +279,7 @@ public class Simulator {
         formatButton(btn_Image_Exploration);
         btn_Image_Exploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-                loadMap(realMap, filename);
-                realMap.repaint();
+                loadDefaultMap();
 
                 CardLayout cl = ((CardLayout) _mapCards.getLayout());
                 cl.show(_mapCards, "EXPLORATION");
@@ -295,6 +307,8 @@ public class Simulator {
         formatButton(btn_TimeExploration);
         btn_TimeExploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
+                loadDefaultMap();
+
                 JDialog timeExploDialog = new JDialog(_appFrame, "Time-Limited Exploration", true);
                 timeExploDialog.setSize(400, 60);
                 timeExploDialog.setLayout(new FlowLayout());
@@ -314,7 +328,7 @@ public class Simulator {
                     }
                 });
 
-                timeExploDialog.add(new JLabel("Time Limit (in MM:SS): "));
+                timeExploDialog.add(new JLabel("Time Limit (MM:SS): "));
                 timeExploDialog.add(timeTF);
                 timeExploDialog.add(timeSaveButton);
                 timeExploDialog.setVisible(true);
@@ -341,6 +355,8 @@ public class Simulator {
         formatButton(btn_CoverageExploration);
         btn_CoverageExploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
+                loadDefaultMap();
+
                 JDialog coverageExploDialog = new JDialog(_appFrame, "Coverage-Limited Exploration", true);
                 coverageExploDialog.setSize(400, 60);
                 coverageExploDialog.setLayout(new FlowLayout());
@@ -358,7 +374,7 @@ public class Simulator {
                     }
                 });
 
-                coverageExploDialog.add(new JLabel("Coverage Limit (% of maze): "));
+                coverageExploDialog.add(new JLabel("Coverage Limit (%): "));
                 coverageExploDialog.add(coverageTF);
                 coverageExploDialog.add(coverageSaveButton);
                 coverageExploDialog.setVisible(true);

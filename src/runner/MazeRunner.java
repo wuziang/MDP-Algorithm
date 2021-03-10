@@ -178,6 +178,9 @@ public class MazeRunner {
                 }
             }
 
+            realMap.setWaypoint(waypointX, waypointY);
+            realMap.repaint();
+
             FastestPathAlgo fastestPathToWayPoint;
             fastestPathToWayPoint = new FastestPathAlgo(realMap, bot);
             String output1 = fastestPathToWayPoint.runFastestPath(waypointX,waypointY);

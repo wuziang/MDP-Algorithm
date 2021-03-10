@@ -34,9 +34,9 @@ public class Simulator {
 
     private static int timeLimit = 3600;            // time limit
     private static int coverageLimit = 300;         // coverage limit
-    private static boolean pledgeEnabled = true;
+    private static boolean pledgeEnabled = false;
 
-    private static String filename = "MD5";
+    private static String filename = "MD1";
 
     /**
      * Initialises the different maps and displays the application.
@@ -145,6 +145,7 @@ public class Simulator {
                         String waypoint=loadWaypoint.getText();
                         waypointX=Integer.parseInt(waypoint.substring(0, waypoint.indexOf(',')));
                         waypointY=Integer.parseInt(waypoint.substring(waypoint.indexOf(',')+1));
+                        realMap.setWaypoint(waypointX, waypointY);
 
                         CardLayout cl = ((CardLayout) _mapCards.getLayout());
                         cl.show(_mapCards, "REAL_MAP");

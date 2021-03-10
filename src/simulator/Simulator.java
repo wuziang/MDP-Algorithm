@@ -36,7 +36,7 @@ public class Simulator {
     private static int coverageLimit = 300;         // coverage limit
     private static boolean pledgeEnabled = false;
 
-    private static String filename = "MD1";
+    private static String filename = "M1";
 
     /**
      * Initialises the different maps and displays the application.
@@ -183,7 +183,7 @@ public class Simulator {
                 fastestPathToGoal = new FastestPathAlgo(realMap, bot);
                 fastestPathToGoal.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
 
-                return 222;
+                return 111;
             }
         }
 
@@ -206,7 +206,7 @@ public class Simulator {
                 exploration.runExploration();
                 generateMapDescriptor(exploredMap);
 
-                return 111;
+                return 222;
             }
         }
 
@@ -286,7 +286,7 @@ public class Simulator {
                 timeExplo.runExploration();
 
                 generateMapDescriptor(exploredMap);
-                return 333;
+                return 444;
             }
         }
 
@@ -332,7 +332,7 @@ public class Simulator {
                 coverageExplo.runExploration();
 
                 generateMapDescriptor(exploredMap);
-                return 444;
+                return 555;
             }
         }
 

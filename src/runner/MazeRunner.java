@@ -232,7 +232,7 @@ public class MazeRunner {
                 realMap.repaint();
             }
 
-            return 222;
+            return 111;
         }
     }
 
@@ -249,7 +249,7 @@ public class MazeRunner {
 
             exploration.runExploration();
 
-            return 111;
+            return 222;
         }
     }
 

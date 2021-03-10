@@ -21,6 +21,7 @@ public class RobotConstants {
     public static final int SENSOR_SHORT_RANGE_H = 3;               // upper range of short range sensor (cells)
     public static final int CAMERA_RANGE = 2;                       // upper range of camera (cells)
 
+    public static final int CALIBRATE_THRESHOLD = 5;
     public static final int INFINITE_COST = 9999;
 
     public enum DIRECTION {

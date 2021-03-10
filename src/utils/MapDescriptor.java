@@ -53,10 +53,6 @@ public class MapDescriptor {
         }
     }
 
-    /**
-     * Reads filename.txt from disk and loads it into the passed Map object. Uses a simple binary indicator to
-     * identify if a cell is an obstacle.
-     */
     private static void loadMapDescriptorFromDisk(Map map, String filename) {
         try {
             InputStream inputStream = new FileInputStream("maps/" + filename + ".txt");

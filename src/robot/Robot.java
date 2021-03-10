@@ -28,14 +28,16 @@ import java.util.concurrent.TimeUnit;
 public class Robot {
     private int posRow; // center cell
     private int posCol; // center cell
+
     private DIRECTION robotDir;
     private int speed;
+
     private final Sensor SRFrontLeft;       // north-facing front-left SR
     private final Sensor SRFrontCenter;     // north-facing front-center SR
     private final Sensor SRFrontRight;      // north-facing front-right SR
     private final Sensor SRLeft;            // west-facing left SR
     private final Sensor SRRight;           // east-facing right SR
-    private boolean touchedGoal;
+
     private final boolean realBot;
 
     public Robot(int row, int col, boolean realBot) {
@@ -80,15 +82,6 @@ public class Robot {
 
     public boolean getRealBot() {
         return realBot;
-    }
-
-    private void updateTouchedGoal() {
-        if (this.getRobotPosRow() == MapConstants.GOAL_ROW && this.getRobotPosCol() == MapConstants.GOAL_COL)
-            this.touchedGoal = true;
-    }
-
-    public boolean getTouchedGoal() {
-        return this.touchedGoal;
     }
 
     /**
@@ -185,9 +178,6 @@ public class Robot {
             CommMgr comm = CommMgr.getCommMgr();
             comm.sendMsg(Character.toString(MOVEMENT.print(m)), CommMgr.AR);
         }
-        // else System.out.println("Move: " + MOVEMENT.print(m));
-
-        updateTouchedGoal();
     }
 
     /**
@@ -254,8 +244,6 @@ public class Robot {
         } else {
             // Input in the form of xx, xx, xx, xx, xx, xx
             String msg = CommMgr.getCommMgr().recvMsg();
-
-            // Splits the incoming message into an array based on the position of ','
             String[] msgArr = msg.split(",");
 
             // Convert the values in the incoming message from strings to double

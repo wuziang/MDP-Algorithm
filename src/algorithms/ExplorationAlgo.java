@@ -447,9 +447,6 @@ public class ExplorationAlgo {
         turnBotDirection(currentDirection);
     }
 
-    /**
-     * Returns true if the East cell has an obstacle
-     */
     private void eastProcess(){
         DIRECTION currentDirection = bot.getRobotCurDir();
 
@@ -487,9 +484,6 @@ public class ExplorationAlgo {
         turnBotDirection(currentDirection);
     }
 
-    /**
-     * Returns true if the South cell has an obstacle
-     */
     private void southProcess(){
         DIRECTION currentDirection = bot.getRobotCurDir();
 
@@ -527,9 +521,6 @@ public class ExplorationAlgo {
         turnBotDirection(currentDirection);
     }
 
-    /**
-     * Returns true if the West cell has an obstacle
-     */
     private void westProcess(){
         DIRECTION currentDirection = bot.getRobotCurDir();
 
@@ -566,7 +557,6 @@ public class ExplorationAlgo {
 
         turnBotDirection(currentDirection);
     }
-
 
     private boolean takePhoto(int targetRow, int targetCol, String side){
         String coordinate = String.valueOf(targetRow) + "," + String.valueOf(targetCol);
@@ -651,15 +641,6 @@ public class ExplorationAlgo {
 
         if (m != MOVEMENT.CALIBRATE) {
             senseAndRepaint();
-
-            if(imageProcessing){
-                northProcess();
-                eastProcess();
-                southProcess();
-                westProcess();
-            }
-
-            if(pledgeMode) exploredMap.getCell(bot.getRobotPosRow(), bot.getRobotPosCol()).setIsPledged(true);
         }
 
         if (bot.getRealBot() && !calibrationMode) {
@@ -670,7 +651,7 @@ public class ExplorationAlgo {
                 moveBot(MOVEMENT.CALIBRATE);
             } else {
                 lastCalibrate++;
-                if (lastCalibrate >= 5) {
+                if (lastCalibrate >= RobotConstants.CALIBRATE_THRESHOLD) {
                     DIRECTION targetDir = getCalibrationDirection();
                     if (targetDir != null) {
                         lastCalibrate = 0;
@@ -680,6 +661,17 @@ public class ExplorationAlgo {
             }
 
             calibrationMode = false;
+        }
+
+        if(imageProcessing){
+            northProcess();
+            eastProcess();
+            southProcess();
+            westProcess();
+        }
+
+        if(pledgeMode){
+            exploredMap.getCell(bot.getRobotPosRow(), bot.getRobotPosCol()).setIsPledged(true);
         }
     }
 
@@ -691,6 +683,7 @@ public class ExplorationAlgo {
         sensorData = bot.sense(exploredMap, realMap);
 
         exploredMap.repaint();
+
         if(bot.getRealBot() && sendToAndroid) {
             String[] mapStrings = MapDescriptor.generateMapDescriptor(exploredMap);
             String robotRow = String.valueOf(bot.getRobotPosRow());

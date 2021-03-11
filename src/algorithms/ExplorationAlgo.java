@@ -19,16 +19,10 @@ public class ExplorationAlgo {
     private final Map realMap;
     private final Robot bot;
 
-    private boolean imageProcessing;
+    private int areaExplored;
 
     private final int coverageLimit;
     private final int timeLimit;
-
-    private int areaExplored;
-
-    private int[] sensorData;
-    private int foundImage=0;
-    private int takenImage=0;
 
     private long startTime;
     private long endTime;
@@ -36,10 +30,14 @@ public class ExplorationAlgo {
     private int lastCalibrate;
     private boolean calibrationMode;
 
+    private int[] sensorData;
+
+    private boolean imageProcessing;
+    private int foundImage=0;
+    private int takenImage=0;
+
     private boolean pledgeEnabled;
     private boolean pledgeMode;
-
-    private boolean sendToAndroid;
 
     public ExplorationAlgo(Map exploredMap, Map realMap, Robot bot, int coverageLimit, int timeLimit) {
         this.exploredMap = exploredMap;
@@ -48,8 +46,6 @@ public class ExplorationAlgo {
         this.coverageLimit = coverageLimit;
         this.timeLimit = timeLimit;
     }
-
-    public void setSendToAndroid(boolean sendToAndroid){ this.sendToAndroid = sendToAndroid; }
 
     public void setImageProcessing(boolean imageProcessing){
         this.imageProcessing = imageProcessing;
@@ -66,9 +62,7 @@ public class ExplorationAlgo {
         System.out.println("\nExploring...");
 
         if (bot.getRealBot()) {
-            if (sendToAndroid) {
-                CommMgr.getCommMgr().recvMsg();
-            }
+            CommMgr.getCommMgr().recvMsg();
 
             bot.move(MOVEMENT.LEFT);
             CommMgr.getCommMgr().recvMsg();
@@ -199,27 +193,21 @@ public class ExplorationAlgo {
                         break;
                 }
 
-                int[] sensorBackwardData = bot.sense(exploredMap, realMap);
-                while (sensorBackwardData[1]!=-1 & sensorBackwardData[1]<=2 | sensorBackwardData[2]!=-1 & sensorBackwardData[2]<=2 | sensorBackwardData[3]!=-1 & sensorBackwardData[3]<=2){
+                while (sensorData[1]!=-1 & sensorData[1]<=2 | sensorData[2]!=-1 & sensorData[2]<=2 | sensorData[3]!=-1 & sensorData[3]<=2){
                     turnBotDirection(currentDirection);
                     moveBot(MOVEMENT.BACKWARD);
-
                     switch (currentDirection) {
                         case NORTH:
                             turnBotDirection(DIRECTION.WEST);
-                            sensorBackwardData = bot.sense(exploredMap, realMap);
                             break;
                         case EAST:
                             turnBotDirection(DIRECTION.NORTH);
-                            sensorBackwardData = bot.sense(exploredMap, realMap);
                             break;
                         case SOUTH:
                             turnBotDirection(DIRECTION.EAST);
-                            sensorBackwardData = bot.sense(exploredMap, realMap);
                             break;
                         case WEST:
                             turnBotDirection(DIRECTION.SOUTH);
-                            sensorBackwardData = bot.sense(exploredMap, realMap);
                             break;
                     }
                 }
@@ -230,7 +218,6 @@ public class ExplorationAlgo {
 
                 // Then we start making the robot traverse across the perimeter of the obstacle
                 while (flag == false) {
-                    int[] sensorDataPledge = bot.sense(exploredMap, realMap);
                     currentColumn = bot.getRobotPosCol();
                     currentRow = bot.getRobotPosRow();
                     currentDirection = bot.getRobotCurDir();
@@ -241,9 +228,9 @@ public class ExplorationAlgo {
                                 turnBotDirection(DIRECTION.EAST);
                                 moveBot(MOVEMENT.FORWARD);
                                 moveBot(MOVEMENT.FORWARD);
-                            } else if (sensorDataPledge[4] > -1 & lookForward()) {
+                            } else if (sensorData[4] > -1 & lookForward()) {
                                 moveBot(MOVEMENT.FORWARD);
-                            } else if (sensorDataPledge[4] > -1 & lookLeft() & !lookForward()) {
+                            } else if (sensorData[4] > -1 & lookLeft() & !lookForward()) {
                                 turnBotDirection(DIRECTION.WEST);
                             } else {
                                 moveBot(MOVEMENT.FORWARD);
@@ -254,9 +241,9 @@ public class ExplorationAlgo {
                                 turnBotDirection(DIRECTION.SOUTH);
                                 moveBot(MOVEMENT.FORWARD);
                                 moveBot(MOVEMENT.FORWARD);
-                            } else if (sensorDataPledge[4] > -1 & lookForward()) {
+                            } else if (sensorData[4] > -1 & lookForward()) {
                                 moveBot(MOVEMENT.FORWARD);
-                            } else if (sensorDataPledge[4] > -1 & lookLeft() & !lookForward()) {
+                            } else if (sensorData[4] > -1 & lookLeft() & !lookForward()) {
                                 turnBotDirection(DIRECTION.NORTH);
                             } else {
                                 moveBot(MOVEMENT.FORWARD);
@@ -267,9 +254,9 @@ public class ExplorationAlgo {
                                 turnBotDirection(DIRECTION.WEST);
                                 moveBot(MOVEMENT.FORWARD);
                                 moveBot(MOVEMENT.FORWARD);
-                            } else if (sensorDataPledge[4] > -1 & lookForward()) {
+                            } else if (sensorData[4] > -1 & lookForward()) {
                                 moveBot(MOVEMENT.FORWARD);
-                            } else if (sensorDataPledge[4] > -1 & lookLeft() & !lookForward()) {
+                            } else if (sensorData[4] > -1 & lookLeft() & !lookForward()) {
                                 turnBotDirection(DIRECTION.EAST);
                             } else {
                                 moveBot(MOVEMENT.FORWARD);
@@ -280,9 +267,9 @@ public class ExplorationAlgo {
                                 turnBotDirection(DIRECTION.NORTH);
                                 moveBot(MOVEMENT.FORWARD);
                                 moveBot(MOVEMENT.FORWARD);
-                            } else if (sensorDataPledge[4] > -1 & lookForward()) {
+                            } else if (sensorData[4] > -1 & lookForward()) {
                                 moveBot(MOVEMENT.FORWARD);
-                            } else if (sensorDataPledge[4] > -1 & lookLeft() & !lookForward()) {
+                            } else if (sensorData[4] > -1 & lookLeft() & !lookForward()) {
                                 turnBotDirection(DIRECTION.SOUTH);
                             } else {
                                 moveBot(MOVEMENT.FORWARD);
@@ -307,11 +294,8 @@ public class ExplorationAlgo {
                                 break;
                         }
 
-                        int[] sensorEndingPledge = bot.sense(exploredMap, realMap);
-
-                        while (sensorEndingPledge[0]!=-1){
+                        while (sensorData[0]!=-1){
                             moveBot(MOVEMENT.FORWARD);
-                            sensorEndingPledge = bot.sense(exploredMap, realMap);
                         }
                         moveBot(MOVEMENT.FORWARD);
 
@@ -524,13 +508,8 @@ public class ExplorationAlgo {
 
         exploredMap.repaint();
 
-        if(bot.getRealBot() && sendToAndroid) {
-            String[] mapStrings = MapDescriptor.generateMapDescriptor(exploredMap);
-            String robotRow = String.valueOf(bot.getRobotPosRow());
-            String robotCol = String.valueOf(bot.getRobotPosCol());
-            String robotDir = Character.toString(DIRECTION.print(bot.getRobotCurDir()));
-
-            CommMgr.getCommMgr().sendMsg(mapStrings[0] + "," + mapStrings[1] + "," + robotCol + "," + robotRow + "," + robotDir, CommMgr.AN);
+        if(!imageProcessing) {
+            sendToAndroid();
         }
     }
 
@@ -636,7 +615,7 @@ public class ExplorationAlgo {
 
         turnCameraDirection(DIRECTION.NORTH);
 
-        if(takePhoto(cellRow, currentColumn, DIRECTION.SOUTH.toString())) foundImage++;;
+        if(sendToCamera(cellRow, currentColumn, DIRECTION.SOUTH.toString())) foundImage++;;
         takenImage++;
 
         turnBotDirection(currentDirection);
@@ -673,7 +652,7 @@ public class ExplorationAlgo {
 
         turnCameraDirection(DIRECTION.EAST);
 
-        if(takePhoto(currentRow, cellColumn, DIRECTION.WEST.toString())) foundImage++;
+        if(sendToCamera(currentRow, cellColumn, DIRECTION.WEST.toString())) foundImage++;
         takenImage++;
 
         turnBotDirection(currentDirection);
@@ -710,7 +689,7 @@ public class ExplorationAlgo {
 
         turnCameraDirection(DIRECTION.SOUTH);
 
-        if(takePhoto(cellRow, currentColumn, DIRECTION.NORTH.toString())) foundImage++;;
+        if(sendToCamera(cellRow, currentColumn, DIRECTION.NORTH.toString())) foundImage++;;
         takenImage++;
 
         turnBotDirection(currentDirection);
@@ -747,14 +726,29 @@ public class ExplorationAlgo {
 
         turnCameraDirection(DIRECTION.WEST);
 
-        if(takePhoto(currentRow, cellColumn, DIRECTION.EAST.toString())) foundImage++;;
+        if(sendToCamera(currentRow, cellColumn, DIRECTION.EAST.toString())) foundImage++;;
         takenImage++;
 
         turnBotDirection(currentDirection);
     }
 
-    private boolean takePhoto(int targetRow, int targetCol, String side){
-        String coordinate = String.valueOf(targetRow) + "," + String.valueOf(targetCol);
+    private void turnCameraDirection(DIRECTION targetDir) {
+        turnBotDirection(targetDir);
+    }
+
+    private void sendToAndroid(){
+        String[] mapStrings = MapDescriptor.generateMapDescriptor(exploredMap);
+        String robotRow = String.valueOf(bot.getRobotPosRow());
+        String robotCol = String.valueOf(bot.getRobotPosCol());
+        String robotDir = Character.toString(DIRECTION.print(bot.getRobotCurDir()));
+
+        if(bot.getRealBot()){
+            CommMgr.getCommMgr().sendMsg(mapStrings[0] + "," + mapStrings[1] + "," + robotCol + "," + robotRow + "," + robotDir, CommMgr.AN);
+        }
+    }
+
+    private boolean sendToCamera(int targetRow, int targetCol, String side){
+        String coordinate = targetRow + "," + targetCol;
 
         if(bot.getRealBot()){
             CommMgr.getCommMgr().sendMsg(coordinate, CommMgr.IR);
@@ -763,12 +757,5 @@ public class ExplorationAlgo {
         else System.out.println("Take Photo: " + coordinate + " ("+ side +")");
 
         return false;
-    }
-
-    /**
-     * Turns the front camera to the required direction.
-     */
-    private void turnCameraDirection(DIRECTION targetDir) {
-        turnBotDirection(targetDir);
     }
 }

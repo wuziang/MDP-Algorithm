@@ -38,11 +38,8 @@ public class MazeRunner {
     private static int waypointRow = 12;
     private static int waypointCol = 9;
 
-    private static final boolean connectedToAndroid = false;
     private static final boolean explorationMode = false;
-    private static boolean pledgeEnabled = false;
-
-
+    private static final boolean pledgeEnabled = false;
 
     /**
      * Initialises the different maps and displays the application.
@@ -171,12 +168,10 @@ public class MazeRunner {
         protected Integer doInBackground() throws Exception {
             bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
 
-            if (connectedToAndroid) {
-                String msg = comm.recvMsg();
-                if(!msg.isEmpty()){
-                    waypointRow =Integer.parseInt(msg.substring(0, msg.indexOf(',')));
-                    waypointCol =Integer.parseInt(msg.substring(msg.indexOf(',')+1));
-                }
+            String msg = comm.recvMsg();
+            if(!msg.isEmpty()){
+                waypointRow =Integer.parseInt(msg.substring(0, msg.indexOf(',')));
+                waypointCol =Integer.parseInt(msg.substring(msg.indexOf(',')+1));
             }
 
             realMap.setWaypoint(waypointRow, waypointCol);
@@ -210,7 +205,7 @@ public class MazeRunner {
 
             bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
             while(bot.getRobotPosRow()!=RobotConstants.GOAL_ROW || bot.getRobotPosCol()!=RobotConstants.GOAL_COL){
-                String msg = comm.recvMsg();
+                msg = comm.recvMsg();
                 RobotConstants.MOVEMENT x;
                 int moveCount = 1;
 
@@ -245,7 +240,6 @@ public class MazeRunner {
             ExplorationAlgo exploration;
             exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
-            exploration.setSendToAndroid(connectedToAndroid);
             exploration.setPledgeEnabled(pledgeEnabled);
 
             exploration.runExploration();
@@ -262,7 +256,6 @@ public class MazeRunner {
             ExplorationAlgo image;
             image = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
-            image.setSendToAndroid(connectedToAndroid);
             image.setPledgeEnabled(pledgeEnabled);
             image.setImageProcessing(true);
 

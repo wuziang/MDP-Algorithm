@@ -165,7 +165,7 @@ public class ExplorationAlgo {
         if (bot.getRobotPosCol() != 1 & bot.getRobotPosRow() != 1) {
             int currentColumn = 0;
             int currentRow = 0;
-            DIRECTION currentDirection = bot.getRobotCurDir();
+            DIRECTION startingDirection = bot.getRobotCurDir();
 
             if (sensorData[0] == 1){
                 int startColumn = bot.getRobotPosCol();
@@ -178,7 +178,7 @@ public class ExplorationAlgo {
                 moveBot(MOVEMENT.BACKWARD);
 
                 // For increase if the robot is still stuck
-                switch (currentDirection) {
+                switch (startingDirection) {
                     case NORTH:
                         turnBotDirection(DIRECTION.WEST);
                         break;
@@ -194,9 +194,9 @@ public class ExplorationAlgo {
                 }
 
                 while (sensorData[1]!=-1 & sensorData[1]<=2 | sensorData[2]!=-1 & sensorData[2]<=2 | sensorData[3]!=-1 & sensorData[3]<=2){
-                    turnBotDirection(currentDirection);
+                    turnBotDirection(startingDirection);
                     moveBot(MOVEMENT.BACKWARD);
-                    switch (currentDirection) {
+                    switch (startingDirection) {
                         case NORTH:
                             turnBotDirection(DIRECTION.WEST);
                             break;
@@ -220,64 +220,123 @@ public class ExplorationAlgo {
                 while (flag == false) {
                     currentColumn = bot.getRobotPosCol();
                     currentRow = bot.getRobotPosRow();
-                    currentDirection = bot.getRobotCurDir();
+                    DIRECTION currentDirection = bot.getRobotCurDir();
 
                     switch (currentDirection) {
                         case NORTH:
                             if (lookRight()) {
                                 turnBotDirection(DIRECTION.EAST);
                                 moveBot(MOVEMENT.FORWARD);
-                                moveBot(MOVEMENT.FORWARD);
                             } else if (sensorData[4] > -1 & lookForward()) {
                                 moveBot(MOVEMENT.FORWARD);
                             } else if (sensorData[4] > -1 & lookLeft() & !lookForward()) {
                                 turnBotDirection(DIRECTION.WEST);
                             } else {
-                                moveBot(MOVEMENT.FORWARD);
+                                if (currentColumn!=1 & currentColumn!=13){
+                                    moveBot(MOVEMENT.FORWARD);
+                                }
+                                else{
+                                    if (!lookForward()){
+                                        flag = true;
+                                        break;
+                                    }
+                                    moveBot(MOVEMENT.FORWARD);
+                                }
                             }
                             break;
                         case EAST:
                             if (lookRight()) {
                                 turnBotDirection(DIRECTION.SOUTH);
                                 moveBot(MOVEMENT.FORWARD);
-                                moveBot(MOVEMENT.FORWARD);
                             } else if (sensorData[4] > -1 & lookForward()) {
                                 moveBot(MOVEMENT.FORWARD);
-                            } else if (sensorData[4] > -1 & lookLeft() & !lookForward()) {
+                            } else if (sensorData[4] > -1 & lookLeft() & !lookForward() & currentColumn!=13) {
                                 turnBotDirection(DIRECTION.NORTH);
                             } else {
-                                moveBot(MOVEMENT.FORWARD);
+                                if (currentColumn!=1 & currentColumn!=13){
+                                    moveBot(MOVEMENT.FORWARD);
+                                }
+                                else{
+                                    if (!lookForward()){
+                                        flag = true;
+                                        break;
+                                    }
+                                    moveBot(MOVEMENT.FORWARD);
+                                }
                             }
                             break;
                         case SOUTH:
                             if (lookRight()) {
                                 turnBotDirection(DIRECTION.WEST);
                                 moveBot(MOVEMENT.FORWARD);
-                                moveBot(MOVEMENT.FORWARD);
                             } else if (sensorData[4] > -1 & lookForward()) {
                                 moveBot(MOVEMENT.FORWARD);
                             } else if (sensorData[4] > -1 & lookLeft() & !lookForward()) {
                                 turnBotDirection(DIRECTION.EAST);
                             } else {
-                                moveBot(MOVEMENT.FORWARD);
+                                if (currentColumn!=1 & currentColumn!=13){
+                                    moveBot(MOVEMENT.FORWARD);
+                                }
+                                else{
+                                    if (!lookForward()){
+                                        flag = true;
+                                        break;
+                                    }
+                                    moveBot(MOVEMENT.FORWARD);
+                                }
                             }
                             break;
                         case WEST:
                             if (lookRight()) {
                                 turnBotDirection(DIRECTION.NORTH);
                                 moveBot(MOVEMENT.FORWARD);
-                                moveBot(MOVEMENT.FORWARD);
                             } else if (sensorData[4] > -1 & lookForward()) {
                                 moveBot(MOVEMENT.FORWARD);
-                            } else if (sensorData[4] > -1 & lookLeft() & !lookForward()) {
+                            } else if (sensorData[4] > -1 & lookLeft() & !lookForward() & currentColumn!=1){
                                 turnBotDirection(DIRECTION.SOUTH);
                             } else {
-                                moveBot(MOVEMENT.FORWARD);
+                                if (currentColumn!=1 & currentColumn!=13){
+                                    moveBot(MOVEMENT.FORWARD);
+                                }
+                                else{
+                                    if (!lookForward()){
+                                        flag = true;
+                                        break;
+                                    }
+                                    moveBot(MOVEMENT.FORWARD);
+                                }
                             }
                             break;
                     }
 
-                    if (currentColumn == startColumn & currentRow == startRow) {
+                    if (currentColumn!=1 | currentColumn!=13){
+                        if (currentColumn == startColumn & currentRow == startRow) {
+                            // Make Robot face the front once again
+                            switch (currentDirection) {
+                                case NORTH:
+                                    turnBotDirection(DIRECTION.SOUTH);
+                                    break;
+                                case EAST:
+                                    turnBotDirection(DIRECTION.WEST);
+                                    break;
+                                case SOUTH:
+                                    turnBotDirection(DIRECTION.NORTH);
+                                    break;
+                                case WEST:
+                                    turnBotDirection(DIRECTION.EAST);
+                                    break;
+                            }
+
+                            while (sensorData[0]!=-1){
+                                moveBot(MOVEMENT.FORWARD);
+                            }
+                            moveBot(MOVEMENT.FORWARD);
+
+                            flag = true;
+                        }
+                    }
+
+                    if ((currentColumn==1 | currentColumn==13) & currentColumn == startColumn & !lookForward()){
                         // Make Robot face the front once again
                         switch (currentDirection) {
                             case NORTH:
@@ -292,13 +351,7 @@ public class ExplorationAlgo {
                             case WEST:
                                 turnBotDirection(DIRECTION.EAST);
                                 break;
-                        }
-
-                        while (sensorData[0]!=-1){
-                            moveBot(MOVEMENT.FORWARD);
-                        }
-                        moveBot(MOVEMENT.FORWARD);
-
+                            }
                         flag = true;
                     }
                 }

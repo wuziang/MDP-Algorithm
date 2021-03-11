@@ -34,9 +34,9 @@ public class MazeRunner {
 
     private static final CommMgr comm = CommMgr.getCommMgr();
 
-    private static final String filename = "MD1";
-    private static int waypointRow = 12;
-    private static int waypointCol = 9;
+    private static final String filename = "MD3";
+    private static int waypointRow = 3;
+    private static int waypointCol = 13;
 
     private static final boolean explorationMode = false;
     private static final boolean pledgeEnabled = false;
@@ -167,6 +167,7 @@ public class MazeRunner {
     private static class FastestPath extends SwingWorker<Integer, String> {
         protected Integer doInBackground() throws Exception {
             bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
+            bot.setRobotDir(RobotConstants.DIRECTION.NORTH);
 
             String msg = comm.recvMsg();
             if(!msg.isEmpty()){

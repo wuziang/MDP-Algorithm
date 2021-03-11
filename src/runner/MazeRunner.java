@@ -34,9 +34,9 @@ public class MazeRunner {
 
     private static final CommMgr comm = CommMgr.getCommMgr();
 
-    private static final String filename = "MD3";
-    private static int waypointRow = 3;
-    private static int waypointCol = 13;
+    private static final String filename = "MD2";
+    private static int waypointRow = 4;
+    private static int waypointCol = 12;
 
     private static final boolean explorationMode = false;
     private static final boolean pledgeEnabled = false;
@@ -189,12 +189,14 @@ public class MazeRunner {
             String output2 = fastestPathToGoal.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
 
             String output;
-            if(output1.charAt(output1.length()-1)<='8'
-                    && output1.charAt(output1.length()-1)>='1'
-                    && output2.charAt(0)<='8'
-                    && output2.charAt(0)>='1'){
+            char output1End = output1.charAt(output1.length()-1);
+            char output2Begin = output2.charAt(0);
+
+            if(output1End<='8' && output1End>='1' && output2Begin<='8' && output2Begin>='1'
+                    && output1End+output2Begin-'0'<='8' && output1End+output2Begin-'0'>='1'){
+
                 output = output1.substring(0, output1.length()-1)
-                        + Character.toString(output1.charAt(output1.length()-1)+output2.charAt(0)-'0')
+                        + Character.toString(output1End+output2Begin-'0')
                         + output2.substring(1);
             }
             else{
@@ -204,30 +206,31 @@ public class MazeRunner {
             comm.sendMsg(output, CommMgr.AR);
             comm.sendMsg("FP_START", CommMgr.AN);
 
-            bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
-            while(bot.getRobotPosRow()!=RobotConstants.GOAL_ROW || bot.getRobotPosCol()!=RobotConstants.GOAL_COL){
-                msg = comm.recvMsg();
-                RobotConstants.MOVEMENT x;
-                int moveCount = 1;
-
-                switch (msg.charAt(0)) {
-                    case 'L':
-                        x = RobotConstants.MOVEMENT.LEFT;
-                        break;
-                    case 'R':
-                        x = RobotConstants.MOVEMENT.RIGHT;
-                        break;
-                    default:
-                        x = RobotConstants.MOVEMENT.FORWARD;
-                        moveCount = Integer.parseInt(msg);
-                        break;
-                }
-
-                for(int i=0;i<moveCount;i++){
-                    bot.move(x);
-                }
-                realMap.repaint();
-            }
+//            bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
+//            bot.setRobotDir(RobotConstants.DIRECTION.NORTH);
+//            while(bot.getRobotPosRow()!=RobotConstants.GOAL_ROW || bot.getRobotPosCol()!=RobotConstants.GOAL_COL){
+//                msg = comm.recvMsg();
+//                RobotConstants.MOVEMENT x;
+//                int moveCount = 1;
+//
+//                switch (msg.charAt(0)) {
+//                    case 'L':
+//                        x = RobotConstants.MOVEMENT.LEFT;
+//                        break;
+//                    case 'R':
+//                        x = RobotConstants.MOVEMENT.RIGHT;
+//                        break;
+//                    default:
+//                        x = RobotConstants.MOVEMENT.FORWARD;
+//                        moveCount = Integer.parseInt(msg);
+//                        break;
+//                }
+//
+//                for(int i=0;i<moveCount;i++){
+//                    bot.move(x);
+//                }
+//                realMap.repaint();
+//            }
 
             return 111;
         }

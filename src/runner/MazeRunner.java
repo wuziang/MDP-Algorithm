@@ -34,9 +34,9 @@ public class MazeRunner {
 
     private static final CommMgr comm = CommMgr.getCommMgr();
 
-    private static final String filename = "MD2";
-    private static int waypointRow = 4;
-    private static int waypointCol = 12;
+    private static final String filename = "MD6";
+    private static int waypointRow = 1;
+    private static int waypointCol = 1;
 
     private static final boolean explorationMode = false;
     private static final boolean pledgeEnabled = false;
@@ -63,7 +63,7 @@ public class MazeRunner {
     private static void displayEverything() {
         // Initialise main frame for display
         _appFrame = new JFrame();
-        _appFrame.setTitle("Real-Time Display");
+        _appFrame.setTitle("Runner");
         _appFrame.setSize(new Dimension(700, 700));
         _appFrame.setResizable(false);
 
@@ -193,7 +193,7 @@ public class MazeRunner {
             char output2Begin = output2.charAt(0);
 
             if(output1End<='8' && output1End>='1' && output2Begin<='8' && output2Begin>='1'
-                    && output1End+output2Begin-'0'<='8' && output1End+output2Begin-'0'>='1'){
+                    && output1End+output2Begin-'0'<='9' && output1End+output2Begin-'0'>='1'){
 
                 output = output1.substring(0, output1.length()-1)
                         + Character.toString(output1End+output2Begin-'0')
@@ -205,32 +205,6 @@ public class MazeRunner {
 
             comm.sendMsg(output, CommMgr.AR);
             comm.sendMsg("FP_START", CommMgr.AN);
-
-//            bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
-//            bot.setRobotDir(RobotConstants.DIRECTION.NORTH);
-//            while(bot.getRobotPosRow()!=RobotConstants.GOAL_ROW || bot.getRobotPosCol()!=RobotConstants.GOAL_COL){
-//                msg = comm.recvMsg();
-//                RobotConstants.MOVEMENT x;
-//                int moveCount = 1;
-//
-//                switch (msg.charAt(0)) {
-//                    case 'L':
-//                        x = RobotConstants.MOVEMENT.LEFT;
-//                        break;
-//                    case 'R':
-//                        x = RobotConstants.MOVEMENT.RIGHT;
-//                        break;
-//                    default:
-//                        x = RobotConstants.MOVEMENT.FORWARD;
-//                        moveCount = Integer.parseInt(msg);
-//                        break;
-//                }
-//
-//                for(int i=0;i<moveCount;i++){
-//                    bot.move(x);
-//                }
-//                realMap.repaint();
-//            }
 
             return 111;
         }

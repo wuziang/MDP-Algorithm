@@ -30,10 +30,10 @@ public class Simulator {
     private static Map exploredMap = null;          // exploration map
 
     private static boolean loadedMap = false;
-    private static String filename = "MD3";
+    private static String filename = "MD6";
 
-    private static int waypointRow = 3;
-    private static int waypointCol = 13;
+    private static int waypointRow = 7;
+    private static int waypointCol = 8;
 
     private static int timeLimit = 3600;            // time limit
     private static int coverageLimit = 300;         // coverage limit
@@ -182,6 +182,8 @@ public class Simulator {
         class FastestPath extends SwingWorker<Integer, String> {
             protected Integer doInBackground() throws Exception {
                 bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
+                bot.setRobotDir(RobotConstants.DIRECTION.NORTH);
+
                 realMap.repaint();
 
                 FastestPathAlgo fastestPathToWayPoint;

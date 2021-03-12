@@ -105,6 +105,7 @@ public class ExplorationAlgo {
             areaExplored = calculateAreaExplored();
             System.out.printf("\nExploration Coverage %.2f%%\n", (areaExplored / 300.0) * 100.0);
 
+            exploredMap.guessUnexploredCells();
             String[] mapStrings = MapDescriptor.generateMapDescriptor(exploredMap);
             System.out.println("P1: " + mapStrings[0]);
             System.out.println("P2: " + mapStrings[1]);

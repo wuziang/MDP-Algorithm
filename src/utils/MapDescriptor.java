@@ -4,6 +4,7 @@ import map.Map;
 import map.MapConstants;
 
 import java.io.*;
+import java.util.Locale;
 
 /**
  * Helper methods for reading & generating map strings.
@@ -57,11 +58,11 @@ public class MapDescriptor {
         try {
             InputStream inputStream = new FileInputStream("maps/" + filename + ".txt");
             BufferedReader buf = new BufferedReader(new InputStreamReader(inputStream));
+            buf.readLine();
 
-            String p1 = buf.readLine();
             String p2 = buf.readLine();
-
             String bin = hexToBin(p2);
+
             int binPtr = 0;
             for (int row = 0; row < MapConstants.MAP_ROWS; row++) {
                 for (int col = 0; col < MapConstants.MAP_COLS; col++) {
@@ -83,7 +84,7 @@ public class MapDescriptor {
 
         int dec = Integer.parseInt(bin,2);
 
-        return Integer.toHexString(dec);
+        return Integer.toHexString(dec).toUpperCase();
     }
 
     /**
@@ -115,6 +116,7 @@ public class MapDescriptor {
     /**
      * Generates Part 1 & Part 2 map descriptor strings from the passed Map object.
      */
+
     public static String[] generateMapDescriptor(Map map) {
         String[] ret = new String[2];
 
@@ -147,15 +149,24 @@ public class MapDescriptor {
                         Part2_bin.append("1");
                     else
                         Part2_bin.append("0");
+                }
 
-                    if (Part2_bin.length() == 4) {
-                        Part2.append(binToHex(Part2_bin.toString()));
-                        Part2_bin.setLength(0);
-                    }
+                if (Part2_bin.length() == 4) {
+                    Part2.append(binToHex(Part2_bin.toString()));
+                    Part2_bin.setLength(0);
                 }
             }
         }
-        if (Part2_bin.length() > 0) Part2.append(binToHex(Part2_bin.toString()));
+
+        if (Part2_bin.length() > 0){
+            while(Part2_bin.length()<4) Part2_bin.append("0");
+            Part2.append(binToHex(Part2_bin.toString()));
+        }
+
+        if(Part2.length()%2!=0){
+            Part2.append("0");
+        }
+
         ret[1] = Part2.toString();
 
         return ret;

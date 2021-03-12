@@ -62,16 +62,14 @@ public class ExplorationAlgo {
         System.out.println("\nExploring...");
 
         if (bot.getRealBot()) {
-            // TODO:: Receive start from Android
 //            CommMgr.getCommMgr().recvMsg();
-
             CommMgr.getCommMgr().sendMsg("S", CommMgr.AR);
         }
 
         startTime = System.currentTimeMillis();
         endTime = startTime + (timeLimit * 1000);
 
-        senseAndUpdate();
+        senseAndRepaint();
         explorationLoop(bot.getRobotPosRow(), bot.getRobotPosCol());
     }
 
@@ -99,13 +97,10 @@ public class ExplorationAlgo {
 
         } while (areaExplored <= coverageLimit && System.currentTimeMillis() <= endTime);
 
-        exploredMap.repaint();
-
         if(!imageProcessing) {
             areaExplored = calculateAreaExplored();
             System.out.printf("\nExploration Coverage %.2f%%\n", (areaExplored / 300.0) * 100.0);
 
-            exploredMap.guessUnexploredCells();
             String[] mapStrings = MapDescriptor.generateMapDescriptor(exploredMap);
             System.out.println("P1: " + mapStrings[0]);
             System.out.println("P2: " + mapStrings[1]);
@@ -501,33 +496,10 @@ public class ExplorationAlgo {
      * Moves the bot, repaints the map and calls senseAndRepaint().
      */
     private void moveBot(MOVEMENT m) {
-        exploredMap.repaint();
         bot.move(m);
 
         if (m != MOVEMENT.CALIBRATE) {
-            senseAndUpdate();
-        }
-
-        if (bot.getRealBot() && !calibrationMode) {
-            calibrationMode = true;
-            bot.setInCalibration(true);
-
-            if (canCalibrateOnTheSpot(bot.getRobotCurDir())) {
-                lastCalibrate = 0;
-                moveBot(MOVEMENT.CALIBRATE);
-            } else {
-                lastCalibrate++;
-                if (lastCalibrate >= RobotConstants.CALIBRATE_THRESHOLD) {
-                    DIRECTION targetDir = getCalibrationDirection();
-                    if (targetDir != null) {
-                        lastCalibrate = 0;
-                        calibrateBot(targetDir);
-                    }
-                }
-            }
-
-            calibrationMode = false;
-            bot.setInCalibration(false);
+            senseAndRepaint();
         }
 
         if(imageProcessing){
@@ -545,13 +517,15 @@ public class ExplorationAlgo {
     /**
      * Sets the bot's sensors, processes the sensor data and repaints the map.
      */
-    private void senseAndUpdate() {
+    private void senseAndRepaint() {
         bot.setSensors();
         sensorData = bot.sense(exploredMap, realMap);
 
         if(!imageProcessing) {
             sendToAndroid();
         }
+
+        exploredMap.repaint();
     }
 
     /**

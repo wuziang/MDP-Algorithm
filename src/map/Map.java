@@ -159,17 +159,6 @@ public class Map extends JPanel {
         this.waypointCol=waypointCol;
     }
 
-    public void guessUnexploredCells(){
-        for (int row = 0; row < grid.length; row++) {
-            for (int col = 0; col < grid[0].length; col++) {
-                if(!grid[row][col].getIsExplored()){
-                    grid[row][col].setIsExplored(true);
-                    grid[row][col].setIsObstacle(true);
-                }
-            }
-        }
-    }
-
     /**
      * Overrides JComponent's paintComponent() method. It creates a two-dimensional array of _DisplayCell objects
      * to store the current map state. Then, it paints square cells for the grid with the appropriate colors as

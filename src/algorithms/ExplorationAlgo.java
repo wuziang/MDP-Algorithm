@@ -549,7 +549,7 @@ public class ExplorationAlgo {
         sensorData = bot.sense(exploredMap, realMap);
 
         if(!imageProcessing) {
-            // sendToAndroid();
+            sendToAndroid();
         }
     }
 

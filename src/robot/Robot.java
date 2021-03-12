@@ -287,14 +287,22 @@ public class Robot {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                System.out.println("Expected: "+Arrays.toString(result));
-
-                SRLeft.senseReal(explorationMap, result[0]);
-                SRFrontLeft.senseReal(explorationMap, result[1]);
-                SRFrontCenter.senseReal(explorationMap, result[2]);
-                SRFrontRight.senseReal(explorationMap, result[3]);
-                SRRight.senseReal(explorationMap, result[4]);
             }
+            else{
+                result[0] = SRLeft.sense(explorationMap, realMap);
+                result[1] = SRFrontLeft.sense(explorationMap, realMap);
+                result[2] = SRFrontCenter.sense(explorationMap, realMap);
+                result[3] = SRFrontRight.sense(explorationMap, realMap);
+                result[4] = SRRight.sense(explorationMap, realMap);
+            }
+
+            System.out.println("Expected: "+Arrays.toString(result));
+
+            SRLeft.senseReal(explorationMap, result[0]);
+            SRFrontLeft.senseReal(explorationMap, result[1]);
+            SRFrontCenter.senseReal(explorationMap, result[2]);
+            SRFrontRight.senseReal(explorationMap, result[3]);
+            SRRight.senseReal(explorationMap, result[4]);
         }
 
         return result;

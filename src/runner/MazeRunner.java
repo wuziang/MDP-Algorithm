@@ -238,7 +238,6 @@ public class MazeRunner {
             image.setImageProcessing(true);
 
             image.runExploration();
-            generateMapDescriptor(exploredMap);
 
             return 333;
         }

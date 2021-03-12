@@ -34,11 +34,11 @@ public class MazeRunner {
 
     private static final CommMgr comm = CommMgr.getCommMgr();
 
-    private static final String filename = "MD6";
+    private static final String filename = "Week8";
     private static int waypointRow = 1;
     private static int waypointCol = 1;
 
-    private static final boolean explorationMode = false;
+    private static final boolean explorationMode = true;
     private static final boolean pledgeEnabled = false;
 
     /**

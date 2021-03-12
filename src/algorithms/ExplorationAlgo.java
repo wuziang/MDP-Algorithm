@@ -62,22 +62,8 @@ public class ExplorationAlgo {
         System.out.println("\nExploring...");
 
         if (bot.getRealBot()) {
-            CommMgr.getCommMgr().recvMsg();
-
-            bot.move(MOVEMENT.LEFT);
-            CommMgr.getCommMgr().recvMsg();
-            bot.move(MOVEMENT.CALIBRATE);
-
-            bot.move(MOVEMENT.LEFT);
-            CommMgr.getCommMgr().recvMsg();
-            bot.move(MOVEMENT.CALIBRATE);
-
-            bot.move(MOVEMENT.RIGHT);
-            CommMgr.getCommMgr().recvMsg();
-            bot.move(MOVEMENT.CALIBRATE);
-
-            bot.move(MOVEMENT.RIGHT);
-            CommMgr.getCommMgr().recvMsg();
+            // TODO:: Receive start from Android
+//            CommMgr.getCommMgr().recvMsg();
 
             CommMgr.getCommMgr().sendMsg("S", CommMgr.AR);
         }
@@ -85,9 +71,7 @@ public class ExplorationAlgo {
         startTime = System.currentTimeMillis();
         endTime = startTime + (timeLimit * 1000);
 
-        senseAndRepaint();
-
-        areaExplored = calculateAreaExplored();
+        senseAndUpdate();
         explorationLoop(bot.getRobotPosRow(), bot.getRobotPosCol());
     }
 
@@ -114,6 +98,8 @@ public class ExplorationAlgo {
             }
 
         } while (areaExplored <= coverageLimit && System.currentTimeMillis() <= endTime);
+
+        exploredMap.repaint();
 
         if(!imageProcessing) {
             areaExplored = calculateAreaExplored();
@@ -514,14 +500,16 @@ public class ExplorationAlgo {
      * Moves the bot, repaints the map and calls senseAndRepaint().
      */
     private void moveBot(MOVEMENT m) {
+        exploredMap.repaint();
         bot.move(m);
 
         if (m != MOVEMENT.CALIBRATE) {
-            senseAndRepaint();
+            senseAndUpdate();
         }
 
         if (bot.getRealBot() && !calibrationMode) {
             calibrationMode = true;
+            bot.setInCalibration(true);
 
             if (canCalibrateOnTheSpot(bot.getRobotCurDir())) {
                 lastCalibrate = 0;
@@ -538,13 +526,14 @@ public class ExplorationAlgo {
             }
 
             calibrationMode = false;
+            bot.setInCalibration(false);
         }
 
         if(imageProcessing){
-            northProcess();
-            eastProcess();
-            southProcess();
-            westProcess();
+            northImage();
+            eastImage();
+            southImage();
+            westImage();
         }
 
         if(pledgeMode){
@@ -555,14 +544,12 @@ public class ExplorationAlgo {
     /**
      * Sets the bot's sensors, processes the sensor data and repaints the map.
      */
-    private void senseAndRepaint() {
+    private void senseAndUpdate() {
         bot.setSensors();
         sensorData = bot.sense(exploredMap, realMap);
 
-        exploredMap.repaint();
-
         if(!imageProcessing) {
-            sendToAndroid();
+            // sendToAndroid();
         }
     }
 
@@ -637,7 +624,7 @@ public class ExplorationAlgo {
         }
     }
 
-    private void northProcess(){
+    private void northImage(){
         DIRECTION currentDirection = bot.getRobotCurDir();
 
         // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
@@ -674,7 +661,7 @@ public class ExplorationAlgo {
         turnBotDirection(currentDirection);
     }
 
-    private void eastProcess(){
+    private void eastImage(){
         DIRECTION currentDirection = bot.getRobotCurDir();
 
         // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
@@ -711,7 +698,7 @@ public class ExplorationAlgo {
         turnBotDirection(currentDirection);
     }
 
-    private void southProcess(){
+    private void southImage(){
         DIRECTION currentDirection = bot.getRobotCurDir();
 
         // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)
@@ -748,7 +735,7 @@ public class ExplorationAlgo {
         turnBotDirection(currentDirection);
     }
 
-    private void westProcess(){
+    private void westImage(){
         DIRECTION currentDirection = bot.getRobotCurDir();
 
         // We need to consider the possibility the robot is along the wall (so we can ignore the wall as an obstacle)

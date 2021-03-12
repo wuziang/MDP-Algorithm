@@ -1,13 +1,14 @@
 package robot;
 
 import map.Map;
-import map.MapConstants;
 import robot.RobotConstants.DIRECTION;
 import robot.RobotConstants.MOVEMENT;
 import utils.CommMgr;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+
+import java.io.*;
 
 // @formatter:off
 /**
@@ -39,6 +40,10 @@ public class Robot {
     private final Sensor SRRight;           // east-facing right SR
 
     private final boolean realBot;
+    private boolean inCalibration;
+
+    private InputStream inputStream;
+    private BufferedReader buf;
 
     public Robot(int row, int col, boolean realBot) {
         posRow = row;
@@ -53,6 +58,14 @@ public class Robot {
         SRFrontRight = new Sensor(RobotConstants.SENSOR_SHORT_RANGE_L, RobotConstants.SENSOR_SHORT_RANGE_H, this.posRow + 1, this.posCol + 1, this.robotDir, "SRFR");
         SRRight = new Sensor(RobotConstants.SENSOR_SHORT_RANGE_L, RobotConstants.SENSOR_SHORT_RANGE_H, this.posRow + 1, this.posCol + 1, findNewDirection(MOVEMENT.RIGHT), "SRR");
         SRLeft = new Sensor(RobotConstants.SENSOR_SHORT_RANGE_L, RobotConstants.SENSOR_SHORT_RANGE_H, this.posRow, this.posCol - 1, findNewDirection(MOVEMENT.LEFT), "SRL");
+
+        // TODO:: Read expected sensor data
+        try{
+            inputStream = new FileInputStream("maps/TestSensor.txt");
+            buf = new BufferedReader(new InputStreamReader(inputStream));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setRobotPos(int row, int col) {
@@ -83,6 +96,8 @@ public class Robot {
     public boolean getRealBot() {
         return realBot;
     }
+
+    public void setInCalibration(boolean inCalibration) { this.inCalibration=inCalibration; }
 
     /**
      * Takes in a MOVEMENT and moves the robot accordingly by changing its position and direction. Sends the movement
@@ -241,6 +256,8 @@ public class Robot {
             result[2] = SRFrontCenter.sense(explorationMap, realMap);
             result[3] = SRFrontRight.sense(explorationMap, realMap);
             result[4] = SRRight.sense(explorationMap, realMap);
+
+            System.out.println(Arrays.toString(result));
         } else {
             // Input in the form of xx, xx, xx, xx, xx, xx
             String msg = CommMgr.getCommMgr().recvMsg();
@@ -256,13 +273,28 @@ public class Robot {
                     result[i] = (int) distance/10+1;
             }
 
-            SRLeft.senseReal(explorationMap, result[0]);
-            SRFrontLeft.senseReal(explorationMap, result[1]);
-            SRFrontCenter.senseReal(explorationMap, result[2]);
-            SRFrontRight.senseReal(explorationMap, result[3]);
-            SRRight.senseReal(explorationMap, result[4]);
+            System.out.println("Received: "+Arrays.toString(result));
 
-            System.out.println("\n"+Arrays.toString(result));
+            // TODO:: Use expected sensor data
+            if(!inCalibration){
+                try{
+                    String line = buf.readLine();
+                    msgArr = line.substring(1, line.length()-1).split(", ");
+
+                    for (int i=0; i<5; i++){
+                        result[i] = Integer.parseInt(msgArr[i]);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Expected: "+Arrays.toString(result));
+
+                SRLeft.senseReal(explorationMap, result[0]);
+                SRFrontLeft.senseReal(explorationMap, result[1]);
+                SRFrontCenter.senseReal(explorationMap, result[2]);
+                SRFrontRight.senseReal(explorationMap, result[3]);
+                SRRight.senseReal(explorationMap, result[4]);
+            }
         }
 
         return result;

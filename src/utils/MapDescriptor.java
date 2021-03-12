@@ -18,7 +18,7 @@ public class MapDescriptor {
      * identify if a cell is an obstacle.
      */
     public static void loadMap(Map map, String filename){
-        if(filename.length()==2){
+        if(filename=="Test"){
             loadMapFromDisk(map, filename);
         }
         else{

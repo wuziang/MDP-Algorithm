@@ -84,7 +84,7 @@ public class CommMgr {
             String outputMsg;
             if (msg == null) {
                 outputMsg = msgType;
-            } else if (msgType.equals(AN) || msgType.equals(AR) || msgType.equals(AR)) {
+            } else if (msgType.equals(AN) || msgType.equals(AR) || msgType.equals(IR)) {
                 outputMsg = msgType + "," + msg + "\n";
             } else{
                 outputMsg = msg + "\n";

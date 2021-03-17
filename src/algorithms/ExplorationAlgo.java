@@ -27,13 +27,9 @@ public class ExplorationAlgo {
     private long startTime;
     private long endTime;
 
-    private int lastCalibrate;
-    private boolean calibrationMode;
-
     private int[] sensorData;
 
     private boolean imageProcessing;
-    private int foundImage=0;
     private int takenImage=0;
 
     private boolean pledgeEnabled;
@@ -108,10 +104,6 @@ public class ExplorationAlgo {
         else {
             double sides = calculateSidesPossible();
             System.out.printf("\nImage Processing Coverage %.2f%%", (takenImage / sides) * 100.0);
-
-            if (bot.getRealBot()) {
-                System.out.printf("\nImages Found: %d\n", foundImage);
-            }
         }
     }
 
@@ -630,7 +622,7 @@ public class ExplorationAlgo {
 
         turnCameraDirection(DIRECTION.NORTH);
 
-        if(sendToCamera(cellRow, currentColumn, DIRECTION.SOUTH.toString())) foundImage++;;
+        sendToCamera(cellRow, currentColumn, DIRECTION.SOUTH.toString());
         takenImage++;
 
         turnBotDirection(currentDirection);
@@ -667,7 +659,7 @@ public class ExplorationAlgo {
 
         turnCameraDirection(DIRECTION.EAST);
 
-        if(sendToCamera(currentRow, cellColumn, DIRECTION.WEST.toString())) foundImage++;
+        sendToCamera(currentRow, cellColumn, DIRECTION.WEST.toString());
         takenImage++;
 
         turnBotDirection(currentDirection);
@@ -704,7 +696,7 @@ public class ExplorationAlgo {
 
         turnCameraDirection(DIRECTION.SOUTH);
 
-        if(sendToCamera(cellRow, currentColumn, DIRECTION.NORTH.toString())) foundImage++;;
+        sendToCamera(cellRow, currentColumn, DIRECTION.NORTH.toString());
         takenImage++;
 
         turnBotDirection(currentDirection);
@@ -741,7 +733,7 @@ public class ExplorationAlgo {
 
         turnCameraDirection(DIRECTION.WEST);
 
-        if(sendToCamera(currentRow, cellColumn, DIRECTION.EAST.toString())) foundImage++;;
+        sendToCamera(currentRow, cellColumn, DIRECTION.EAST.toString());
         takenImage++;
 
         turnBotDirection(currentDirection);
@@ -762,7 +754,7 @@ public class ExplorationAlgo {
         }
     }
 
-    private boolean sendToCamera(int targetRow, int targetCol, String side){
+    private void sendToCamera(int targetRow, int targetCol, String side){
         String coordinate = targetRow + "," + targetCol;
 
         if(bot.getRealBot()){
@@ -770,7 +762,5 @@ public class ExplorationAlgo {
             CommMgr.getCommMgr().recvMsg();
         }
         else System.out.println("Take Photo: " + coordinate + " ("+ side +")");
-
-        return false;
     }
 }

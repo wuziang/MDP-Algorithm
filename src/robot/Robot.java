@@ -101,6 +101,10 @@ public class Robot {
                 System.out.println("Something went wrong in Robot.move()!");
             }
         }
+        else{
+            CommMgr comm = CommMgr.getCommMgr();
+            comm.sendMsg(Character.toString(MOVEMENT.print(m)), CommMgr.AR);
+        }
 
         switch (m) {
             case FORWARD:
@@ -177,11 +181,6 @@ public class Robot {
                 System.out.println("Error in Robot.move()!");
                 break;
         }
-
-        if (realBot){
-            CommMgr comm = CommMgr.getCommMgr();
-            comm.sendMsg(Character.toString(MOVEMENT.print(m)), CommMgr.AR);
-        }
     }
 
     /**
@@ -245,6 +244,8 @@ public class Robot {
             result[2] = SRFrontCenter.sense(explorationMap, realMap);
             result[3] = SRFrontRight.sense(explorationMap, realMap);
             result[4] = SRRight.sense(explorationMap, realMap);
+
+            // System.out.println(Arrays.toString(result));
         } else {
 
             String msg = CommMgr.getCommMgr().recvMsg();

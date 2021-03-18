@@ -30,7 +30,7 @@ public class Simulator {
     private static Map exploredMap = null;          // exploration map
 
     private static boolean loadedMap = false;
-    private static String filename = "Sample5";
+    private static String filename = "Test";
 
     private static int waypointRow = 7;
     private static int waypointCol = 8;
@@ -107,12 +107,12 @@ public class Simulator {
      * Initialises the JPanel for the buttons.
      */
     private static void initButtonsLayout() {
-        _buttons.setLayout(new GridLayout(2,1));
+        _buttons.setLayout(new GridLayout(2, 1));
         addButtons();
     }
 
-    private static void loadDefaultMap(){
-        if(!loadedMap) {
+    private static void loadDefaultMap() {
+        if (!loadedMap) {
             loadMap(realMap, filename);
             realMap.setWaypoint(waypointRow, waypointCol);
 
@@ -154,9 +154,9 @@ public class Simulator {
                         loadMapDialog.setVisible(false);
                         loadMap(realMap, loadTF.getText());
 
-                        String waypoint=loadWaypoint.getText();
-                        waypointRow =Integer.parseInt(waypoint.substring(0, waypoint.indexOf(',')));
-                        waypointCol =Integer.parseInt(waypoint.substring(waypoint.indexOf(',')+1));
+                        String waypoint = loadWaypoint.getText();
+                        waypointRow = Integer.parseInt(waypoint.substring(0, waypoint.indexOf(',')));
+                        waypointCol = Integer.parseInt(waypoint.substring(waypoint.indexOf(',') + 1));
                         realMap.setWaypoint(waypointRow, waypointCol);
 
                         CardLayout cl = ((CardLayout) _mapCards.getLayout());

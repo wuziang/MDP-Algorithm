@@ -245,9 +245,6 @@ public class Robot {
             result[2] = SRFrontCenter.sense(explorationMap, realMap);
             result[3] = SRFrontRight.sense(explorationMap, realMap);
             result[4] = SRRight.sense(explorationMap, realMap);
-
-            System.out.println(Arrays.toString(result));
-
         } else {
 
             String msg = CommMgr.getCommMgr().recvMsg();

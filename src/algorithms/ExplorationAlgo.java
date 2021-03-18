@@ -145,23 +145,28 @@ public class ExplorationAlgo {
         if ((sensorData[1] == 1 & sensorData[2] == 1) | (sensorData[2] == 1 & sensorData[3] == 1)){
             // For incase if the robot is against the wall
             if (bot.getRobotPosCol()==1 && bot.getRobotCurDir()==DIRECTION.NORTH){
+                turnBotDirection(DIRECTION.SOUTH);
+                pledgeMode=false;
+                return;
+            }
+            if (bot.getRobotPosCol()==1 && bot.getRobotCurDir()==DIRECTION.WEST){
+                turnBotDirection(DIRECTION.SOUTH);
                 pledgeMode=false;
                 return;
             }
             if (bot.getRobotPosCol()==13 && bot.getRobotCurDir()==DIRECTION.SOUTH){
+                turnBotDirection(DIRECTION.NORTH);
+                pledgeMode=false;
+                return;
+            }
+            if (bot.getRobotPosCol()==13 && bot.getRobotCurDir()==DIRECTION.EAST){
+                turnBotDirection(DIRECTION.NORTH);
                 pledgeMode=false;
                 return;
             }
 
-            int startColumn = bot.getRobotPosCol();
-            int startRow = bot.getRobotPosRow();
-
-            // We do not conduct the Pledge on cells that have already been explored by an earlier Pledge
-            if (exploredMap.getCell(startRow, startColumn).getIsPledged()){
-                return;
-            }
-
             boolean flag = false;
+            System.out.println("Starting alternate Pledge");
 
             // Then we start making the robot traverse across the perimeter of the obstacle
             while (flag == false) {
@@ -255,17 +260,14 @@ public class ExplorationAlgo {
                 if (bot.getRobotPosRow() == 1 | bot.getRobotPosRow() == 18){
                     flag = true;
                     pledgeMode = false;
+                    System.out.println("Exiting alternate Pledge");
                     return;
                 }
                 if (bot.getRobotPosCol() == 1 | bot.getRobotPosCol() == 13){
                     flag = true;
                     pledgeMode = false;
+                    System.out.println("Exiting alternate Pledge");
                     return;
-                }
-
-                // For incase if there is an obstacle on the left of the robot during this alternate Pledge
-                if (sensorData[0] == 1){
-                    flag = true;
                 }
             }
         }
@@ -273,9 +275,13 @@ public class ExplorationAlgo {
         // This Pledge algorithm is for every other kind of obstacle
         if (move != 0){
             // This is the normal Pledge for any obstacle that is not on the first and last row
-            int currentColumn = 0;
-            int currentRow = 0;
+            int currentColumn = bot.getRobotPosCol();
+            int currentRow = bot.getRobotPosRow();
             DIRECTION startingDirection = bot.getRobotCurDir();
+
+            Cell c = exploredMap.getCell(currentRow, currentColumn);
+            // int index = DIRECTION.SOUTH.getIndex();
+            //if(c.getIsExplored() && c.getIsObstacle() && !c.getIsProcessed(index)){}
 
             if (sensorData[0] == 1){
                 // For incase if the robot is against the wall
@@ -290,7 +296,7 @@ public class ExplorationAlgo {
 
                 // For incase if the robot is on the edges
                 if (bot.getRobotPosCol()==1 && bot.getRobotPosRow()==18){
-                    // Turn robot to face the correct direction (towards the goal)
+                    // Turn robot to face the correct direction (towards the start)
                     turnBotDirection(DIRECTION.SOUTH);
 
                     while (sensorData[0]==1){
@@ -310,7 +316,7 @@ public class ExplorationAlgo {
                     return;
                 }
                 if (bot.getRobotPosCol()==13 && bot.getRobotPosRow()==18){
-                    // Turn robot to face the correct direction (towards the goal)
+                    // Turn robot to face the correct direction (towards the other edge)
                     turnBotDirection(DIRECTION.WEST);
 
                     while (sensorData[0]==1){
@@ -329,9 +335,27 @@ public class ExplorationAlgo {
                 }
 
                 boolean flag = false;
+                System.out.println("Starting standard Pledge");
 
                 // This is the calibration part of the pledge which will move the robot backwards to prepare it for the Pledge
-                moveBot(MOVEMENT.BACKWARD);
+                switch (startingDirection){
+                    case NORTH:
+                        turnBotDirection(DIRECTION.SOUTH);
+                        moveBot(MOVEMENT.FORWARD);
+                        break;
+                    case EAST:
+                        turnBotDirection(DIRECTION.WEST);
+                        moveBot(MOVEMENT.FORWARD);
+                        break;
+                    case SOUTH:
+                        turnBotDirection(DIRECTION.NORTH);
+                        moveBot(MOVEMENT.FORWARD);
+                        break;
+                    case WEST:
+                        turnBotDirection(DIRECTION.EAST);
+                        moveBot(MOVEMENT.FORWARD);
+                        break;
+                }
 
                 // Check if the front part of the robot is still stuck
                 switch (startingDirection) {
@@ -350,19 +374,25 @@ public class ExplorationAlgo {
                 }
 
                 while (sensorData[1]==1 | sensorData[2]==1 | sensorData[3]==1){
-                    turnBotDirection(startingDirection);
-                    moveBot(MOVEMENT.BACKWARD);
                     switch (startingDirection) {
                         case NORTH:
+                            turnBotDirection(DIRECTION.SOUTH);
+                            moveBot(MOVEMENT.FORWARD);
                             turnBotDirection(DIRECTION.WEST);
                             break;
                         case EAST:
+                            turnBotDirection(DIRECTION.WEST);
+                            moveBot(MOVEMENT.FORWARD);
                             turnBotDirection(DIRECTION.NORTH);
                             break;
                         case SOUTH:
+                            turnBotDirection(DIRECTION.NORTH);
+                            moveBot(MOVEMENT.FORWARD);
                             turnBotDirection(DIRECTION.EAST);
                             break;
                         case WEST:
+                            turnBotDirection(DIRECTION.EAST);
+                            moveBot(MOVEMENT.FORWARD);
                             turnBotDirection(DIRECTION.SOUTH);
                             break;
                     }
@@ -393,6 +423,7 @@ public class ExplorationAlgo {
                                 else{
                                     if (!lookForward()){
                                         flag = true;
+                                        System.out.println("Early exit north");
                                         break;
                                     }
                                     moveBot(MOVEMENT.FORWARD);
@@ -414,6 +445,7 @@ public class ExplorationAlgo {
                                 else{
                                     if (!lookForward()){
                                         flag = true;
+                                        System.out.println("Early exit east");
                                         break;
                                     }
                                     moveBot(MOVEMENT.FORWARD);
@@ -435,6 +467,7 @@ public class ExplorationAlgo {
                                 else{
                                     if (!lookForward()){
                                         flag = true;
+                                        System.out.println("Early exit south");
                                         break;
                                     }
                                     moveBot(MOVEMENT.FORWARD);
@@ -456,6 +489,7 @@ public class ExplorationAlgo {
                                 else{
                                     if (!lookForward()){
                                         flag = true;
+                                        System.out.println("Early exit west");
                                         break;
                                     }
                                     moveBot(MOVEMENT.FORWARD);
@@ -484,6 +518,7 @@ public class ExplorationAlgo {
                             }
 
                             flag = true;
+                            System.out.println("Exiting standard Pledge");
                         }
                     }
 
@@ -505,6 +540,7 @@ public class ExplorationAlgo {
                                 break;
                         }
                         flag = true;
+                        System.out.println("Exiting alternate Pledge");
                     }
                 }
             }

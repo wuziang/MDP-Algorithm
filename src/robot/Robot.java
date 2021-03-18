@@ -247,7 +247,6 @@ public class Robot {
 
             // System.out.println(Arrays.toString(result));
         } else {
-
             String msg = CommMgr.getCommMgr().recvMsg();
             String[] msgArr = msg.split(",");
 

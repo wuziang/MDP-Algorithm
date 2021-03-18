@@ -13,7 +13,7 @@ public class RobotConstants {
 
     public static final int MOVE_COST = 10;                         // cost of FORWARD, BACKWARD movement
     public static final int TURN_COST = 20;                         // cost of RIGHT, LEFT movement
-    public static final int SPEED = 300;                            // delay between movements (ms)
+    public static final int SPEED = 500;                            // delay between movements (ms)
 
     public static final DIRECTION START_DIR = DIRECTION.NORTH;      // start direction
 
@@ -23,7 +23,7 @@ public class RobotConstants {
     public static final int CAMERA_RANGE = 2;                       // upper range of camera (cells)
     public static final String CAMERA_DIRECTION = "FRONT";          // direction of camera (cells)
 
-    public static final int CALIBRATE_THRESHOLD = 5;
+    public static final int STOP_TIME = 5;
     public static final int INFINITE_COST = 9999;
 
     public enum DIRECTION {

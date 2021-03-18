@@ -29,7 +29,7 @@ public class MazeRunner {
     private static Map realMap = null;              // real map
     private static Map exploredMap = null;          // exploration map
 
-    private static int timeLimit = 3600;            // time limit
+    private static int timeLimit = 360;            // time limit
     private static int coverageLimit = 300;         // coverage limit
 
     private static final CommMgr comm = CommMgr.getCommMgr();

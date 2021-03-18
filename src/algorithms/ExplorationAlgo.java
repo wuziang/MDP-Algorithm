@@ -42,7 +42,7 @@ public class ExplorationAlgo {
         this.realMap = realMap;
         this.bot = bot;
         this.coverageLimit = coverageLimit;
-        this.timeLimit = timeLimit;
+        this.timeLimit = timeLimit-RobotConstants.STOP_TIME;
     }
 
     public void setImageProcessing(boolean imageProcessing){
@@ -60,7 +60,7 @@ public class ExplorationAlgo {
         System.out.println("\nExploring...");
 
         if (bot.getRealBot()) {
-//            CommMgr.getCommMgr().recvMsg();
+            CommMgr.getCommMgr().recvMsg();
             CommMgr.getCommMgr().sendMsg("S", CommMgr.AR);
         }
 
@@ -166,7 +166,6 @@ public class ExplorationAlgo {
             }
 
             boolean flag = false;
-            System.out.println("Starting alternate pledge");
 
             // Then we start making the robot traverse across the perimeter of the obstacle
             while (flag == false) {
@@ -264,13 +263,11 @@ public class ExplorationAlgo {
                 if (bot.getRobotPosRow() == 1 | bot.getRobotPosRow() == 18){
                     flag = true;
                     pledgeMode = false;
-                    System.out.println("Exiting alternate pledge");
                     return;
                 }
                 if (bot.getRobotPosCol() == 1 | bot.getRobotPosCol() == 13){
                     flag = true;
                     pledgeMode = false;
-                    System.out.println("Exiting alternate pledge");
                     return;
                 }
             }
@@ -343,7 +340,6 @@ public class ExplorationAlgo {
                 }
 
                 boolean flag = false;
-                System.out.println("Starting standard pledge");
 
                 // This is the calibration part of the pledge which will move the robot backwards to prepare it for the Pledge
                 switch (startingDirection){
@@ -432,7 +428,6 @@ public class ExplorationAlgo {
                                 else{
                                     if (!lookForward()){
                                         flag = true;
-                                        System.out.println("Early exit north");
                                         break;
                                     }
                                     moveBot(MOVEMENT.FORWARD);
@@ -455,7 +450,6 @@ public class ExplorationAlgo {
                                 else{
                                     if (!lookForward()){
                                         flag = true;
-                                        System.out.println("Early exit east");
                                         break;
                                     }
                                     moveBot(MOVEMENT.FORWARD);
@@ -478,7 +472,6 @@ public class ExplorationAlgo {
                                 else{
                                     if (!lookForward()){
                                         flag = true;
-                                        System.out.println("Early exit south");
                                         break;
                                     }
                                     moveBot(MOVEMENT.FORWARD);
@@ -501,7 +494,6 @@ public class ExplorationAlgo {
                                 else{
                                     if (!lookForward()){
                                         flag = true;
-                                        System.out.println("Early exit west");
                                         break;
                                     }
                                     moveBot(MOVEMENT.FORWARD);
@@ -529,7 +521,6 @@ public class ExplorationAlgo {
                                     break;
                             }
                             flag = true;
-                            System.out.println("Exiting standard pledge");
                         }
                     }
 
@@ -551,7 +542,6 @@ public class ExplorationAlgo {
                                 break;
                         }
                         flag = true;
-                        System.out.println("Exiting standard pledge");
                     }
                 }
             }

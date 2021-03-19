@@ -39,7 +39,6 @@ public class MazeRunner {
     private static int waypointCol = 1;
 
     private static final boolean explorationMode = true;
-    private static final boolean pledgeEnabled = false;
 
     /**
      * Initialises the different maps and displays the application.
@@ -217,9 +216,6 @@ public class MazeRunner {
 
             ExplorationAlgo exploration;
             exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
-
-            exploration.setPledgeEnabled(pledgeEnabled);
-
             exploration.runExploration();
 
             return 222;
@@ -234,9 +230,7 @@ public class MazeRunner {
             ExplorationAlgo image;
             image = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
-            image.setPledgeEnabled(pledgeEnabled);
             image.setImageProcessing(true);
-
             image.runExploration();
 
             return 333;

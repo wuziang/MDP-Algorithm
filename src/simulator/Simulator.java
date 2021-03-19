@@ -37,7 +37,6 @@ public class Simulator {
 
     private static int timeLimit = 360;            // time limit
     private static int coverageLimit = 300;         // coverage limit
-    private static boolean pledgeEnabled = false;
 
     /**
      * Initialises the different maps and displays the application.
@@ -214,11 +213,7 @@ public class Simulator {
 
                 ExplorationAlgo exploration;
                 exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
-
-                exploration.setPledgeEnabled(pledgeEnabled);
-
                 exploration.runExploration();
-                generateMapDescriptor(exploredMap);
 
                 return 222;
             }
@@ -239,10 +234,7 @@ public class Simulator {
                 image = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
                 image.setImageProcessing(true);
-                image.setPledgeEnabled(pledgeEnabled);
-
                 image.runExploration();
-                generateMapDescriptor(exploredMap);
 
                 return 333;
             }

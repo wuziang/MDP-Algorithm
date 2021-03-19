@@ -10,6 +10,8 @@ import robot.RobotConstants.MOVEMENT;
 import utils.CommMgr;
 import utils.MapDescriptor;
 
+import java.util.Random;
+
 /**
  * Exploration algorithm for the robot.
  */
@@ -36,6 +38,8 @@ public class ExplorationAlgo {
 
     private boolean pledgeEnabled;
     private boolean pledgeMode;
+
+    private final Random random = new Random();
 
     public ExplorationAlgo(Map exploredMap, Map realMap, Robot bot, int coverageLimit, int timeLimit) {
         this.exploredMap = exploredMap;
@@ -134,8 +138,7 @@ public class ExplorationAlgo {
             moveBot(MOVEMENT.RIGHT);
             if (lookForward())
                 moveBot(MOVEMENT.FORWARD);
-        }
-        else{
+        } else if (bot.getRealBot()){
             forceForward();
             forceForward();
         }
@@ -707,6 +710,12 @@ public class ExplorationAlgo {
             moveBot(MOVEMENT.RIGHT);
 
         moveBot(MOVEMENT.FORWARD);
+
+        if(random.nextInt()%2==0){
+            moveBot(MOVEMENT.RIGHT);
+        } else{
+            moveBot(MOVEMENT.LEFT);
+        }
     }
 
     /**

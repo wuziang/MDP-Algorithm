@@ -224,16 +224,16 @@ public class Robot {
                 result[i] = Integer.parseInt(msgArr[i]);
             }
 
-            try{
-                String line = buf.readLine();
-
-                msgArr = line.substring(1, line.length()-1).split(", ");
-                for (int i=0; i<5; i++){
-                    result[i] = Integer.parseInt(msgArr[i]);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            try{
+//                String line = buf.readLine();
+//
+//                msgArr = line.substring(1, line.length()-1).split(", ");
+//                for (int i=0; i<5; i++){
+//                    result[i] = Integer.parseInt(msgArr[i]);
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
 
             SRLeft.senseReal(explorationMap, result[0]);
             SRFrontLeft.senseReal(explorationMap, result[1]);

@@ -69,7 +69,7 @@ public class ExplorationAlgo {
         }
 
         if (bot.getRealBot()) {
-//            CommMgr.getCommMgr().recvMsg();
+            CommMgr.getCommMgr().recvMsg();
             CommMgr.getCommMgr().sendMsg("S", CommMgr.AR);
         }
 
@@ -105,8 +105,8 @@ public class ExplorationAlgo {
 
         if(!imageProcessing) {
             areaExplored = calculateAreaExplored();
-            System.out.printf("\nExploration Coverage %.2f%%\n", (areaExplored / 300.0) * 100.0);
-            System.out.printf("\nTotal Moves: "+moves);
+            System.out.printf("\nExploration Coverage %.2f%%", (areaExplored / 300.0) * 100.0);
+            System.out.println("\nTotal Moves: "+moves);
 
             String[] mapStrings = MapDescriptor.generateMapDescriptor(exploredMap);
             System.out.println("P1: " + mapStrings[0]);
@@ -115,7 +115,7 @@ public class ExplorationAlgo {
         else {
             double sides = calculateSidesPossible();
             System.out.printf("\nImage Processing Coverage %.2f%%", (takenImage / sides) * 100.0);
-            System.out.printf("\nTotal Moves: "+moves);
+            System.out.println("\nTotal Moves: "+moves);
         }
     }
 
@@ -937,10 +937,10 @@ public class ExplorationAlgo {
 
         if(bot.getRealBot()){
             CommMgr.getCommMgr().sendMsg(coordinate, CommMgr.IR);
-//            CommMgr.getCommMgr().recvMsg();
+            CommMgr.getCommMgr().recvMsg();
         }
         else{
-//            System.out.println("Take Photo: " + coordinate + " ("+ side +")");
+            System.out.println("Take Photo: " + coordinate + " ("+ side +")");
         }
     }
 }

@@ -5,7 +5,6 @@ import robot.RobotConstants.DIRECTION;
 import robot.RobotConstants.MOVEMENT;
 import utils.CommMgr;
 
-import java.io.*;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -40,9 +39,6 @@ public class Robot {
 
     private final boolean realBot;
 
-    private InputStream inputStream;
-    private BufferedReader buf;
-
     public Robot(int row, int col, boolean realBot) {
         posRow = row;
         posCol = col;
@@ -56,13 +52,6 @@ public class Robot {
         SRFrontRight = new Sensor(RobotConstants.SENSOR_SHORT_RANGE_L, RobotConstants.SENSOR_SHORT_RANGE_H, this.posRow + 1, this.posCol + 1, this.robotDir, "SRFR");
         SRLeft = new Sensor(RobotConstants.SENSOR_SHORT_RANGE_L, RobotConstants.SENSOR_SHORT_RANGE_H, this.posRow + 1, this.posCol - 1, findNewDirection(MOVEMENT.LEFT), "SRL");
         SRRight = new Sensor(RobotConstants.SENSOR_SHORT_RANGE_L, RobotConstants.SENSOR_SHORT_RANGE_H, this.posRow + 1, this.posCol + 1, findNewDirection(MOVEMENT.RIGHT), "SRR");
-
-        try{
-            inputStream = new FileInputStream("maps/Sensors.txt");
-            buf = new BufferedReader(new InputStreamReader(inputStream));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public void setRobotPos(int row, int col) {
@@ -222,17 +211,6 @@ public class Robot {
 
             for (int i=0; i<5; i++){
                 result[i] = Integer.parseInt(msgArr[i]);
-            }
-
-            try{
-                String line = buf.readLine();
-
-                msgArr = line.substring(1, line.length()-1).split(", ");
-                for (int i=0; i<5; i++){
-                    result[i] = Integer.parseInt(msgArr[i]);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
 
             SRLeft.senseReal(explorationMap, result[0]);

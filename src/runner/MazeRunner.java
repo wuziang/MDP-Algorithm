@@ -45,7 +45,7 @@ public class MazeRunner {
      * Initialises the different maps and displays the application.
      */
     public static void main(String[] args) {
-        comm.openConnection();
+//        comm.openConnection();
         bot = new Robot(RobotConstants.START_ROW, RobotConstants.START_COL, explorationMode);
 
         realMap = new Map(bot);

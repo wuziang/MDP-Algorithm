@@ -69,7 +69,7 @@ public class ExplorationAlgo {
         }
 
         if (bot.getRealBot()) {
-            CommMgr.getCommMgr().recvMsg();
+//            CommMgr.getCommMgr().recvMsg();
             CommMgr.getCommMgr().sendMsg("S", CommMgr.AR);
         }
 
@@ -937,10 +937,10 @@ public class ExplorationAlgo {
 
         if(bot.getRealBot()){
             CommMgr.getCommMgr().sendMsg(coordinate, CommMgr.IR);
-            CommMgr.getCommMgr().recvMsg();
+//            CommMgr.getCommMgr().recvMsg();
         }
         else{
-            System.out.println("Take Photo: " + coordinate + " ("+ side +")");
+//            System.out.println("Take Photo: " + coordinate + " ("+ side +")");
         }
     }
 }

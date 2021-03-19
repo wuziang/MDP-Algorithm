@@ -58,7 +58,7 @@ public class Robot {
         SRRight = new Sensor(RobotConstants.SENSOR_SHORT_RANGE_L, RobotConstants.SENSOR_SHORT_RANGE_H, this.posRow + 1, this.posCol + 1, findNewDirection(MOVEMENT.RIGHT), "SRR");
 
         try{
-            inputStream = new FileInputStream("maps/TestSensor.txt");
+            inputStream = new FileInputStream("maps/Sensors.txt");
             buf = new BufferedReader(new InputStreamReader(inputStream));
         } catch (IOException e) {
             e.printStackTrace();
@@ -224,16 +224,16 @@ public class Robot {
                 result[i] = Integer.parseInt(msgArr[i]);
             }
 
-//            try{
-//                String line = buf.readLine();
-//
-//                msgArr = line.substring(1, line.length()-1).split(", ");
-//                for (int i=0; i<5; i++){
-//                    result[i] = Integer.parseInt(msgArr[i]);
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
+            try{
+                String line = buf.readLine();
+
+                msgArr = line.substring(1, line.length()-1).split(", ");
+                for (int i=0; i<5; i++){
+                    result[i] = Integer.parseInt(msgArr[i]);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             SRLeft.senseReal(explorationMap, result[0]);
             SRFrontLeft.senseReal(explorationMap, result[1]);

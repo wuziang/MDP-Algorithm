@@ -5,10 +5,9 @@ import robot.RobotConstants.DIRECTION;
 import robot.RobotConstants.MOVEMENT;
 import utils.CommMgr;
 
+import java.io.*;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-
-import java.io.*;
 
 // @formatter:off
 /**
@@ -57,6 +56,13 @@ public class Robot {
         SRFrontRight = new Sensor(RobotConstants.SENSOR_SHORT_RANGE_L, RobotConstants.SENSOR_SHORT_RANGE_H, this.posRow + 1, this.posCol + 1, this.robotDir, "SRFR");
         SRLeft = new Sensor(RobotConstants.SENSOR_SHORT_RANGE_L, RobotConstants.SENSOR_SHORT_RANGE_H, this.posRow + 1, this.posCol - 1, findNewDirection(MOVEMENT.LEFT), "SRL");
         SRRight = new Sensor(RobotConstants.SENSOR_SHORT_RANGE_L, RobotConstants.SENSOR_SHORT_RANGE_H, this.posRow + 1, this.posCol + 1, findNewDirection(MOVEMENT.RIGHT), "SRR");
+
+        try{
+            inputStream = new FileInputStream("maps/TestSensor.txt");
+            buf = new BufferedReader(new InputStreamReader(inputStream));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setRobotPos(int row, int col) {
@@ -98,7 +104,6 @@ public class Robot {
             try {
                 TimeUnit.MILLISECONDS.sleep(speed);
             } catch (InterruptedException e) {
-                System.out.println("Something went wrong in Robot.move()!");
             }
         }
         else{
@@ -143,42 +148,7 @@ public class Robot {
             case LEFT:
                 robotDir = findNewDirection(m);
                 break;
-            case FORCEDLEFT:
-                switch (robotDir) {
-                    case NORTH:
-                        posCol--;
-                        break;
-                    case EAST:
-                        posRow++;
-                        break;
-                    case SOUTH:
-                        posCol++;
-                        break;
-                    case WEST:
-                        posRow--;
-                        break;
-                }
-                break;
-            case FORCEDRIGHT:
-                switch (robotDir) {
-                    case NORTH:
-                        posCol++;
-                        break;
-                    case EAST:
-                        posRow--;
-                        break;
-                    case SOUTH:
-                        posCol--;
-                        break;
-                    case WEST:
-                        posRow++;
-                        break;
-                }
-                break;
-            case CALIBRATE:
-                break;
             default:
-                System.out.println("Error in Robot.move()!");
                 break;
         }
     }
@@ -245,13 +215,24 @@ public class Robot {
             result[3] = SRFrontRight.sense(explorationMap, realMap);
             result[4] = SRRight.sense(explorationMap, realMap);
 
-            // System.out.println(Arrays.toString(result));
+            System.out.println(Arrays.toString(result));
         } else {
             String msg = CommMgr.getCommMgr().recvMsg();
             String[] msgArr = msg.split(",");
 
             for (int i=0; i<5; i++){
                 result[i] = Integer.parseInt(msgArr[i]);
+            }
+
+            try{
+                String line = buf.readLine();
+
+                msgArr = line.substring(1, line.length()-1).split(", ");
+                for (int i=0; i<5; i++){
+                    result[i] = Integer.parseInt(msgArr[i]);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
             SRLeft.senseReal(explorationMap, result[0]);

@@ -44,6 +44,13 @@ public class Map extends JPanel {
     }
 
     /**
+     * Returns true if the row and column values are valid robot position.
+     */
+    public boolean checkValidRobotPositions(int row, int col) {
+        return row > 0 && col > 0 && row < MapConstants.MAP_ROWS-1 && col < MapConstants.MAP_COLS-1;
+    }
+
+    /**
      * Returns true if the row and column values are in the start zone.
      */
     private boolean inStartZone(int row, int col) {

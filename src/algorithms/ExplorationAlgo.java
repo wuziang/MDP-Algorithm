@@ -20,6 +20,7 @@ public class ExplorationAlgo {
     private final Robot bot;
 
     private int areaExplored;
+    private int moves;
 
     private final int coverageLimit;
     private final int timeLimit;
@@ -35,7 +36,6 @@ public class ExplorationAlgo {
 
     private boolean pledgeEnabled;
     private boolean pledgeMode;
-    private int move;
 
     public ExplorationAlgo(Map exploredMap, Map realMap, Robot bot, int coverageLimit, int timeLimit) {
         this.exploredMap = exploredMap;
@@ -57,7 +57,12 @@ public class ExplorationAlgo {
      * Main method that is called to start the exploration.
      */
     public void runExploration() {
-        System.out.println("\nExploring...");
+        if(!imageProcessing) {
+            System.out.println("\nExploring...");
+        }
+        else{
+            System.out.println("\nImage Processing...");
+        }
 
         if (bot.getRealBot()) {
             CommMgr.getCommMgr().recvMsg();
@@ -92,14 +97,12 @@ public class ExplorationAlgo {
             if(pledgeEnabled) {
                 runPledgeAlgo();
             }
-
-            move++;
-
         } while (areaExplored <= coverageLimit && System.currentTimeMillis() <= endTime);
 
         if(!imageProcessing) {
             areaExplored = calculateAreaExplored();
             System.out.printf("\nExploration Coverage %.2f%%\n", (areaExplored / 300.0) * 100.0);
+            System.out.printf("\nTotal Moves: "+moves);
 
             String[] mapStrings = MapDescriptor.generateMapDescriptor(exploredMap);
             System.out.println("P1: " + mapStrings[0]);
@@ -108,6 +111,7 @@ public class ExplorationAlgo {
         else {
             double sides = calculateSidesPossible();
             System.out.printf("\nImage Processing Coverage %.2f%%", (takenImage / sides) * 100.0);
+            System.out.printf("\nTotal Moves: "+moves);
         }
     }
 
@@ -125,9 +129,15 @@ public class ExplorationAlgo {
             moveBot(MOVEMENT.LEFT);
             if (lookForward())
                 moveBot(MOVEMENT.FORWARD);
-        } else {
+        } else if (lookBackward()){
             moveBot(MOVEMENT.RIGHT);
             moveBot(MOVEMENT.RIGHT);
+            if (lookForward())
+                moveBot(MOVEMENT.FORWARD);
+        }
+        else{
+            forceForward();
+            forceForward();
         }
     }
 
@@ -274,7 +284,7 @@ public class ExplorationAlgo {
         }
 
         // This Pledge algorithm is for every other kind of obstacle
-        if (move != 0){
+        if (moves != 0){
             // This is the normal Pledge for any obstacle that is not on the first and last row
             int currentColumn = bot.getRobotPosCol();
             int currentRow = bot.getRobotPosRow();
@@ -601,6 +611,23 @@ public class ExplorationAlgo {
     }
 
     /**
+     * Returns true if the robot is free to move backward.
+     */
+    private boolean lookBackward() {
+        switch (bot.getRobotCurDir()) {
+            case NORTH:
+                return southFree();
+            case EAST:
+                return westFree();
+            case SOUTH:
+                return northFree();
+            case WEST:
+                return eastFree();
+        }
+        return false;
+    }
+
+    /**
      * Returns true if the robot can move to the north cell.
      */
     private boolean northFree() {
@@ -658,6 +685,30 @@ public class ExplorationAlgo {
         return false;
     }
 
+    private boolean checkForward(){
+        int r = bot.getRobotPosRow();
+        int c = bot.getRobotPosCol();
+
+        switch (bot.getRobotCurDir()) {
+            case NORTH:
+                return exploredMap.checkValidRobotPositions(r+1, c);
+            case EAST:
+                return exploredMap.checkValidRobotPositions(r, c+1);
+            case SOUTH:
+                return exploredMap.checkValidRobotPositions(r-1, c);
+            case WEST:
+                return exploredMap.checkValidRobotPositions(r, c-1);
+        }
+        return false;
+    }
+
+    private void forceForward(){
+        while(!checkForward())
+            moveBot(MOVEMENT.RIGHT);
+
+        moveBot(MOVEMENT.FORWARD);
+    }
+
     /**
      * Returns the number of cells explored in the grid.
      */
@@ -704,10 +755,9 @@ public class ExplorationAlgo {
      */
     private void moveBot(MOVEMENT m) {
         bot.move(m);
+        moves++;
 
-        if (m != MOVEMENT.CALIBRATE) {
-            senseAndRepaint();
-        }
+        senseAndRepaint();
 
         if(imageProcessing && !imageMode){
             imageMode=true;
@@ -732,58 +782,6 @@ public class ExplorationAlgo {
 
         sendToAndroid();
         exploredMap.repaint();
-    }
-
-    /**
-     * Checks if the robot can calibrate at its current position given a direction.
-     */
-    private boolean canCalibrateOnTheSpot(DIRECTION botDir) {
-        int row = bot.getRobotPosRow();
-        int col = bot.getRobotPosCol();
-
-        switch (botDir) {
-            case NORTH:
-                return exploredMap.getIsObstacleOrWall(row + 2, col - 1) && exploredMap.getIsObstacleOrWall(row + 2, col) && exploredMap.getIsObstacleOrWall(row + 2, col + 1);
-            case EAST:
-                return exploredMap.getIsObstacleOrWall(row + 1, col + 2) && exploredMap.getIsObstacleOrWall(row, col + 2) && exploredMap.getIsObstacleOrWall(row - 1, col + 2);
-            case SOUTH:
-                return exploredMap.getIsObstacleOrWall(row - 2, col - 1) && exploredMap.getIsObstacleOrWall(row - 2, col) && exploredMap.getIsObstacleOrWall(row - 2, col + 1);
-            case WEST:
-                return exploredMap.getIsObstacleOrWall(row + 1, col - 2) && exploredMap.getIsObstacleOrWall(row, col - 2) && exploredMap.getIsObstacleOrWall(row - 1, col - 2);
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns a possible direction for robot calibration or null, otherwise.
-     */
-    private DIRECTION getCalibrationDirection() {
-        DIRECTION origDir = bot.getRobotCurDir();
-        DIRECTION dirToCheck;
-
-        dirToCheck = DIRECTION.getNext(origDir);                    // right turn
-        if (canCalibrateOnTheSpot(dirToCheck)) return dirToCheck;
-
-        dirToCheck = DIRECTION.getPrevious(origDir);                // left turn
-        if (canCalibrateOnTheSpot(dirToCheck)) return dirToCheck;
-
-        dirToCheck = DIRECTION.getPrevious(dirToCheck);             // u turn
-        if (canCalibrateOnTheSpot(dirToCheck)) return dirToCheck;
-
-        return null;
-    }
-
-    /**
-     * Turns the bot in the needed direction and sends the CALIBRATE movement. Once calibrated, the bot is turned back
-     * to its original direction.
-     */
-    private void calibrateBot(DIRECTION targetDir) {
-        DIRECTION origDir = bot.getRobotCurDir();
-
-        turnBotDirection(targetDir);
-        moveBot(MOVEMENT.CALIBRATE);
-        turnBotDirection(origDir);
     }
 
     /**

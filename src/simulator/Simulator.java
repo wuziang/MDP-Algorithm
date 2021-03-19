@@ -35,7 +35,7 @@ public class Simulator {
     private static int waypointRow = 7;
     private static int waypointCol = 8;
 
-    private static int timeLimit = 360;            // time limit
+    private static int timeLimit = 3600;            // time limit
     private static int coverageLimit = 300;         // coverage limit
     private static boolean pledgeEnabled = false;
 

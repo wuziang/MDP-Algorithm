@@ -13,7 +13,7 @@ public class RobotConstants {
 
     public static final int MOVE_COST = 10;                         // cost of FORWARD, BACKWARD movement
     public static final int TURN_COST = 20;                         // cost of RIGHT, LEFT movement
-    public static final int SPEED = 500;                            // delay between movements (ms)
+    public static final int SPEED = 50;                            // delay between movements (ms)
 
     public static final DIRECTION START_DIR = DIRECTION.NORTH;      // start direction
 
@@ -63,7 +63,7 @@ public class RobotConstants {
     }
 
     public enum MOVEMENT {
-        FORWARD, BACKWARD, RIGHT, LEFT, CALIBRATE, FORCEDLEFT, FORCEDRIGHT, ERROR;
+        FORWARD, BACKWARD, RIGHT, LEFT, ERROR;
 
         public static char print(MOVEMENT m) {
             switch (m) {
@@ -75,13 +75,6 @@ public class RobotConstants {
                     return 'R';
                 case LEFT:
                     return 'L';
-                case FORCEDLEFT:
-                    return 'A';
-                case FORCEDRIGHT:
-                    return 'D';
-                case CALIBRATE:
-                    return 'C';
-                case ERROR:
                 default:
                     return 'E';
             }

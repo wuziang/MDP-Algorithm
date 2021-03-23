@@ -1,6 +1,7 @@
 package robot;
 
 import map.Map;
+import map.MapConstants;
 import robot.RobotConstants.DIRECTION;
 import robot.RobotConstants.MOVEMENT;
 import utils.CommMgr;
@@ -37,6 +38,7 @@ public class Robot {
     private final Sensor SRLeft;            // west-facing left SR
     private final Sensor SRRight;           // east-facing right SR
 
+    private boolean touchedGoal;
     private final boolean realBot;
 
     public Robot(int row, int col, boolean realBot) {
@@ -82,6 +84,16 @@ public class Robot {
     public boolean getRealBot() {
         return realBot;
     }
+
+    private void updateTouchedGoal() {
+        if (this.getRobotPosRow() == MapConstants.GOAL_ROW && this.getRobotPosCol() == MapConstants.GOAL_COL)
+            this.touchedGoal = true;
+    }
+
+    public boolean getTouchedGoal() {
+        return this.touchedGoal;
+    }
+
 
     /**
      * Takes in a MOVEMENT and moves the robot accordingly by changing its position and direction. Sends the movement
@@ -140,6 +152,8 @@ public class Robot {
             default:
                 break;
         }
+
+        updateTouchedGoal();
     }
 
     /**

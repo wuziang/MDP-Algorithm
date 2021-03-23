@@ -30,13 +30,11 @@ public class ExplorationAlgo {
     private long startTime;
     private long endTime;
 
-    private int[] sensorData;
-
     private boolean imageProcessing;
     private boolean imageMode;
     private int takenImage=0;
 
-    private final Random random = new Random();
+    private int rightHanded=0;
 
     public ExplorationAlgo(Map exploredMap, Map realMap, Robot bot, int coverageLimit, int timeLimit) {
         this.exploredMap = exploredMap;
@@ -62,7 +60,6 @@ public class ExplorationAlgo {
         }
 
         if (bot.getRealBot()) {
-            CommMgr.getCommMgr().recvMsg();
             CommMgr.getCommMgr().sendMsg("S", CommMgr.AR);
         }
 
@@ -70,6 +67,12 @@ public class ExplorationAlgo {
         endTime = startTime + (timeLimit * 1000);
 
         senseAndRepaint();
+
+        // TODO: Android -> PC
+//        if (bot.getRealBot()){
+//            CommMgr.getCommMgr().recvMsg();
+//        }
+
         explorationLoop(bot.getRobotPosRow(), bot.getRobotPosCol());
     }
 
@@ -91,6 +94,8 @@ public class ExplorationAlgo {
                 }
             }
         } while (areaExplored <= coverageLimit && System.currentTimeMillis() <= endTime);
+
+        goHome();
 
         if(!imageProcessing) {
             areaExplored = calculateAreaExplored();
@@ -216,6 +221,19 @@ public class ExplorationAlgo {
     }
 
     /**
+     * Returns the robot to START after exploration and points the bot northwards.
+     */
+    private void goHome() {
+        if (!bot.getTouchedGoal() && coverageLimit == 300 && timeLimit == 3600) {
+            FastestPathAlgo goToGoal = new FastestPathAlgo(exploredMap, bot, realMap);
+            goToGoal.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
+        }
+
+        FastestPathAlgo returnToStart = new FastestPathAlgo(exploredMap, bot, realMap);
+        returnToStart.runFastestPath(RobotConstants.START_ROW, RobotConstants.START_COL);
+    }
+
+    /**
      * Returns true for cells that are explored and not obstacles.
      */
     private boolean isExploredNotObstacle(int r, int c) {
@@ -302,7 +320,7 @@ public class ExplorationAlgo {
      */
     private void senseAndRepaint() {
         bot.setSensors();
-        sensorData = bot.sense(exploredMap, realMap);
+        bot.sense(exploredMap, realMap);
 
         sendToAndroid();
         exploredMap.repaint();
@@ -441,9 +459,10 @@ public class ExplorationAlgo {
         String robotCol = String.valueOf(bot.getRobotPosCol());
         String robotDir = Character.toString(DIRECTION.print(bot.getRobotCurDir()));
 
-        if(bot.getRealBot()){
-            CommMgr.getCommMgr().sendMsg(mapStrings[0] + "," + mapStrings[1] + "," + robotCol + "," + robotRow + "," + robotDir, CommMgr.AN);
-        }
+        // TODO: PC -> Android
+//        if(bot.getRealBot()){
+//            CommMgr.getCommMgr().sendMsg(mapStrings[0] + "," + mapStrings[1] + "," + robotCol + "," + robotRow + "," + robotDir, CommMgr.AN);
+//        }
     }
 
     private void sendToCamera(int targetRow, int targetCol, String side){

@@ -30,7 +30,7 @@ public class Simulator {
     private static Map exploredMap = null;          // exploration map
 
     private static boolean loadedMap = false;
-    private static String filename = "Week9";
+    private static String filename = "Sample5";
 
     private static int waypointRow = -1;
     private static int waypointCol = -1;

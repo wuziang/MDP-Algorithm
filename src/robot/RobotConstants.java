@@ -23,7 +23,7 @@ public class RobotConstants {
     public static final int CAMERA_RANGE = 2;                       // upper range of camera (cells)
     public static final String CAMERA_DIRECTION = "FRONT";          // direction of camera (cells)
 
-    public static final int STOP_TIME = 10;
+    public static final int STOP_TIME = 30;
     public static final int INFINITE_COST = 9999;
 
     public enum DIRECTION {

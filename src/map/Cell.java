@@ -8,9 +8,12 @@ public class Cell {
     private final int row;
     private final int col;
 
-    private boolean isObstacle;
+    private int isObstacle;
     private boolean isVirtualWall;
     private boolean isExplored;
+
+    private double senseCount;
+    private double senseObstacle;
 
     private boolean[] isProcessed;
 
@@ -29,11 +32,12 @@ public class Cell {
     }
 
     public void setIsObstacle(boolean val) {
-        this.isObstacle = val;
+        if(val) this.senseObstacle++;
+        this.senseCount++;
     }
 
     public boolean getIsObstacle() {
-        return this.isObstacle;
+        return (senseObstacle/senseCount)>0.5;
     }
 
     public void setVirtualWall(boolean val) {

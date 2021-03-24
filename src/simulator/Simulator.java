@@ -20,18 +20,16 @@ import static utils.MapDescriptor.*;
 
 public class Simulator {
     private static JFrame _appFrame = null;         // application JFrame
-
     private static JPanel _mapCards = null;         // JPanel for map views
     private static JPanel _buttons = null;          // JPanel for buttons
 
     private static Robot bot;
 
+    private static boolean loadedMap = false;
     private static Map realMap = null;              // real map
     private static Map exploredMap = null;          // exploration map
 
-    private static boolean loadedMap = false;
     private static String filename = "Week9";
-
     private static int waypointRow = -1;
     private static int waypointCol = -1;
 
@@ -179,72 +177,6 @@ public class Simulator {
 
         _buttons.add(btn_LoadMap);
 
-        // FastestPath Class for Multithreading
-        class FastestPath extends SwingWorker<Integer, String> {
-            protected Integer doInBackground() throws Exception {
-                bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
-                bot.setRobotDir(RobotConstants.DIRECTION.NORTH);
-
-                realMap.repaint();
-
-                FastestPathAlgo fastestPathToWayPoint;
-                fastestPathToWayPoint = new FastestPathAlgo(realMap, bot);
-                fastestPathToWayPoint.runFastestPath(waypointRow, waypointCol);
-
-                bot.setRobotPos(waypointRow, waypointCol);
-                realMap.repaint();
-
-                FastestPathAlgo fastestPathToGoal;
-                fastestPathToGoal = new FastestPathAlgo(realMap, bot);
-                fastestPathToGoal.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
-
-                return 111;
-            }
-        }
-
-        // Exploration Class for Multithreading
-        class Exploration extends SwingWorker<Integer, String> {
-            protected Integer doInBackground() throws Exception {
-                int row, col;
-
-                row = RobotConstants.START_ROW;
-                col = RobotConstants.START_COL;
-
-                bot.setRobotPos(row, col);
-                exploredMap.repaint();
-
-                ExplorationAlgo exploration;
-                exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
-
-                exploration.setPledgeEnabled(pledgeMode);
-                exploration.runExploration();
-
-                return 222;
-            }
-        }
-
-        // Image Exploration Class for Multithreading
-        class ImageExploration extends SwingWorker<Integer, String> {
-            protected Integer doInBackground() throws Exception {
-                int row, col;
-
-                row = RobotConstants.START_ROW;
-                col = RobotConstants.START_COL;
-
-                bot.setRobotPos(row, col);
-                exploredMap.repaint();
-
-                ExplorationAlgo image;
-                image = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
-
-                image.setImageProcessing(true);
-                image.setPledgeEnabled(pledgeMode);
-                image.runExploration();
-
-                return 333;
-            }
-        }
-
         // Fastest Path Button
         JButton btn_FastestPath = new JButton("Fastest Path");
         formatButton(btn_FastestPath);
@@ -282,24 +214,10 @@ public class Simulator {
 
                 CardLayout cl = ((CardLayout) _mapCards.getLayout());
                 cl.show(_mapCards, "EXPLORATION");
-                new ImageExploration().execute();
+                new ImageProcessing().execute();
             }
         });
         _buttons.add(btn_Image_Exploration);
-
-        // TimeExploration Class for Multithreading
-        class TimeExploration extends SwingWorker<Integer, String> {
-            protected Integer doInBackground() throws Exception {
-                bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
-                exploredMap.repaint();
-
-                ExplorationAlgo timeExplo = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
-                timeExplo.runExploration();
-
-                generateMapDescriptor(exploredMap);
-                return 444;
-            }
-        }
 
         // Time-limited Exploration Button
         JButton btn_TimeExploration = new JButton("Time-Limited");
@@ -323,7 +241,7 @@ public class Simulator {
                         timeLimit = (Integer.parseInt(timeArr[0]) * 60) + Integer.parseInt(timeArr[1]);
                         CardLayout cl = ((CardLayout) _mapCards.getLayout());
                         cl.show(_mapCards, "EXPLORATION");
-                        new TimeExploration().execute();
+                        new ExplorationTime().execute();
                     }
                 });
 
@@ -334,20 +252,6 @@ public class Simulator {
             }
         });
         _buttons.add(btn_TimeExploration);
-
-        // CoverageExploration Class for Multithreading
-        class CoverageExploration extends SwingWorker<Integer, String> {
-            protected Integer doInBackground() throws Exception {
-                bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
-                exploredMap.repaint();
-
-                ExplorationAlgo coverageExplo = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
-                coverageExplo.runExploration();
-
-                generateMapDescriptor(exploredMap);
-                return 555;
-            }
-        }
 
         // Coverage-limited Exploration Button
         JButton btn_CoverageExploration = new JButton("Coverage-Limited");
@@ -367,7 +271,7 @@ public class Simulator {
                     public void mousePressed(MouseEvent e) {
                         coverageExploDialog.setVisible(false);
                         coverageLimit = (int) ((Integer.parseInt(coverageTF.getText())) * MapConstants.MAP_SIZE / 100.0);
-                        new CoverageExploration().execute();
+                        new ExplorationCoverage().execute();
                         CardLayout cl = ((CardLayout) _mapCards.getLayout());
                         cl.show(_mapCards, "EXPLORATION");
                     }
@@ -381,5 +285,99 @@ public class Simulator {
         });
 
         _buttons.add(btn_CoverageExploration);
+    }
+
+    // FastestPath Class for Multithreading
+    private static class FastestPath extends SwingWorker<Integer, String> {
+        protected Integer doInBackground() throws Exception {
+            bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
+            bot.setRobotDir(RobotConstants.DIRECTION.NORTH);
+
+            realMap.repaint();
+
+            FastestPathAlgo fastestPathToWayPoint;
+            fastestPathToWayPoint = new FastestPathAlgo(realMap, bot);
+            fastestPathToWayPoint.runFastestPath(waypointRow, waypointCol);
+
+            bot.setRobotPos(waypointRow, waypointCol);
+            realMap.repaint();
+
+            FastestPathAlgo fastestPathToGoal;
+            fastestPathToGoal = new FastestPathAlgo(realMap, bot);
+            fastestPathToGoal.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
+
+            return 111;
+        }
+    }
+
+    // Exploration Class for Multithreading
+    private static class Exploration extends SwingWorker<Integer, String> {
+        protected Integer doInBackground() throws Exception {
+            int row, col;
+
+            row = RobotConstants.START_ROW;
+            col = RobotConstants.START_COL;
+
+            bot.setRobotPos(row, col);
+            exploredMap.repaint();
+
+            ExplorationAlgo exploration;
+            exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+
+            exploration.setPledgeEnabled(pledgeMode);
+            exploration.runExploration();
+
+            return 222;
+        }
+    }
+
+    // Image Exploration Class for Multithreading
+    private static class ImageProcessing extends SwingWorker<Integer, String> {
+        protected Integer doInBackground() throws Exception {
+            int row, col;
+
+            row = RobotConstants.START_ROW;
+            col = RobotConstants.START_COL;
+
+            bot.setRobotPos(row, col);
+            exploredMap.repaint();
+
+            ExplorationAlgo image;
+            image = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+
+            image.setImageProcessing(true);
+            image.setPledgeEnabled(pledgeMode);
+            image.runExploration();
+
+            return 333;
+        }
+    }
+
+    // ExplorationTime Class for Multithreading
+    private static class ExplorationTime extends SwingWorker<Integer, String> {
+        protected Integer doInBackground() throws Exception {
+            bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
+            exploredMap.repaint();
+
+            ExplorationAlgo timeExplo = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+            timeExplo.runExploration();
+
+            generateMapDescriptor(exploredMap);
+            return 444;
+        }
+    }
+
+    // ExplorationCoverage Class for Multithreading
+    private static class ExplorationCoverage extends SwingWorker<Integer, String> {
+        protected Integer doInBackground() throws Exception {
+            bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
+            exploredMap.repaint();
+
+            ExplorationAlgo coverageExplo = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+            coverageExplo.runExploration();
+
+            generateMapDescriptor(exploredMap);
+            return 555;
+        }
     }
 }

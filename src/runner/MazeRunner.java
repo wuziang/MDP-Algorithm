@@ -63,10 +63,6 @@ public class MazeRunner {
         _appFrame.setSize(new Dimension(700, 700));
         _appFrame.setResizable(false);
 
-        // Center the main frame in the middle of the screen
-        Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
-        _appFrame.setLocation(dim.width / 2 - _appFrame.getSize().width / 2, dim.height / 2 - _appFrame.getSize().height / 2);
-
         // Create the CardLayout for storing the different maps
         _mapCards = new JPanel(new CardLayout());
 

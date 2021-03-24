@@ -319,7 +319,7 @@ public class FastestPathAlgo {
             outputString.append(fCount);
         }
 
-        if(!outputString.isEmpty()) {
+        if(outputString.length()!=0) {
             System.out.println("Instructions: " + outputString.toString());
         }
 

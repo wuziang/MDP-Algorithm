@@ -320,37 +320,25 @@ public class FastestPathAlgo {
         }
 
         if(!outputString.isEmpty()) {
-            System.out.println("Moves: " + outputString.toString());
+            System.out.println("Instructions: " + outputString.toString());
         }
 
-        if (!bot.getRealBot()) {
-            for (MOVEMENT x : movements) {
-                if (x == MOVEMENT.FORWARD) {
-                    if (!canMoveForward()) {
-                        System.out.println("Early termination of fastest path execution.");
-                        return "T";
-                    }
+        for (MOVEMENT x : movements) {
+            if (x == MOVEMENT.FORWARD) {
+                if (!canMoveForward()) {
+                    System.out.println("Early termination of fastest path execution.");
+                    return "T";
                 }
-
-                bot.move(x);
-                this.exploredMap.repaint();
             }
-        }
-        else{
-            for (MOVEMENT x : movements) {
-                if (x == MOVEMENT.FORWARD) {
-                    if (!canMoveForward()) {
-                        System.out.println("Early termination of fastest path execution.");
-                        return "T";
-                    }
-                }
 
-                bot.move(x);
+            bot.move(x);
 
+            if(explorationMode){
                 bot.setSensors();
                 bot.sense(this.exploredMap, this.realMap);
-                this.exploredMap.repaint();
             }
+
+            this.exploredMap.repaint();
         }
 
         return outputString.toString();

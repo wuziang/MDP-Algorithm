@@ -12,6 +12,8 @@ public class Cell {
     private boolean isVirtualWall;
     private boolean isExplored;
 
+    private boolean isPledged;
+
     private double senseCount;
     private double senseObstacle;
 
@@ -61,6 +63,10 @@ public class Cell {
     public boolean getIsExplored() {
         return this.isExplored;
     }
+
+    public void setIsPledged(boolean val) { this.isPledged = val; }
+
+    public boolean getIsPledged() { return this.isPledged; }
 
     public void setIsProcessed(int index, boolean val) {
         this.isProcessed[index] = val;

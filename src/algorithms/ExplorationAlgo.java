@@ -34,18 +34,24 @@ public class ExplorationAlgo {
     private boolean imageMode;
     private int takenImage=0;
 
-    private int rightHanded=0;
+    private int[] sensorData;
+    private boolean pledgeEnabled;
+    private boolean pledgeMode;
 
     public ExplorationAlgo(Map exploredMap, Map realMap, Robot bot, int coverageLimit, int timeLimit) {
         this.exploredMap = exploredMap;
         this.realMap = realMap;
         this.bot = bot;
-        this.coverageLimit = coverageLimit;
+        this.coverageLimit = coverageLimit-3;
         this.timeLimit = timeLimit-RobotConstants.STOP_TIME;
     }
 
     public void setImageProcessing(boolean imageProcessing){
         this.imageProcessing = imageProcessing;
+    }
+
+    public void setPledgeEnabled(boolean pledgeEnabled){
+        this.pledgeEnabled = pledgeEnabled;
     }
 
     /**
@@ -68,10 +74,9 @@ public class ExplorationAlgo {
 
         senseAndRepaint();
 
-        // TODO: Android -> PC
-//        if (bot.getRealBot()){
-//            CommMgr.getCommMgr().recvMsg();
-//        }
+        if (bot.getRealBot()){
+            CommMgr.getCommMgr().recvMsg();
+        }
 
         explorationLoop(bot.getRobotPosRow(), bot.getRobotPosCol());
     }
@@ -93,7 +98,11 @@ public class ExplorationAlgo {
                     break;
                 }
             }
-        } while (areaExplored <= coverageLimit && System.currentTimeMillis() <= endTime);
+
+            if(pledgeEnabled){
+                runPledgeAlgo();
+            }
+        } while (areaExplored < coverageLimit && System.currentTimeMillis() < endTime);
 
         goHome();
 
@@ -255,6 +264,417 @@ public class ExplorationAlgo {
         return false;
     }
 
+
+    /**
+     * Pledge algorithm
+     * General flow:
+     * - If an obstacle is detected to the robot's left/right, begin pledge algorithm
+     * - This will be inside a while loop (or maybe not) and will continue until the very starting waypoint is reached again
+     * - The starting waypoint should not be visited and this should be the main condition to start the pledge algorithm
+     **/
+    private void runPledgeAlgo() {
+        pledgeMode=true;
+
+        // This Pledge algorithm is designed to traverse obstacles that have one side towards the wall
+        if ((sensorData[1] == 1 & sensorData[2] == 1) | (sensorData[2] == 1 & sensorData[3] == 1)){
+            // For incase if the robot is against the wall
+            if (bot.getRobotPosCol()==1 && bot.getRobotCurDir()==DIRECTION.NORTH){
+                turnBotDirection(DIRECTION.SOUTH);
+                pledgeMode=false;
+                return;
+            }
+            if (bot.getRobotPosCol()==1 && bot.getRobotCurDir()==DIRECTION.WEST){
+                turnBotDirection(DIRECTION.SOUTH);
+                pledgeMode=false;
+                return;
+            }
+            if (bot.getRobotPosCol()==13 && bot.getRobotCurDir()==DIRECTION.SOUTH){
+                turnBotDirection(DIRECTION.NORTH);
+                pledgeMode=false;
+                return;
+            }
+            if (bot.getRobotPosCol()==13 && bot.getRobotCurDir()==DIRECTION.EAST){
+                turnBotDirection(DIRECTION.NORTH);
+                pledgeMode=false;
+                return;
+            }
+
+            boolean flag = false;
+
+            // Then we start making the robot traverse across the perimeter of the obstacle
+            while (flag == false) {
+                int currentColumn = bot.getRobotPosCol();
+                DIRECTION currentDirection = bot.getRobotCurDir();
+
+                switch (currentDirection) {
+                    case NORTH:
+                        if (lookRight()) {
+                            turnBotDirection(DIRECTION.EAST);
+                            moveBot(MOVEMENT.FORWARD);
+                        } else if (!lookRight() & lookForward()) {
+                            moveBot(MOVEMENT.FORWARD);
+                        } else if (!lookRight() & !lookForward() & lookLeft()) {
+                            turnBotDirection(DIRECTION.WEST);
+                            moveBot(MOVEMENT.FORWARD);
+                        } else {
+                            // For the situation where the bot is stuck inside an L shaped obstacle
+                            turnBotDirection(DIRECTION.WEST);
+                            while (sensorData[1]==1 | sensorData[2]==1 | sensorData[3]==1) {
+                                turnBotDirection(DIRECTION.NORTH);
+                                moveBot(MOVEMENT.BACKWARD);
+                                turnBotDirection(DIRECTION.WEST);
+                            }
+                            moveBot(MOVEMENT.FORWARD);
+                        }
+                        break;
+                    case EAST:
+                        if (lookRight()) {
+                            turnBotDirection(DIRECTION.SOUTH);
+                            moveBot(MOVEMENT.FORWARD);
+                        } else if (!lookRight() & lookForward()) {
+                            moveBot(MOVEMENT.FORWARD);
+                        } else if (!lookRight() & !lookForward() & lookLeft() & currentColumn!=13) {
+                            turnBotDirection(DIRECTION.NORTH);
+                            moveBot(MOVEMENT.FORWARD);
+                        } else {
+                            // For the situation where the bot is stuck inside an L shaped obstacle
+                            turnBotDirection(DIRECTION.NORTH);
+                            while (sensorData[1]==1 | sensorData[2]==1 | sensorData[3]==1) {
+                                turnBotDirection(DIRECTION.EAST);
+                                moveBot(MOVEMENT.BACKWARD);
+                                turnBotDirection(DIRECTION.NORTH);
+                            }
+                            moveBot(MOVEMENT.FORWARD);
+                        }
+                        break;
+                    case SOUTH:
+                        if (lookRight()) {
+                            turnBotDirection(DIRECTION.WEST);
+                            moveBot(MOVEMENT.FORWARD);
+                        } else if (!lookRight() & lookForward()) {
+                            moveBot(MOVEMENT.FORWARD);
+                        } else if (!lookRight() & lookLeft() & !lookForward()) {
+                            turnBotDirection(DIRECTION.EAST);
+                            moveBot(MOVEMENT.FORWARD);
+                        } else {
+                            // For the situation where the bot is stuck inside an L shaped obstacle
+                            turnBotDirection(DIRECTION.EAST);
+                            while (sensorData[1]==1 | sensorData[2]==1 | sensorData[3]==1) {
+                                turnBotDirection(DIRECTION.SOUTH);
+                                moveBot(MOVEMENT.BACKWARD);
+                                turnBotDirection(DIRECTION.EAST);
+                            }
+                            moveBot(MOVEMENT.FORWARD);
+                        }
+                        break;
+                    case WEST:
+                        if (lookRight()) {
+                            turnBotDirection(DIRECTION.NORTH);
+                            moveBot(MOVEMENT.FORWARD);
+                        } else if (!lookRight() & lookForward()) {
+                            moveBot(MOVEMENT.FORWARD);
+                        } else if (!lookRight() & !lookForward() & lookLeft() & currentColumn!=1){
+                            turnBotDirection(DIRECTION.SOUTH);
+                            moveBot(MOVEMENT.FORWARD);
+                        } else {
+                            // For the situation where the bot is stuck inside an L shaped obstacle
+                            turnBotDirection(DIRECTION.SOUTH);
+                            while (sensorData[1]==1 | sensorData[2]==1 | sensorData[3]==1) {
+                                turnBotDirection(DIRECTION.WEST);
+                                moveBot(MOVEMENT.BACKWARD);
+                                turnBotDirection(DIRECTION.SOUTH);
+                            }
+                            moveBot(MOVEMENT.FORWARD);
+                        }
+                        break;
+                }
+
+                // The exit condition is when the robot is back at the same row/column
+                if (bot.getRobotPosRow() == 1 | bot.getRobotPosRow() == 18){
+                    flag = true;
+                    pledgeMode = false;
+                    return;
+                }
+                if (bot.getRobotPosCol() == 1 | bot.getRobotPosCol() == 13){
+                    flag = true;
+                    pledgeMode = false;
+                    return;
+                }
+            }
+        }
+
+        // This Pledge algorithm is for every other kind of obstacle
+        if (moves != 0){
+            // This is the normal Pledge for any obstacle that is not on the first and last row
+            int currentColumn = bot.getRobotPosCol();
+            int currentRow = bot.getRobotPosRow();
+            DIRECTION startingDirection = bot.getRobotCurDir();
+
+            Cell c = exploredMap.getCell(currentRow, currentColumn);
+            //int index = DIRECTION.SOUTH.getIndex();
+            //if(c.getIsExplored() && c.getIsObstacle() && !c.getIsProcessed(index)){}
+
+            if (sensorData[0] == 1){
+                // For incase if the robot is against the wall
+                if (bot.getRobotPosCol()==1 && bot.getRobotCurDir()==DIRECTION.NORTH){
+                    pledgeMode=false;
+                    return;
+                }
+                if (bot.getRobotPosCol()==13 && bot.getRobotCurDir()==DIRECTION.SOUTH){
+                    pledgeMode=false;
+                    return;
+                }
+
+                // For incase if the robot is on the edges
+                if (bot.getRobotPosCol()==1 && bot.getRobotPosRow()==18){
+                    // Turn robot to face the correct direction (towards the start)
+                    turnBotDirection(DIRECTION.SOUTH);
+
+                    while (sensorData[0]==1){
+                        moveBot(MOVEMENT.FORWARD);
+                    }
+                    pledgeMode=false;
+                    return;
+                }
+                if (bot.getRobotPosCol()==13 && bot.getRobotPosRow()==1){
+                    // Turn robot to face the correct direction (towards the goal)
+                    turnBotDirection(DIRECTION.NORTH);
+
+                    while (sensorData[0]==1){
+                        moveBot(MOVEMENT.FORWARD);
+                    }
+                    pledgeMode=false;
+                    return;
+                }
+                if (bot.getRobotPosCol()==13 && bot.getRobotPosRow()==18){
+                    // Turn robot to face the correct direction (towards the other edge)
+                    turnBotDirection(DIRECTION.WEST);
+
+                    while (sensorData[0]==1){
+                        moveBot(MOVEMENT.FORWARD);
+                    }
+                    pledgeMode=false;
+                    return;
+                }
+                if (bot.getRobotCurDir()==DIRECTION.EAST && bot.getRobotPosRow()==18){
+                    pledgeMode=false;
+                    return;
+                }
+
+                int startColumn = bot.getRobotPosCol();
+                int startRow = bot.getRobotPosRow();
+
+                // We do not conduct the Pledge on cells that have already been explored by an earlier Pledge
+                if (exploredMap.getCell(startRow, startColumn).getIsPledged()){
+                    return;
+                }
+
+                boolean flag = false;
+
+                // This is the calibration part of the pledge which will move the robot backwards to prepare it for the Pledge
+                switch (startingDirection){
+                    case NORTH:
+                        turnBotDirection(DIRECTION.SOUTH);
+                        moveBot(MOVEMENT.FORWARD);
+                        break;
+                    case EAST:
+                        turnBotDirection(DIRECTION.WEST);
+                        moveBot(MOVEMENT.FORWARD);
+                        break;
+                    case SOUTH:
+                        turnBotDirection(DIRECTION.NORTH);
+                        moveBot(MOVEMENT.FORWARD);
+                        break;
+                    case WEST:
+                        turnBotDirection(DIRECTION.EAST);
+                        moveBot(MOVEMENT.FORWARD);
+                        break;
+                }
+
+                // Check if the front part of the robot is still stuck
+                switch (startingDirection) {
+                    case NORTH:
+                        turnBotDirection(DIRECTION.WEST);
+                        break;
+                    case EAST:
+                        turnBotDirection(DIRECTION.NORTH);
+                        break;
+                    case SOUTH:
+                        turnBotDirection(DIRECTION.EAST);
+                        break;
+                    case WEST:
+                        turnBotDirection(DIRECTION.SOUTH);
+                        break;
+                }
+
+                while (sensorData[1]==1 | sensorData[2]==1 | sensorData[3]==1){
+                    switch (startingDirection) {
+                        case NORTH:
+                            turnBotDirection(DIRECTION.SOUTH);
+                            moveBot(MOVEMENT.FORWARD);
+                            turnBotDirection(DIRECTION.WEST);
+                            break;
+                        case EAST:
+                            turnBotDirection(DIRECTION.WEST);
+                            moveBot(MOVEMENT.FORWARD);
+                            turnBotDirection(DIRECTION.NORTH);
+                            break;
+                        case SOUTH:
+                            turnBotDirection(DIRECTION.NORTH);
+                            moveBot(MOVEMENT.FORWARD);
+                            turnBotDirection(DIRECTION.EAST);
+                            break;
+                        case WEST:
+                            turnBotDirection(DIRECTION.EAST);
+                            moveBot(MOVEMENT.FORWARD);
+                            turnBotDirection(DIRECTION.SOUTH);
+                            break;
+                    }
+                }
+
+                // Make the bot move forward so it will have an obstacle on it's right side
+                moveBot(MOVEMENT.FORWARD);
+
+                // Then we start making the robot traverse across the perimeter of the obstacle
+                while (flag == false) {
+                    currentColumn = bot.getRobotPosCol();
+                    currentRow = bot.getRobotPosRow();
+                    DIRECTION currentDirection = bot.getRobotCurDir();
+
+                    switch (currentDirection) {
+                        case NORTH:
+                            if (lookRight()) {
+                                turnBotDirection(DIRECTION.EAST);
+                                moveBot(MOVEMENT.FORWARD);
+                            } else if (!lookRight() & lookForward()) {
+                                moveBot(MOVEMENT.FORWARD);
+                            } else if (!lookRight() & !lookForward() & lookLeft()) {
+                                turnBotDirection(DIRECTION.WEST);
+                            } else {
+                                if (currentColumn!=1 & currentColumn!=13 & lookForward()){
+                                    moveBot(MOVEMENT.FORWARD);
+                                }
+                                else{
+                                    if (!lookForward()){
+                                        flag = true;
+                                        break;
+                                    }
+                                    moveBot(MOVEMENT.FORWARD);
+                                }
+                            }
+                            break;
+                        case EAST:
+                            if (lookRight()) {
+                                turnBotDirection(DIRECTION.SOUTH);
+                                moveBot(MOVEMENT.FORWARD);
+                            } else if (!lookRight() & lookForward()) {
+                                moveBot(MOVEMENT.FORWARD);
+                            } else if (!lookRight() & !lookForward() & lookLeft() & currentColumn!=13) {
+                                turnBotDirection(DIRECTION.NORTH);
+                            } else {
+                                if (currentColumn!=1 & currentColumn!=13 & lookForward()){
+                                    moveBot(MOVEMENT.FORWARD);
+                                }
+                                else{
+                                    if (!lookForward()){
+                                        flag = true;
+                                        break;
+                                    }
+                                    moveBot(MOVEMENT.FORWARD);
+                                }
+                            }
+                            break;
+                        case SOUTH:
+                            if (lookRight()) {
+                                turnBotDirection(DIRECTION.WEST);
+                                moveBot(MOVEMENT.FORWARD);
+                            } else if (!lookRight() & lookForward()) {
+                                moveBot(MOVEMENT.FORWARD);
+                            } else if (!lookRight() & lookLeft() & !lookForward()) {
+                                turnBotDirection(DIRECTION.EAST);
+                            } else {
+                                if (currentColumn!=1 & currentColumn!=13 & lookForward()){
+                                    moveBot(MOVEMENT.FORWARD);
+                                }
+                                else{
+                                    if (!lookForward()){
+                                        flag = true;
+                                        break;
+                                    }
+                                    moveBot(MOVEMENT.FORWARD);
+                                }
+                            }
+                            break;
+                        case WEST:
+                            if (lookRight()) {
+                                turnBotDirection(DIRECTION.NORTH);
+                                moveBot(MOVEMENT.FORWARD);
+                            } else if (!lookRight() & lookForward()) {
+                                moveBot(MOVEMENT.FORWARD);
+                            } else if (!lookRight() & !lookForward() & lookLeft() & currentColumn!=1){
+                                turnBotDirection(DIRECTION.SOUTH);
+                            } else {
+                                if (currentColumn!=1 & currentColumn!=13 & lookForward()){
+                                    moveBot(MOVEMENT.FORWARD);
+                                }
+                                else{
+                                    if (!lookForward()){
+                                        flag = true;
+                                        break;
+                                    }
+                                    moveBot(MOVEMENT.FORWARD);
+                                }
+                            }
+                            break;
+                    }
+
+                    if (currentColumn!=1 | currentColumn!=13){
+                        // This is the usual exit condition should the Robot manage to traverse the entire obstacle
+                        if (currentColumn == startColumn & currentRow == startRow) {
+                            // Make Robot face the front once again
+                            switch (currentDirection) {
+                                case NORTH:
+                                    turnBotDirection(DIRECTION.SOUTH);
+                                    break;
+                                case EAST:
+                                    turnBotDirection(DIRECTION.WEST);
+                                    break;
+                                case SOUTH:
+                                    turnBotDirection(DIRECTION.NORTH);
+                                    break;
+                                case WEST:
+                                    turnBotDirection(DIRECTION.EAST);
+                                    break;
+                            }
+                            flag = true;
+                        }
+                    }
+
+                    if ((currentColumn==1 | currentColumn==13) & currentColumn == startColumn & !lookForward()){
+                        // This is the early exit condition for incase if the obstacle is on the wall
+                        // Make Robot face the front once again
+                        switch (currentDirection) {
+                            case NORTH:
+                                turnBotDirection(DIRECTION.SOUTH);
+                                break;
+                            case EAST:
+                                turnBotDirection(DIRECTION.WEST);
+                                break;
+                            case SOUTH:
+                                turnBotDirection(DIRECTION.NORTH);
+                                break;
+                            case WEST:
+                                turnBotDirection(DIRECTION.EAST);
+                                break;
+                        }
+                        flag = true;
+                    }
+                }
+            }
+        }
+        pledgeMode=false;
+    }
+
     /**
      * Returns the number of cells explored in the grid.
      */
@@ -313,6 +733,10 @@ public class ExplorationAlgo {
             westImage();
             imageMode=false;
         }
+
+        if(pledgeMode){
+            exploredMap.getCell(bot.getRobotPosRow(), bot.getRobotPosCol()).setIsPledged(true);
+        }
     }
 
     /**
@@ -320,7 +744,7 @@ public class ExplorationAlgo {
      */
     private void senseAndRepaint() {
         bot.setSensors();
-        bot.sense(exploredMap, realMap);
+        sensorData = bot.sense(exploredMap, realMap);
 
         sendToAndroid();
         exploredMap.repaint();
@@ -459,10 +883,9 @@ public class ExplorationAlgo {
         String robotCol = String.valueOf(bot.getRobotPosCol());
         String robotDir = Character.toString(DIRECTION.print(bot.getRobotCurDir()));
 
-        // TODO: PC -> Android
-//        if(bot.getRealBot()){
-//            CommMgr.getCommMgr().sendMsg(mapStrings[0] + "," + mapStrings[1] + "," + robotCol + "," + robotRow + "," + robotDir, CommMgr.AN);
-//        }
+        if(bot.getRealBot()){
+            CommMgr.getCommMgr().sendMsg(mapStrings[0] + "," + mapStrings[1] + "," + robotCol + "," + robotRow + "," + robotDir, CommMgr.AN);
+        }
     }
 
     private void sendToCamera(int targetRow, int targetCol, String side){

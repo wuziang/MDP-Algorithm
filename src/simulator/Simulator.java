@@ -30,13 +30,15 @@ public class Simulator {
     private static Map exploredMap = null;          // exploration map
 
     private static boolean loadedMap = false;
-    private static String filename = "Sample5";
+    private static String filename = "Week9";
 
     private static int waypointRow = -1;
     private static int waypointCol = -1;
 
     private static int timeLimit = 360;            // time limit
     private static int coverageLimit = 300;         // coverage limit
+
+    private static boolean pledgeMode = true;
 
     /**
      * Initialises the different maps and displays the application.
@@ -213,6 +215,8 @@ public class Simulator {
 
                 ExplorationAlgo exploration;
                 exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+
+                exploration.setPledgeEnabled(pledgeMode);
                 exploration.runExploration();
 
                 return 222;
@@ -234,6 +238,7 @@ public class Simulator {
                 image = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
                 image.setImageProcessing(true);
+                image.setPledgeEnabled(pledgeMode);
                 image.runExploration();
 
                 return 333;

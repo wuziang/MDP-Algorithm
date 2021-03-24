@@ -34,11 +34,8 @@ public class MazeRunner {
 
     private static final CommMgr comm = CommMgr.getCommMgr();
 
-    private static final String filename = "Week8";
-    private static int waypointRow = 1;
-    private static int waypointCol = 1;
-
     private static final boolean explorationMode = true;
+    private static boolean pledgeMode = true;
 
     /**
      * Initialises the different maps and displays the application.
@@ -130,6 +127,7 @@ public class MazeRunner {
         formatButton(btn_FastestPath);
         btn_FastestPath.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
+                String filename = "Week8";
                 loadMap(realMap, filename);
                 realMap.repaint();
 
@@ -165,6 +163,9 @@ public class MazeRunner {
     // FastestPath Class for Multithreading
     private static class FastestPath extends SwingWorker<Integer, String> {
         protected Integer doInBackground() throws Exception {
+            int waypointRow = 8;
+            int waypointCol = 7;
+
             bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
             bot.setRobotDir(RobotConstants.DIRECTION.NORTH);
 
@@ -216,6 +217,8 @@ public class MazeRunner {
 
             ExplorationAlgo exploration;
             exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+
+            exploration.setPledgeEnabled(pledgeMode);
             exploration.runExploration();
 
             return 222;
@@ -231,6 +234,7 @@ public class MazeRunner {
             image = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
             image.setImageProcessing(true);
+            image.setPledgeEnabled(pledgeMode);
             image.runExploration();
 
             return 333;

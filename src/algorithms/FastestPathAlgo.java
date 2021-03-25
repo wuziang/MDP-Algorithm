@@ -25,18 +25,21 @@ public class FastestPathAlgo {
     private ArrayList<Cell> toVisit;        // array of Cells to be visited
     private ArrayList<Cell> visited;        // array of visited Cells
     private HashMap<Cell, Cell> parents;    // HashMap of Child --> Parent
+
     private Cell current;                   // current Cell
     private Cell[] neighbors;               // array of neighbors of current Cell
     private DIRECTION curDir;               // current direction of robot
     private double[][] gCosts;              // array of real cost from START to [row][col] i.e. g(n)
+
     private Robot bot;
+
     private Map exploredMap;
-    private final Map realMap;
+    private Map realMap;
+
     private int loopCount;
     private boolean explorationMode;
 
     public FastestPathAlgo(Map exploredMap, Robot bot) {
-        this.realMap = null;
         initObject(exploredMap, bot);
     }
 
@@ -45,7 +48,6 @@ public class FastestPathAlgo {
         this.explorationMode = true;
         initObject(exploredMap, bot);
     }
-
     /**
      * Initialise the FastestPathAlgo object.
      */
@@ -170,7 +172,7 @@ public class FastestPathAlgo {
      * Find the fastest path from the robot's current position to [goalRow, goalCol].
      */
     public String runFastestPath(int goalRow, int goalCol) {
-        System.out.println("Calculating fastest path from (" + current.getRow() + ", " + current.getCol() + ") to goal (" + goalRow + ", " + goalCol + ")...");
+        System.out.println("\nFinding fastest path from (" + current.getRow() + ", " + current.getCol() + ") to goal (" + goalRow + ", " + goalCol + ")...");
 
         Stack<Cell> path;
         do {
@@ -188,7 +190,6 @@ public class FastestPathAlgo {
             toVisit.remove(current);    // remove current from toVisit
 
             if (visited.contains(exploredMap.getCell(goalRow, goalCol))) {
-                System.out.println("Goal visited. Path found!");
                 path = getPath(goalRow, goalCol);
                 printFastestPath(path);
                 return executePath(path, goalRow, goalCol);
@@ -276,8 +277,11 @@ public class FastestPathAlgo {
 
         ArrayList<MOVEMENT> movements = new ArrayList<>();
 
-        Robot tempBot = new Robot(1, 1, false);
+        Robot tempBot = new Robot(bot.getRobotPosRow(), bot.getRobotPosCol(), false);
+        tempBot.setRobotDir(bot.getRobotCurDir());
         tempBot.setSpeed(0);
+
+        int fCount = 0;
         while ((tempBot.getRobotPosRow() != goalRow) || (tempBot.getRobotPosCol() != goalCol)) {
             if (tempBot.getRobotPosRow() == temp.getRow() && tempBot.getRobotPosCol() == temp.getCol()) {
                 temp = path.pop();
@@ -292,61 +296,51 @@ public class FastestPathAlgo {
                 m = MOVEMENT.FORWARD;
             }
 
-            System.out.println("Movement " + MOVEMENT.print(m) + " from (" + tempBot.getRobotPosRow() + ", " + tempBot.getRobotPosCol() + ") to (" + temp.getRow() + ", " + temp.getCol() + ")");
-
             tempBot.move(m);
             movements.add(m);
-            outputString.append(MOVEMENT.print(m));
-        }
+            // outputString.append(MOVEMENT.print(m));
 
-        if (!bot.getRealBot() || explorationMode) {
-            for (MOVEMENT x : movements) {
-                if (x == MOVEMENT.FORWARD) {
-                    if (!canMoveForward()) {
-                        System.out.println("Early termination of fastest path execution.");
-                        return "T";
-                    }
+            if (m == MOVEMENT.FORWARD) {
+                fCount++;
+                if (fCount == 9) {
+                    outputString.append(fCount);
+                    fCount = 0;
                 }
-
-                bot.move(x);
-                this.exploredMap.repaint();
-
-                // During exploration, use sensor data to update exploredMap.
-                if (explorationMode) {
-                    bot.setSensors();
-                    bot.sense(this.exploredMap, this.realMap);
-                    this.exploredMap.repaint();
+            } else if (m == MOVEMENT.RIGHT || m == MOVEMENT.LEFT) {
+                if (fCount > 0) {
+                    outputString.append(fCount);
+                    fCount = 0;
                 }
-            }
-        } else {
-            int fCount = 0;
-            for (MOVEMENT x : movements) {
-                if (x == MOVEMENT.FORWARD) {
-                    fCount++;
-                    if (fCount == 10) {
-                        bot.moveForwardMultiple(fCount);
-                        fCount = 0;
-                        exploredMap.repaint();
-                    }
-                } else if (x == MOVEMENT.RIGHT || x == MOVEMENT.LEFT) {
-                    if (fCount > 0) {
-                        bot.moveForwardMultiple(fCount);
-                        fCount = 0;
-                        exploredMap.repaint();
-                    }
-
-                    bot.move(x);
-                    exploredMap.repaint();
-                }
-            }
-
-            if (fCount > 0) {
-                bot.moveForwardMultiple(fCount);
-                exploredMap.repaint();
+                outputString.append(MOVEMENT.print(m));
             }
         }
 
-        System.out.println("\nMovements: " + outputString.toString());
+        if (fCount > 0) {
+            outputString.append(fCount);
+        }
+
+        if(outputString.length()!=0) {
+            System.out.println("Instructions: " + outputString.toString());
+        }
+
+        for (MOVEMENT x : movements) {
+            if (x == MOVEMENT.FORWARD) {
+                if (!canMoveForward()) {
+                    System.out.println("Early termination of fastest path execution.");
+                    return "T";
+                }
+            }
+
+            bot.move(x);
+
+            if(explorationMode){
+                bot.setSensors();
+                bot.sense(this.exploredMap, this.realMap);
+            }
+
+            this.exploredMap.repaint();
+        }
+
         return outputString.toString();
     }
 
@@ -443,19 +437,14 @@ public class FastestPathAlgo {
      * Prints the fastest path from the Stack object.
      */
     private void printFastestPath(Stack<Cell> path) {
-        System.out.println("\nLooped " + loopCount + " times.");
-        System.out.println("The number of steps is: " + (path.size() - 1) + "\n");
-
         Stack<Cell> pathForPrint = (Stack<Cell>) path.clone();
         Cell temp;
-        System.out.println("Path:");
+        System.out.print("Path: ");
         while (!pathForPrint.isEmpty()) {
             temp = pathForPrint.pop();
-            if (!pathForPrint.isEmpty()) System.out.print("(" + temp.getRow() + ", " + temp.getCol() + ") --> ");
-            else System.out.print("(" + temp.getRow() + ", " + temp.getCol() + ")");
+            if (!pathForPrint.isEmpty()) System.out.print("(" + temp.getRow() + "," + temp.getCol() + ")->");
+            else System.out.print("(" + temp.getRow() + "," + temp.getCol() + ")\n");
         }
-
-        System.out.println("\n");
     }
 
     /**

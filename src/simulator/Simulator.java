@@ -6,15 +6,13 @@ import map.Map;
 import map.MapConstants;
 import robot.Robot;
 import robot.RobotConstants;
-import utils.CommMgr;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static utils.MapDescriptor.generateMapDescriptor;
-import static utils.MapDescriptor.loadMapFromDisk;
+import static utils.MapDescriptor.*;
 
 /**
  * Simulator for robot navigation in virtual arena.
@@ -22,33 +20,33 @@ import static utils.MapDescriptor.loadMapFromDisk;
 
 public class Simulator {
     private static JFrame _appFrame = null;         // application JFrame
-
     private static JPanel _mapCards = null;         // JPanel for map views
     private static JPanel _buttons = null;          // JPanel for buttons
 
     private static Robot bot;
 
+    private static boolean loadedMap = false;
     private static Map realMap = null;              // real map
     private static Map exploredMap = null;          // exploration map
 
-    private static int timeLimit = 3600;            // time limit
+    private static String filename = "Week9";
+    private static int waypointRow = -1;
+    private static int waypointCol = -1;
+
+    private static int timeLimit = 360;            // time limit
     private static int coverageLimit = 300;         // coverage limit
 
-    private static final CommMgr comm = CommMgr.getCommMgr();
-    private static final boolean realRun = false;
+    private static boolean pledgeMode = true;
 
     /**
      * Initialises the different maps and displays the application.
      */
     public static void main(String[] args) {
-        if (realRun) comm.openConnection();
 
-        bot = new Robot(RobotConstants.START_ROW, RobotConstants.START_COL, realRun);
+        bot = new Robot(RobotConstants.START_ROW, RobotConstants.START_COL, false);
 
-        if (!realRun) {
-            realMap = new Map(bot);
-            realMap.setAllUnexplored();
-        }
+        realMap = new Map(bot);
+        realMap.setAllUnexplored();
 
         exploredMap = new Map(bot);
         exploredMap.setAllUnexplored();
@@ -62,8 +60,8 @@ public class Simulator {
     private static void displayEverything() {
         // Initialise main frame for display
         _appFrame = new JFrame();
-        _appFrame.setTitle("MDP Group 2 Simulator");
-        _appFrame.setSize(new Dimension(690, 700));
+        _appFrame.setTitle("Simulator");
+        _appFrame.setSize(new Dimension(700, 750));
         _appFrame.setResizable(false);
 
         // Center the main frame in the middle of the screen
@@ -97,25 +95,28 @@ public class Simulator {
      * by default.
      */
     private static void initMainLayout() {
-        if (!realRun) {
-            _mapCards.add(realMap, "REAL_MAP");
-        }
+        _mapCards.add(realMap, "REAL_MAP");
         _mapCards.add(exploredMap, "EXPLORATION");
 
         CardLayout cl = ((CardLayout) _mapCards.getLayout());
-        if (!realRun) {
-            cl.show(_mapCards, "REAL_MAP");
-        } else {
-            cl.show(_mapCards, "EXPLORATION");
-        }
+        cl.show(_mapCards, "REAL_MAP");
     }
 
     /**
      * Initialises the JPanel for the buttons.
      */
     private static void initButtonsLayout() {
-        _buttons.setLayout(new GridLayout());
+        _buttons.setLayout(new GridLayout(2, 1));
         addButtons();
+    }
+
+    private static void loadDefaultMap() {
+        if (!loadedMap) {
+            loadMap(realMap, filename);
+            realMap.setWaypoint(waypointRow, waypointCol);
+
+            realMap.repaint();
+        }
     }
 
     /**
@@ -131,95 +132,72 @@ public class Simulator {
      * (for user input) for the different functions of the buttons.
      */
     private static void addButtons() {
-        if (!realRun) {
-            // Load Map Button
-            JButton btn_LoadMap = new JButton("Load Map");
-            formatButton(btn_LoadMap);
-            btn_LoadMap.addMouseListener(new MouseAdapter() {
-                public void mousePressed(MouseEvent e) {
-                    JDialog loadMapDialog = new JDialog(_appFrame, "Load Map", true);
-                    loadMapDialog.setSize(400, 60);
-                    loadMapDialog.setLayout(new FlowLayout());
+        JButton btn_LoadMap = new JButton("Load Map");
+        formatButton(btn_LoadMap);
 
-                    final JTextField loadTF = new JTextField(15);
-                    JButton loadMapButton = new JButton("Load");
+        btn_LoadMap.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                loadedMap = true;
 
-                    loadMapButton.addMouseListener(new MouseAdapter() {
-                        public void mousePressed(MouseEvent e) {
-                            loadMapDialog.setVisible(false);
-                            loadMapFromDisk(realMap, loadTF.getText());
-                            CardLayout cl = ((CardLayout) _mapCards.getLayout());
-                            cl.show(_mapCards, "REAL_MAP");
-                            realMap.repaint();
-                        }
-                    });
+                JDialog loadMapDialog = new JDialog(_appFrame, "Load Map", true);
+                loadMapDialog.setSize(600, 80);
+                loadMapDialog.setLayout(new FlowLayout());
 
-                    loadMapDialog.add(new JLabel("File Name: "));
-                    loadMapDialog.add(loadTF);
-                    loadMapDialog.add(loadMapButton);
-                    loadMapDialog.setVisible(true);
-                }
-            });
-            _buttons.add(btn_LoadMap);
-        }
+                final JTextField loadTF = new JTextField(15);
+                final JTextField loadWaypoint = new JTextField(10);
 
-        // FastestPath Class for Multithreading
-        class FastestPath extends SwingWorker<Integer, String> {
-            protected Integer doInBackground() throws Exception {
-                bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
-                exploredMap.repaint();
+                JButton loadMapButton = new JButton("Load");
 
-                if (realRun) {
-                    while (true) {
-                        System.out.println("Waiting for FP_START...");
-                        String msg = comm.recvMsg();
-                        if (msg.equals(CommMgr.FP_START)) break;
+                loadMapButton.addMouseListener(new MouseAdapter() {
+                    public void mousePressed(MouseEvent e) {
+                        loadMapDialog.setVisible(false);
+                        loadMap(realMap, loadTF.getText());
+
+                        String waypoint = loadWaypoint.getText();
+                        waypointRow = Integer.parseInt(waypoint.substring(0, waypoint.indexOf(',')));
+                        waypointCol = Integer.parseInt(waypoint.substring(waypoint.indexOf(',') + 1));
+                        realMap.setWaypoint(waypointRow, waypointCol);
+
+                        CardLayout cl = ((CardLayout) _mapCards.getLayout());
+                        cl.show(_mapCards, "REAL_MAP");
+                        realMap.repaint();
                     }
-                }
+                });
 
-                FastestPathAlgo fastestPath;
-                fastestPath = new FastestPathAlgo(exploredMap, bot);
+                loadMapDialog.add(new JLabel("File: "));
+                loadMapDialog.add(loadTF);
 
-                fastestPath.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
+                loadMapDialog.add(new JLabel("Waypoint: "));
+                loadMapDialog.add(loadWaypoint);
+                loadMapDialog.add(loadMapButton);
 
-                return 222;
+                loadMapDialog.setVisible(true);
             }
-        }
+        });
 
-        // Exploration Class for Multithreading
-        class Exploration extends SwingWorker<Integer, String> {
-            protected Integer doInBackground() throws Exception {
-                int row, col;
+        _buttons.add(btn_LoadMap);
 
-                row = RobotConstants.START_ROW;
-                col = RobotConstants.START_COL;
+        // Fastest Path Button
+        JButton btn_FastestPath = new JButton("Fastest Path");
+        formatButton(btn_FastestPath);
+        btn_FastestPath.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                loadDefaultMap();
 
-                bot.setRobotPos(row, col);
-                exploredMap.repaint();
-
-                ExplorationAlgo exploration;
-                exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
-
-                if (realRun) {
-                    CommMgr.getCommMgr().sendMsg(null, CommMgr.BOT_START);
-                }
-
-                exploration.runExploration();
-                generateMapDescriptor(exploredMap);
-
-                if (realRun) {
-                    new FastestPath().execute();
-                }
-
-                return 111;
+                CardLayout cl = ((CardLayout) _mapCards.getLayout());
+                cl.show(_mapCards, "REAL_MAP");
+                new FastestPath().execute();
             }
-        }
+        });
+        _buttons.add(btn_FastestPath);
 
         // Exploration Button
         JButton btn_Exploration = new JButton("Exploration");
         formatButton(btn_Exploration);
         btn_Exploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
+                loadDefaultMap();
+
                 CardLayout cl = ((CardLayout) _mapCards.getLayout());
                 cl.show(_mapCards, "EXPLORATION");
                 new Exploration().execute();
@@ -227,42 +205,31 @@ public class Simulator {
         });
         _buttons.add(btn_Exploration);
 
-        // Fastest Path Button
-        JButton btn_FastestPath = new JButton("Fastest Path");
-        formatButton(btn_FastestPath);
-        btn_FastestPath.addMouseListener(new MouseAdapter() {
+        // Image Exploration Button
+        JButton btn_Image_Exploration = new JButton("Image Processing");
+        formatButton(btn_Image_Exploration);
+        btn_Image_Exploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
+                loadDefaultMap();
+
                 CardLayout cl = ((CardLayout) _mapCards.getLayout());
                 cl.show(_mapCards, "EXPLORATION");
-                new FastestPath().execute();
+                new ImageProcessing().execute();
             }
         });
-        _buttons.add(btn_FastestPath);
-
-
-        // TimeExploration Class for Multithreading
-        class TimeExploration extends SwingWorker<Integer, String> {
-            protected Integer doInBackground() throws Exception {
-                bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
-                exploredMap.repaint();
-
-                ExplorationAlgo timeExplo = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
-                timeExplo.runExploration();
-
-                generateMapDescriptor(exploredMap);
-
-                return 333;
-            }
-        }
+        _buttons.add(btn_Image_Exploration);
 
         // Time-limited Exploration Button
         JButton btn_TimeExploration = new JButton("Time-Limited");
         formatButton(btn_TimeExploration);
         btn_TimeExploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
+                loadDefaultMap();
+
                 JDialog timeExploDialog = new JDialog(_appFrame, "Time-Limited Exploration", true);
                 timeExploDialog.setSize(400, 60);
                 timeExploDialog.setLayout(new FlowLayout());
+
                 final JTextField timeTF = new JTextField(5);
                 JButton timeSaveButton = new JButton("Run");
 
@@ -274,11 +241,11 @@ public class Simulator {
                         timeLimit = (Integer.parseInt(timeArr[0]) * 60) + Integer.parseInt(timeArr[1]);
                         CardLayout cl = ((CardLayout) _mapCards.getLayout());
                         cl.show(_mapCards, "EXPLORATION");
-                        new TimeExploration().execute();
+                        new ExplorationTime().execute();
                     }
                 });
 
-                timeExploDialog.add(new JLabel("Time Limit (in MM:SS): "));
+                timeExploDialog.add(new JLabel("Time Limit (MM:SS): "));
                 timeExploDialog.add(timeTF);
                 timeExploDialog.add(timeSaveButton);
                 timeExploDialog.setVisible(true);
@@ -286,30 +253,17 @@ public class Simulator {
         });
         _buttons.add(btn_TimeExploration);
 
-
-        // CoverageExploration Class for Multithreading
-        class CoverageExploration extends SwingWorker<Integer, String> {
-            protected Integer doInBackground() throws Exception {
-                bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
-                exploredMap.repaint();
-
-                ExplorationAlgo coverageExplo = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
-                coverageExplo.runExploration();
-
-                generateMapDescriptor(exploredMap);
-
-                return 444;
-            }
-        }
-
         // Coverage-limited Exploration Button
         JButton btn_CoverageExploration = new JButton("Coverage-Limited");
         formatButton(btn_CoverageExploration);
         btn_CoverageExploration.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
+                loadDefaultMap();
+
                 JDialog coverageExploDialog = new JDialog(_appFrame, "Coverage-Limited Exploration", true);
                 coverageExploDialog.setSize(400, 60);
                 coverageExploDialog.setLayout(new FlowLayout());
+
                 final JTextField coverageTF = new JTextField(5);
                 JButton coverageSaveButton = new JButton("Run");
 
@@ -317,18 +271,113 @@ public class Simulator {
                     public void mousePressed(MouseEvent e) {
                         coverageExploDialog.setVisible(false);
                         coverageLimit = (int) ((Integer.parseInt(coverageTF.getText())) * MapConstants.MAP_SIZE / 100.0);
-                        new CoverageExploration().execute();
+                        new ExplorationCoverage().execute();
                         CardLayout cl = ((CardLayout) _mapCards.getLayout());
                         cl.show(_mapCards, "EXPLORATION");
                     }
                 });
 
-                coverageExploDialog.add(new JLabel("Coverage Limit (% of maze): "));
+                coverageExploDialog.add(new JLabel("Coverage Limit (%): "));
                 coverageExploDialog.add(coverageTF);
                 coverageExploDialog.add(coverageSaveButton);
                 coverageExploDialog.setVisible(true);
             }
         });
+
         _buttons.add(btn_CoverageExploration);
+    }
+
+    // FastestPath Class for Multithreading
+    private static class FastestPath extends SwingWorker<Integer, String> {
+        protected Integer doInBackground() throws Exception {
+            bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
+            bot.setRobotDir(RobotConstants.DIRECTION.NORTH);
+
+            realMap.repaint();
+
+            FastestPathAlgo fastestPathToWayPoint;
+            fastestPathToWayPoint = new FastestPathAlgo(realMap, bot);
+            fastestPathToWayPoint.runFastestPath(waypointRow, waypointCol);
+
+            bot.setRobotPos(waypointRow, waypointCol);
+            realMap.repaint();
+
+            FastestPathAlgo fastestPathToGoal;
+            fastestPathToGoal = new FastestPathAlgo(realMap, bot);
+            fastestPathToGoal.runFastestPath(RobotConstants.GOAL_ROW, RobotConstants.GOAL_COL);
+
+            return 111;
+        }
+    }
+
+    // Exploration Class for Multithreading
+    private static class Exploration extends SwingWorker<Integer, String> {
+        protected Integer doInBackground() throws Exception {
+            int row, col;
+
+            row = RobotConstants.START_ROW;
+            col = RobotConstants.START_COL;
+
+            bot.setRobotPos(row, col);
+            exploredMap.repaint();
+
+            ExplorationAlgo exploration;
+            exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+
+            exploration.setPledgeEnabled(pledgeMode);
+            exploration.runExploration();
+
+            return 222;
+        }
+    }
+
+    // Image Exploration Class for Multithreading
+    private static class ImageProcessing extends SwingWorker<Integer, String> {
+        protected Integer doInBackground() throws Exception {
+            int row, col;
+
+            row = RobotConstants.START_ROW;
+            col = RobotConstants.START_COL;
+
+            bot.setRobotPos(row, col);
+            exploredMap.repaint();
+
+            ExplorationAlgo image;
+            image = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+
+            image.setImageProcessing(true);
+            image.setPledgeEnabled(pledgeMode);
+            image.runExploration();
+
+            return 333;
+        }
+    }
+
+    // ExplorationTime Class for Multithreading
+    private static class ExplorationTime extends SwingWorker<Integer, String> {
+        protected Integer doInBackground() throws Exception {
+            bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
+            exploredMap.repaint();
+
+            ExplorationAlgo timeExplo = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+            timeExplo.runExploration();
+
+            generateMapDescriptor(exploredMap);
+            return 444;
+        }
+    }
+
+    // ExplorationCoverage Class for Multithreading
+    private static class ExplorationCoverage extends SwingWorker<Integer, String> {
+        protected Integer doInBackground() throws Exception {
+            bot.setRobotPos(RobotConstants.START_ROW, RobotConstants.START_COL);
+            exploredMap.repaint();
+
+            ExplorationAlgo coverageExplo = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+            coverageExplo.runExploration();
+
+            generateMapDescriptor(exploredMap);
+            return 555;
+        }
     }
 }

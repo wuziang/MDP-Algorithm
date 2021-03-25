@@ -1,27 +1,17 @@
 # MDP-Algorithm
 Raymond Hartono, Ziang Wu
 
-Start RPi
+run robot
 ```
-ssh pi@192.168.4.4
-2021rpiGrp4
-
-cd Desktop/CommMods/
-sudo python3 multiProcessMod.py
+run runner/MazeRunner.run()
 ```
 
-Reset RPi
+run simulator
 ```
-ps -fA | grep python3
-sudo kill -9 $(ps -A | grep python3 | awk '{print $1}')
-```
-
-Run Robot
-```
-run MazeRunner.run()
+run simulator/Simulator.run()
 ```
 
-Run Simulator
-```
-run Simulator.run()
+enable pledge algorithm
+```java
+private static boolean pledgeMode = true;
 ```

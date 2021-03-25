@@ -13,7 +13,7 @@ run simulator
 run simulator/Simulator.run()
 ```
 
-switch from fastest path to exploration
+switch to exploration/image processing
 ```java
 private static boolean explorationMode = true;
 ```
@@ -23,18 +23,14 @@ enable extra exploration
 private static boolean extraMode = false;
 ```
 
-
 ## RPi
-connect rpi
+remote access
 ```
 ssh pi@192.168.4.4
 2021rpiGrp4
-
-cd Desktop/CommMods/
-sudo python3 multiProcessMod.py
 ```
 
-reset communication
+communication reset
 ```
 ps -fA | grep python3
 sudo kill -9 $(ps -A | grep python3 | awk '{print $1}')

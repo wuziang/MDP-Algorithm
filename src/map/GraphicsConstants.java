@@ -11,9 +11,13 @@ class GraphicsConstants {
 
     public static final Color C_START = Color.BLUE;
     public static final Color C_GOAL = Color.GREEN;
+
     public static final Color C_UNEXPLORED = Color.LIGHT_GRAY;
+    public static final Color C_VISITED = Color.PINK;
+
     public static final Color C_FREE = Color.WHITE;
     public static final Color C_OBSTACLE = Color.BLACK;
+    public static final Color C_WAYPOINT = Color.YELLOW;
 
     public static final Color C_ROBOT = Color.RED;
     public static final Color C_ROBOT_DIR = Color.WHITE;

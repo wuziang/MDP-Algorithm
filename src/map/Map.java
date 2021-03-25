@@ -14,6 +14,9 @@ public class Map extends JPanel {
     private final Cell[][] grid;
     private final Robot bot;
 
+    private int waypointRow = -1;
+    private int waypointCol = -1;
+
     /**
      * Initialises a Map object with a grid of Cell objects.
      */
@@ -101,6 +104,25 @@ public class Map extends JPanel {
         }
     }
 
+    public void resetExplored(){
+        for (int row = 0; row < grid.length; row++) {
+            for (int col = 0; col < grid[0].length; col++) {
+
+                if(!grid[row][col].getIsVisited()){
+                    grid[row][col].setIsExplored(false);
+                }
+            }
+        }
+    }
+
+    public void clearAllPositions() {
+        for (int row = 0; row < grid.length; row++) {
+            for (int col = 0; col < grid[0].length; col++) {
+                grid[row][col].clearPositionCount();
+            }
+        }
+    }
+
     /**
      * Sets a cell as an obstacle and the surrounding cells as virtual walls or resets the cell and surrounding
      * virtual walls.
@@ -151,6 +173,11 @@ public class Map extends JPanel {
         return !checkValidCoordinates(row, col) || getCell(row, col).getIsObstacle();
     }
 
+    public void setWaypoint(int waypointRow, int waypointCol){
+        this.waypointRow=waypointRow;
+        this.waypointCol=waypointCol;
+    }
+
     /**
      * Overrides JComponent's paintComponent() method. It creates a two-dimensional array of _DisplayCell objects
      * to store the current map state. Then, it paints square cells for the grid with the appropriate colors as
@@ -158,10 +185,10 @@ public class Map extends JPanel {
      */
     public void paintComponent(Graphics g) {
         // Create a two-dimensional array of _DisplayCell objects for rendering.
-        _DisplayCell[][] _mapCells = new _DisplayCell[MapConstants.MAP_ROWS][MapConstants.MAP_COLS];
+        MapDisplay[][] _mapCells = new MapDisplay[MapConstants.MAP_ROWS][MapConstants.MAP_COLS];
         for (int mapRow = 0; mapRow < MapConstants.MAP_ROWS; mapRow++) {
             for (int mapCol = 0; mapCol < MapConstants.MAP_COLS; mapCol++) {
-                _mapCells[mapRow][mapCol] = new _DisplayCell(mapCol * GraphicsConstants.CELL_SIZE, mapRow * GraphicsConstants.CELL_SIZE, GraphicsConstants.CELL_SIZE);
+                _mapCells[mapRow][mapCol] = new MapDisplay(mapCol * GraphicsConstants.CELL_SIZE, mapRow * GraphicsConstants.CELL_SIZE, GraphicsConstants.CELL_SIZE);
             }
         }
 
@@ -179,6 +206,10 @@ public class Map extends JPanel {
                         cellColor = GraphicsConstants.C_UNEXPLORED;
                     else if (grid[mapRow][mapCol].getIsObstacle())
                         cellColor = GraphicsConstants.C_OBSTACLE;
+                    else if(grid[mapRow][mapCol].getIsVisited())
+                        cellColor = GraphicsConstants.C_VISITED;
+                    else if(mapRow== waypointRow && mapCol== waypointCol)
+                        cellColor = GraphicsConstants.C_WAYPOINT;
                     else
                         cellColor = GraphicsConstants.C_FREE;
                 }
@@ -214,12 +245,12 @@ public class Map extends JPanel {
         }
     }
 
-    private class _DisplayCell {
+    private class MapDisplay {
         public final int cellX;
         public final int cellY;
         public final int cellSize;
 
-        public _DisplayCell(int borderX, int borderY, int borderSize) {
+        public MapDisplay(int borderX, int borderY, int borderSize) {
             this.cellX = borderX + GraphicsConstants.CELL_LINE_WEIGHT;
             this.cellY = GraphicsConstants.MAP_H - (borderY - GraphicsConstants.CELL_LINE_WEIGHT);
             this.cellSize = borderSize - (GraphicsConstants.CELL_LINE_WEIGHT * 2);

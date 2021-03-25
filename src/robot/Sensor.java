@@ -127,7 +127,9 @@ public class Sensor {
             exploredMap.getCell(row, col).setIsExplored(true);
 
             if (sensorVal == i) {
-                exploredMap.setObstacleCell(row, col, true);
+                if (!exploredMap.getCell(row, col).getIsVisited()){
+                    exploredMap.setObstacleCell(row, col, true);
+                }
                 break;
             }
 

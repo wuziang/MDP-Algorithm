@@ -13,7 +13,7 @@ public class RobotConstants {
 
     public static final int MOVE_COST = 10;                         // cost of FORWARD, BACKWARD movement
     public static final int TURN_COST = 20;                         // cost of RIGHT, LEFT movement
-    public static final int SPEED = 25;                             // delay between movements (ms)
+    public static final int SPEED = 10;                             // delay between movements (ms)
 
     public static final DIRECTION START_DIR = DIRECTION.NORTH;      // start direction
 

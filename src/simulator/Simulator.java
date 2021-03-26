@@ -30,11 +30,11 @@ public class Simulator {
     private static Map exploredMap = null;          // exploration map
 
     private static String filename = "Week10";
-    private static int waypointRow = 3;
-    private static int waypointCol = 8;
+    private static int waypointRow = -1;
+    private static int waypointCol = -1;
 
     private static int timeLimit = 360;            // time limit
-    private static int coverageLimit = 1;         // coverage limit
+    private static int coverageLimit = 300;         // coverage limit
 
     private static boolean extraMode = false;
 
@@ -320,8 +320,8 @@ public class Simulator {
             ExplorationAlgo exploration;
             exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
-            exploration.runExploration();
             exploration.setExtraExploration(extraMode);
+            exploration.runExploration();
 
             return 222;
         }
@@ -342,6 +342,7 @@ public class Simulator {
             image = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
             image.setImageProcessing(true);
+            image.setExtraExploration(extraMode);
             image.runExploration();
 
             return 333;
@@ -355,6 +356,8 @@ public class Simulator {
             exploredMap.repaint();
 
             ExplorationAlgo timeExplo = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+
+            timeExplo.setExtraExploration(extraMode);
             timeExplo.runExploration();
 
             generateMapDescriptor(exploredMap);
@@ -369,6 +372,8 @@ public class Simulator {
             exploredMap.repaint();
 
             ExplorationAlgo coverageExplo = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
+
+            coverageExplo.setExtraExploration(extraMode);
             coverageExplo.runExploration();
 
             generateMapDescriptor(exploredMap);

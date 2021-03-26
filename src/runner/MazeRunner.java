@@ -248,8 +248,8 @@ public class MazeRunner {
             ExplorationAlgo exploration;
             exploration = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
-            exploration.runExploration();
             exploration.setExtraExploration(extraMode);
+            exploration.runExploration();
 
             return 222;
         }
@@ -264,6 +264,7 @@ public class MazeRunner {
             image = new ExplorationAlgo(exploredMap, realMap, bot, coverageLimit, timeLimit);
 
             image.setImageProcessing(true);
+            image.setExtraExploration(extraMode);
             image.runExploration();
 
             return 333;

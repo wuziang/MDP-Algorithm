@@ -83,34 +83,27 @@ public class ExplorationAlgo {
      * 3. System.currentTimeMillis() > endTime
      */
     private void explorationLoop() {
-        if(!extraExploration){
-            while(!bot.getReturnedStart()){
-                nextExplore();
-                forceRestart();
+        while(continueExploring()){
+            nextExplore();
+            forceRestart();
+
+            if(bot.getReturnedStart()){
+                exploredMap.clearAllPositions();
+                bot.resetRobotState();
+                break;
             }
         }
-        else{
-            while(continueExploring()){
-                nextExplore();
-                forceRestart();
 
-                if(bot.getReturnedStart()){
-                    exploredMap.clearAllPositions();
-                    bot.resetRobotState();
-                    break;
-                }
+        while (extraExploration && continueExploring()) {
+            nextExtraExplore();
+
+            if(bot.getReturnedStart()){
+                break;
             }
-
-            while (continueExploring()) {
-                nextExtraExplore();
-
-                if(bot.getReturnedStart()){
-                    break;
-                }
-            }
-
-            goHome();
         }
+
+        goHome();
+
         if(!imageProcessing) {
             calculateAreaExplored();
             System.out.printf("\nExploration Coverage %.2f%%", (areaExplored / 300.0) * 100.0);
@@ -452,7 +445,7 @@ public class ExplorationAlgo {
         if(exploredMap.getCell(botRow, botCol).getPositionCount()>RobotConstants.RESTART_LIMIT) {
             extraExploration = false;
 
-            exploredMap.resetExplored();
+            exploredMap.resetExplored(botRow, botCol);
             exploredMap.clearAllPositions();
 
             FastestPathAlgo returnToStart = new FastestPathAlgo(exploredMap, bot);

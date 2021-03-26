@@ -104,12 +104,13 @@ public class Map extends JPanel {
         }
     }
 
-    public void resetExplored(){
-        for (int row = 0; row < grid.length; row++) {
-            for (int col = 0; col < grid[0].length; col++) {
-
-                if(!grid[row][col].getIsVisited()){
-                    grid[row][col].setIsExplored(false);
+    public void resetExplored(int row, int col){
+        for (int i = -3; i <= 3; i++) {
+            for (int j = -3; j <= 3; j++) {
+                if(!checkValidCoordinates(row+i, col+j))
+                    continue;
+                if(!grid[row+i][col+j].getIsVisited()){
+                    grid[row+i][col+j].setIsExplored(false);
                 }
             }
         }
